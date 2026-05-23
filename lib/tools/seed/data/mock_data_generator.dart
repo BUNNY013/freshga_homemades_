@@ -1,15 +1,16 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'image_constants.dart';
+import '../../../core/utils/search_utils.dart';
 
 class MockDataGenerator {
   static final Random _random = Random();
 
-  static const List<String> storePrefixes = ['The Heritage', 'Organic', 'Grandma\'s', 'Amma\'s', 'NatureNest', 'Village Spice', 'Traditional', 'Pure Harvest', 'Rustic', 'Golden Harvest'];
-  static const List<String> storeSuffixes = ['Kitchen', 'Roots', 'Secrets', 'Pickles', 'Foods', 'House', 'Bowl', 'Recipes', 'Farm', 'Pantry'];
+  static const List<String> storePrefixes = ['The Heritage', 'Organic', 'Grandma\'s', 'Amma\'s', 'NatureNest', 'Village Spice', 'Traditional', 'Pure Harvest', 'Rustic', 'Golden Harvest', 'Royal Andhra', 'Native', 'Green Earth', 'Millet', 'Spice'];
+  static const List<String> storeSuffixes = ['Kitchen', 'Roots', 'Secrets', 'Pickles', 'Foods', 'House', 'Bowl', 'Recipes', 'Farm', 'Pantry', 'Tastes', 'Organics', 'Kingdom', 'Trails'];
 
-  static const List<String> productPrefixes = ['Spicy', 'Wild Forest', 'Garlic', 'Millet', 'Traditional Ghee', 'Homemade', 'Dry Fruit', 'Masala', 'Premium', 'Authentic'];
-  static const List<String> productBases = ['Mango Pickle', 'Honey', 'Chutney Powder', 'Laddu', 'Cookies', 'Amla Pickle', 'Murukku', 'Gongura Pickle', 'Peanuts', 'Mixture'];
+  static const List<String> productPrefixes = ['Spicy', 'Wild Forest', 'Garlic', 'Millet', 'Traditional Ghee', 'Homemade', 'Dry Fruit', 'Masala', 'Premium', 'Authentic', 'Andhra', 'Nattu', 'Organic', 'Herbal', 'Traditional'];
+  static const List<String> productBases = ['Mango Pickle', 'Honey', 'Chutney Powder', 'Laddu', 'Cookies', 'Amla Pickle', 'Murukku', 'Gongura Pickle', 'Peanuts', 'Mixture', 'Karivepaku Powder', 'Ragi Cookies', 'Jaggery', 'Avakaya', 'Mysore Pak', 'Sweets', 'Tea Mix'];
 
   static const List<String> tags = ['spicy', 'traditional', 'homemade', 'organic', 'fresh', 'healthy', 'sweet', 'savory', 'authentic', 'premium'];
 
@@ -24,7 +25,9 @@ class MockDataGenerator {
 
   static Map<String, dynamic> generateStoreData(String storeId, String ownerId) {
     final name = generateStoreName();
-    final isVerified = _random.nextBool();
+    final categories = ['Pickles', 'Snacks'];
+    final searchableText = "$name ${categories.join(' ')}";
+    final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
     
     return {
       'storeId': storeId,
@@ -37,17 +40,18 @@ class MockDataGenerator {
       'instagramLink': 'https://instagram.com/mock',
       'youtubeLink': '',
       'facebookLink': '',
-      'categories': ['Pickles', 'Snacks'],
+      'categories': categories,
       'followers': _random.nextInt(5000),
       'likesCount': _random.nextInt(10000),
       'productsCount': _random.nextInt(50) + 5,
       'rating': double.parse((3.5 + _random.nextDouble() * 1.5).toStringAsFixed(1)),
       'totalReviews': _random.nextInt(500),
       'totalOrders': _random.nextInt(2000),
-      'verified': isVerified,
-      'isFeatured': isVerified && _random.nextDouble() > 0.7,
+      'verified': true, // Enforced premium verification as requested
+      'isFeatured': _random.nextDouble() > 0.5,
       'isActive': true,
       'dispatchTime': '${_random.nextInt(2) + 1}-${_random.nextInt(3) + 3} Days',
+      'searchKeywords': searchKeywords,
       'createdBySeeder': true,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
@@ -64,6 +68,9 @@ class MockDataGenerator {
   }) {
     final name = '${productPrefixes[_random.nextInt(productPrefixes.length)]} ${productBases[_random.nextInt(productBases.length)]}';
     final basePrice = 150 + _random.nextInt(400);
+    
+    final searchableText = "$name $storeName $categoryId";
+    final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
 
     return {
       'productId': productId,
@@ -81,6 +88,14 @@ class MockDataGenerator {
       ],
       'variants': [
         {
+          'variantId': '100g',
+          'label': '100g',
+          'price': (basePrice * 0.5).toInt(),
+          'discountPrice': (basePrice * 0.5).toInt() - 10,
+          'stock': 100,
+          'isAvailable': true
+        },
+        {
           'variantId': '250g',
           'label': '250g',
           'price': basePrice,
@@ -91,9 +106,17 @@ class MockDataGenerator {
         {
           'variantId': '500g',
           'label': '500g',
-          'price': basePrice * 1.8,
-          'discountPrice': (basePrice * 1.8) - 40,
+          'price': (basePrice * 1.8).toInt(),
+          'discountPrice': (basePrice * 1.8).toInt() - 40,
           'stock': 30,
+          'isAvailable': true
+        },
+        {
+          'variantId': '1kg',
+          'label': '1kg',
+          'price': (basePrice * 3.2).toInt(),
+          'discountPrice': (basePrice * 3.2).toInt() - 100,
+          'stock': 15,
           'isAvailable': true
         }
       ],
@@ -107,7 +130,7 @@ class MockDataGenerator {
       'isFeatured': _random.nextDouble() > 0.8,
       'isTrending': _random.nextDouble() > 0.7,
       'isActive': true,
-      'searchKeywords': name.toLowerCase().split(' ')..add(categoryId.toLowerCase()),
+      'searchKeywords': searchKeywords,
       'createdBySeeder': true,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),

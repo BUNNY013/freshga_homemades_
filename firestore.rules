@@ -2,37 +2,113 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default deny
+
+    // =========================
+    // Helper Functions
+    // =========================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // =========================
+    // Default Deny
+    // =========================
+
     match /{document=**} {
       allow read, write: if false;
     }
-    
-    // User profiles
+
+    // =========================
+    // USERS
+    // =========================
+
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
-    
-    // Public read access for home feed collections
+
+    // =========================
+    // SUPPLIER APPLICATIONS
+    // =========================
+
+    match /supplierApplications/{applicationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // =========================
+    // SEEDER ALLOWED COLLECTIONS
+    // =========================
+    // WARNING: These collections are temporarily set to `allow write: if true;` 
+    // to allow the development seeder to work from the client app. 
+    // Revert these to secure rules before deploying to production!
+
+    match /stores/{storeId} {
+      allow read, write: if true; 
+    }
+
+    match /products/{productId} {
+      allow read, write: if true;
+    }
+
     match /categories/{document} {
-      allow read: if true;
+      allow read, write: if true;
     }
+
+    match /subcategories/{document} {
+      allow read, write: if true;
+    }
+
     match /banners/{document} {
-      allow read: if true;
+      allow read, write: if true;
     }
-    match /stores/{document} {
-      allow read: if true;
-    }
-    match /products/{document} {
-      allow read: if true;
-    }
+
     match /collections/{document} {
-      allow read: if true;
+      allow read, write: if true;
     }
+
     match /home_sections/{document} {
-      allow read: if true;
+      allow read, write: if true;
     }
+
     match /trust_features/{document} {
-      allow read: if true;
+      allow read, write: if true;
+    }
+
+    // =========================
+    // ORDERS
+    // =========================
+
+    match /orders/{orderId} {
+      allow create: if isAuthenticated();
+      allow read, update: if isAuthenticated();
+      allow delete: if false;
+    }
+
+    // =========================
+    // FOLLOWERS
+    // =========================
+
+    match /followers/{followId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // =========================
+    // TRANSACTIONS & PAYOUTS
+    // =========================
+
+    match /transactions/{transactionId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /payouts/{payoutId} {
+      allow read, write: if isAuthenticated();
     }
   }
 }

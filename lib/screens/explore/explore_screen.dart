@@ -4,6 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../services/category_service.dart';
 import '../../models/category_model.dart';
 import '../../widgets/home/loading_shimmers.dart';
+import '../search/search_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -55,25 +56,33 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 const SizedBox(height: 24),
 
                 // Search Bar
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.search_rounded, color: AppColors.textPrimary),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          "Search products, stores, categories...",
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SearchScreen()),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.search_rounded, color: AppColors.textPrimary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            "Search products, stores, categories...",
+                            style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                          ),
                         ),
-                      ),
-                      const Icon(Icons.tune_rounded, color: AppColors.textPrimary),
-                    ],
+                        const Icon(Icons.tune_rounded, color: AppColors.textPrimary),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),
