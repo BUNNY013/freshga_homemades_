@@ -2,15 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
 class StoreTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
+  final TabController tabController;
 
-  StoreTabBarDelegate({required this.tabBar});
-
-  @override
-  double get minExtent => tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
+  StoreTabBarDelegate(this.tabController);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -18,15 +12,33 @@ class StoreTabBarDelegate extends SliverPersistentHeaderDelegate {
       color: Colors.white,
       child: Column(
         children: [
-          tabBar,
-          Container(height: 1, color: Colors.grey.shade200),
+          TabBar(
+            controller: tabController,
+            labelColor: AppColors.primaryGreen,
+            unselectedLabelColor: AppColors.textSecondary,
+            indicatorColor: AppColors.primaryGreen,
+            indicatorWeight: 2,
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+            tabs: const [
+              Tab(text: "Shop"),
+              Tab(text: "About"),
+            ],
+          ),
+          Divider(height: 1, color: Colors.grey.shade200),
         ],
       ),
     );
   }
 
   @override
-  bool shouldRebuild(StoreTabBarDelegate oldDelegate) {
+  double get maxExtent => 49.0;
+
+  @override
+  double get minExtent => 49.0;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
     return false;
   }
 }

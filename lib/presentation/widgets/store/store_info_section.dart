@@ -17,76 +17,80 @@ class StoreInfoSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Logo overlapping banner
-          Transform.translate(
-            offset: const Offset(0, -30),
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 4),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: ClipOval(
-                child: CachedNetworkImage(
-                  imageUrl: store.logoUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(color: Colors.grey.shade100),
-                  errorWidget: (context, url, error) => const Icon(Icons.store, color: Colors.grey),
-                ),
-              ),
-            ),
-          ),
+          // The logo is now rendered by StoreHeader to properly overlap the banner without clipping.
+          // We add a tiny bit of spacing to balance the layout.
+          const SizedBox(height: 8),
           
           // Name and Follow Row
-          Transform.translate(
-            offset: const Offset(0, -10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          store.name,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        store.name,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      if (store.isVerified)
-                        const Padding(
-                          padding: EdgeInsets.only(left: 6.0),
-                          child: Icon(Icons.verified, color: AppColors.primaryGreen, size: 20),
-                        ),
-                    ],
-                  ),
+                    ),
+                    if (store.isVerified)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 6.0),
+                        child: Icon(Icons.verified, color: AppColors.primaryGreen, size: 20),
+                      ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                const FollowButton(),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              const FollowButton(), // Using the green filled FollowButton
+            ],
           ),
           
           // Stats Row
           StoreStatsRow(store: store),
           const SizedBox(height: 16),
+          
+          // Divider
+          Divider(color: Colors.grey.shade200),
+          const SizedBox(height: 12),
+          
+          // Info Badges Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildInfoBadge(Icons.eco_outlined, "100% Natural", "No preservatives"),
+              _buildInfoBadge(Icons.access_time_outlined, store.dispatchTime, "Dispatch Time"),
+              _buildInfoBadge(Icons.location_on_outlined, "Bangalore,", "Karnataka"),
+            ],
+          ),
+          const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  Widget _buildInfoBadge(IconData icon, String title, String subtitle) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: AppColors.primaryGreen, size: 20),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            Text(subtitle, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+          ],
+        )
+      ],
     );
   }
 }

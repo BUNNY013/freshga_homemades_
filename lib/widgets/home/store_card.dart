@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../models/store_model.dart';
+import '../../presentation/screens/store/store_screen.dart';
 import 'loading_shimmers.dart';
 
 class StoreCard extends StatelessWidget {
@@ -18,10 +19,17 @@ class StoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 200, // Increased width for a wider, rectangular store feel
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => StoreScreen(storeId: store.id)),
+        );
+      },
+      child: Container(
+        width: 200, // Increased width for a wider, rectangular store feel
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -147,6 +155,6 @@ class StoreCard extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

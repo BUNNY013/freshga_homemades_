@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/store_model.dart';
+import 'social_links_row.dart';
 
 class AboutStoreSection extends StatelessWidget {
   final StoreModel store;
@@ -20,7 +21,9 @@ class AboutStoreSection extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            store.description,
+            store.description.isNotEmpty 
+                ? store.description 
+                : "Welcome to our store! We source the finest ingredients from local farmers and create homemade products in small batches to ensure authenticity, freshness and quality in every jar.",
             style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.5),
           ),
           const SizedBox(height: 24),
@@ -29,30 +32,61 @@ class AboutStoreSection extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0FDF4), // Very light green
+              color: const Color(0xFFF0FDF4),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildValueBadge(Icons.eco_outlined, "100% Natural", "No preservatives"),
-                _buildValueBadge(Icons.soup_kitchen_outlined, "Homemade", "In small batches"),
+                _buildValueBadge(Icons.soup_kitchen_outlined, "Small Batch", "Made with love"),
                 _buildValueBadge(Icons.health_and_safety_outlined, "Hygienic", "Clean & safe"),
                 _buildValueBadge(Icons.compost_outlined, "Sustainable", "Eco friendly"),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
-          // Details List
-          _buildDetailRow(Icons.calendar_today_outlined, "Established", "Apr 2022"),
-          _buildDetailRow(Icons.storefront_outlined, "Business Type", "Home-based Food Business"),
-          _buildDetailRow(Icons.assignment_turned_in_outlined, "FSSAI License", "11223344000567", hasArrow: true),
-          _buildDetailRow(Icons.location_on_outlined, "Pickup Location", "Bangalore, Karnataka", hasArrow: true),
-          _buildDetailRow(Icons.access_time_outlined, "Dispatch Time", store.dispatchTime, hasArrow: true),
-          _buildDetailRow(Icons.category_outlined, "Categories", store.categories.join(', '), hasArrow: true),
+          const Text(
+            "Business Information",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 16),
+
+          // Details Grid
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildDetailRow(Icons.calendar_today_outlined, "Established", "Apr 2022"),
+                    _buildDetailRow(Icons.storefront_outlined, "Business Type", "Home-based Food Business"),
+                    _buildDetailRow(Icons.access_time_outlined, "Dispatch Time", store.dispatchTime),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildDetailRow(Icons.location_on_outlined, "Pickup Location", "Bangalore, Karnataka"),
+                    _buildDetailRow(Icons.category_outlined, "Categories", store.categories.join(', ')),
+                  ],
+                ),
+              ),
+            ],
+          ),
           
-          const SizedBox(height: 100), // Bottom padding
+          const SizedBox(height: 32),
+          
+          const Text(
+            "Follow Us",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          ),
+          SocialLinksRow(store: store),
+          
+          const SizedBox(height: 100),
         ],
       ),
     );
@@ -80,31 +114,30 @@ class AboutStoreSection extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value, {bool hasArrow = false}) {
+  Widget _buildDetailRow(IconData icon, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: AppColors.textSecondary, size: 20),
           const SizedBox(width: 12),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(width: 16),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-              textAlign: TextAlign.right,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(fontSize: 13, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ],
             ),
           ),
-          if (hasArrow) ...[
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
-          ],
         ],
       ),
     );

@@ -64,12 +64,14 @@ class MockDataGenerator {
     required String storeId,
     required String storeName,
     required String categoryId,
-    required String subCategoryId,
+    required String categoryName,
+    required List<String> subCategoryIds,
   }) {
     final name = '${productPrefixes[_random.nextInt(productPrefixes.length)]} ${productBases[_random.nextInt(productBases.length)]}';
     final basePrice = 150 + _random.nextInt(400);
     
-    final searchableText = "$name $storeName $categoryId";
+    final selectedTags = [tags[_random.nextInt(tags.length)], tags[_random.nextInt(tags.length)]];
+    final searchableText = "$name $storeName $categoryName $categoryId ${subCategoryIds.join(' ')} ${selectedTags.join(' ')}";
     final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
 
     return {
@@ -81,7 +83,8 @@ class MockDataGenerator {
       'description': 'Authentic homemade $name made with premium ingredients and no preservatives. A perfect addition to your daily meals.',
       'shortDescription': 'Traditional homemade $name',
       'categoryId': categoryId,
-      'subCategoryId': subCategoryId,
+      'categoryName': categoryName,
+      'subCategoryIds': subCategoryIds,
       'images': [
         ImageConstants.productImages[_random.nextInt(ImageConstants.productImages.length)],
         ImageConstants.productImages[_random.nextInt(ImageConstants.productImages.length)]
@@ -121,7 +124,7 @@ class MockDataGenerator {
         }
       ],
       'ingredients': ['Ingredient 1', 'Ingredient 2', 'Traditional Spices'],
-      'tags': [tags[_random.nextInt(tags.length)], tags[_random.nextInt(tags.length)]],
+      'tags': selectedTags,
       'rating': double.parse((3.8 + _random.nextDouble() * 1.2).toStringAsFixed(1)),
       'totalReviews': _random.nextInt(200),
       'totalOrders': _random.nextInt(1000),

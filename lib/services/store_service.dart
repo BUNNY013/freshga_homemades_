@@ -31,6 +31,40 @@ class StoreService {
     }
   }
 
+  Future<List<ProductModel>> getAllStoreProducts(String storeId) async {
+    try {
+      final snapshot = await _firestore.collection('products')
+          .where('storeId', isEqualTo: storeId)
+          .where('isActive', isEqualTo: true)
+          .limit(500) // Safe limit for homemade stores
+          .get();
+      return snapshot.docs.map((doc) => ProductModel.fromJson(doc.data(), doc.id)).toList();
+    } catch (e) {
+      print('Error getting all store products: $e');
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getSubcategoriesByIds(List<String> subCategoryIds) async {
+    if (subCategoryIds.isEmpty) return [];
+    try {
+      // Firestore 'whereIn' limits to 10 items per query.
+      // We chunk the list into groups of 10.
+      List<Map<String, dynamic>> results = [];
+      for (var i = 0; i < subCategoryIds.length; i += 10) {
+        var chunk = subCategoryIds.sublist(i, i + 10 > subCategoryIds.length ? subCategoryIds.length : i + 10);
+        var snapshot = await _firestore.collection('subcategories')
+            .where('subCategoryId', whereIn: chunk)
+            .get();
+        results.addAll(snapshot.docs.map((d) => d.data()).toList());
+      }
+      return results;
+    } catch (e) {
+      print('Error getting subcategories: $e');
+      return [];
+    }
+  }
+
   Future<List<ProductModel>> getStoreProducts(String storeId, {DocumentSnapshot? startAfter, int limit = 20}) async {
     try {
       Query query = _firestore.collection('products')

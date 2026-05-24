@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:math';
 import 'data/image_constants.dart';
 import 'data/mock_data_generator.dart';
 
 class DatabaseSeeder {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final Random _random = Random();
 
   final List<String> _collectionsToClear = [
     'banners',
@@ -17,7 +19,26 @@ class DatabaseSeeder {
     'home_sections',
   ];
 
-  /// Core helper to execute batched writes safely
+  final List<String> _mainCategories = [
+    'Pickles', 'Honey', 'Cookies & Biscuits', 'Snacks', 'Sweets', 
+    'Masalas & Powders', 'Chutneys & Spreads', 'Millet & Healthy Foods', 
+    'Beverages & Mixes', 'Ready-to-Cook', 'Homemade Powders & Podis', 
+    'Dry Fruits & Nuts', 'Oils & Ghee', 'Herbal & Ayurvedic Products', 
+    'Bakery Items', 'Papads & Fryums', 'Homemade Sauces & Syrups', 
+    'Breakfast Essentials', 'Gift Hampers', 'Regional Specialties'
+  ];
+
+  final Map<String, List<String>> _subcategoriesMap = {
+    'pickles': ['Veg Pickles', 'Non Veg Pickles', 'Andhra Pickles', 'Traditional Pickles', 'Spicy Pickles', 'Oil-Free Pickles'],
+    'honey': ['Raw Honey', 'Forest Honey', 'Organic Honey', 'Herbal Honey'],
+    'snacks': ['Namkeen', 'Murukku & Chakli', 'Mixture', 'Chips'],
+    'sweets': ['Dry Sweets', 'Jaggery Sweets', 'Laddu Varieties'],
+    'masalas_and_powders': ['Curry Powders', 'Biryani Masala', 'Sambar Powder', 'Rasam Powder', 'Karam Podi'],
+    'millet_and_healthy_foods': ['Millet Noodles', 'Millet Snacks', 'Health Mixes'],
+    // Add generic subcategories for others just to ensure data exists
+    'default': ['Premium Quality', 'Homemade Classics', 'Best Sellers', 'Organic Picks']
+  };
+
   Future<void> _commitBatches(List<Map<String, dynamic>> items, String collectionPath, {String Function(int)? idGenerator}) async {
     int count = 0;
     WriteBatch batch = _db.batch();
@@ -28,26 +49,36 @@ class DatabaseSeeder {
       batch.set(docRef, items[i]);
       count++;
 
-      // Firestore limit is 500 operations per batch
-      if (count == 400) {
-        await batch.commit();
+      if (count == 50) {
+        try {
+          await batch.commit();
+        } catch (e) {
+          debugPrint('Error committing batch in $collectionPath: $e');
+          // Print the first item to see its structure
+          debugPrint('First item in failing batch: ${items.first}');
+          rethrow;
+        }
         batch = _db.batch();
         count = 0;
-        debugPrint('Committed 400 items to $collectionPath');
+        debugPrint('Committed 50 items to $collectionPath');
       }
     }
 
     if (count > 0) {
-      await batch.commit();
+      try {
+        await batch.commit();
+      } catch (e) {
+        debugPrint('Error committing final batch in $collectionPath: $e');
+        debugPrint('First item in failing batch: ${items.first}');
+        rethrow;
+      }
       debugPrint('Committed remaining $count items to $collectionPath');
     }
   }
 
-  /// Clears ONLY seeded data across all relevant collections
   Future<void> clearSeededData() async {
     for (String collection in _collectionsToClear) {
       final snapshot = await _db.collection(collection).where('createdBySeeder', isEqualTo: true).get();
-      
       if (snapshot.docs.isEmpty) continue;
 
       WriteBatch batch = _db.batch();
@@ -57,7 +88,7 @@ class DatabaseSeeder {
         batch.delete(doc.reference);
         count++;
 
-        if (count == 400) {
+        if (count == 50) {
           await batch.commit();
           batch = _db.batch();
           count = 0;
@@ -73,99 +104,70 @@ class DatabaseSeeder {
 
   Future<void> seedCategories() async {
     List<Map<String, dynamic>> cats = [];
-    int index = 1;
-    final extraCategories = [
-      'Organic Foods', 'Healthy Foods', 'Traditional Foods', 'Festival Specials', 
-      'Ready Mixes', 'Instant Foods', 'Spice Powders', 'Herbal Wellness', 
-      'Homemade Chocolates', 'Bakery', 'Breakfast Foods', 'Regional Foods', 
-      'Andhra Specials', 'Tamil Specials', 'Kerala Specials', 'Ghee & Butter'
-    ];
     
-    // First add the categories from images
-    ImageConstants.categoryImages.forEach((name, url) {
-      cats.add(_buildCategoryMap(name, url, index++));
-    });
+    for (int i = 0; i < _mainCategories.length; i++) {
+      String name = _mainCategories[i];
+      String id = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_');
+      String slug = name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '-').replaceAll(RegExp(r'-+'), '-');
+      
+      String fallbackUrl = ImageConstants.categoryImages.values.elementAt(i % ImageConstants.categoryImages.length);
 
-    // Add extra categories to reach 30+
-    for (String name in extraCategories) {
-      String fallbackUrl = ImageConstants.categoryImages.values.elementAt((index) % ImageConstants.categoryImages.length);
-      cats.add(_buildCategoryMap(name, fallbackUrl, index++));
+      cats.add({
+        'categoryId': id,
+        'name': name,
+        'slug': slug,
+        'imageUrl': fallbackUrl,
+        'isActive': true,
+        'sortOrder': i + 1,
+        'createdBySeeder': true,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
     }
 
     await _commitBatches(cats, 'categories', idGenerator: (i) => cats[i]['categoryId']);
   }
 
-  Map<String, dynamic> _buildCategoryMap(String name, String url, int index) {
-    return {
-      'categoryId': name.toLowerCase().replaceAll(' ', '_').replaceAll('&', 'and'),
-      'name': name,
-      'slug': name.toLowerCase().replaceAll(' ', '-').replaceAll('&', 'and'),
-      'imageUrl': url,
-      'isActive': true,
-      'order': index,
-      'tags': [name.toLowerCase(), 'homemade'],
-      'keywords': [name.toLowerCase(), 'fresh'],
-      'itemCount': 50 + (index * 12),
-      'color': '#FFF9EE',
-      'iconType': 'default',
-      'createdBySeeder': true,
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
-  }
-
   Future<void> seedSubcategories() async {
-    final subCats = [
-      {'categoryId': 'pickles', 'name': 'Mango Pickles'},
-      {'categoryId': 'pickles', 'name': 'Garlic Pickles'},
-      {'categoryId': 'pickles', 'name': 'Gongura Pickles'},
-      {'categoryId': 'pickles', 'name': 'Lemon Pickles'},
-      {'categoryId': 'pickles', 'name': 'Amla Pickles'},
-      {'categoryId': 'snacks', 'name': 'Murukku'},
-      {'categoryId': 'snacks', 'name': 'Mixture'},
-      {'categoryId': 'snacks', 'name': 'Namkeen'},
-      {'categoryId': 'snacks', 'name': 'Chips'},
-      {'categoryId': 'cookies', 'name': 'Millet Cookies'},
-      {'categoryId': 'cookies', 'name': 'Butter Cookies'},
-      {'categoryId': 'cookies', 'name': 'Jaggery Cookies'},
-      {'categoryId': 'sweets', 'name': 'Laddu'},
-      {'categoryId': 'sweets', 'name': 'Halwa'},
-      {'categoryId': 'sweets', 'name': 'Mysore Pak'},
-      {'categoryId': 'masalas', 'name': 'Curry Powders'},
-      {'categoryId': 'masalas', 'name': 'Spice Mixes'},
-      {'categoryId': 'masalas', 'name': 'Karam Powders'},
-    ];
-
     List<Map<String, dynamic>> items = [];
-    for (int i = 0; i < 100; i++) {
-      final template = subCats[i % subCats.length];
-      String subId = '${template['categoryId']}_sub_$i';
-      items.add({
-        'subCategoryId': subId,
-        'categoryId': template['categoryId'],
-        'name': '${template['name']} $i',
-        'imageUrl': ImageConstants.categoryImages.values.elementAt(i % ImageConstants.categoryImages.length),
-        'isActive': true,
-        'sortOrder': i,
-        'createdBySeeder': true,
-      });
+    int sortCounter = 1;
+
+    for (int i = 0; i < _mainCategories.length; i++) {
+      String catName = _mainCategories[i];
+      String catId = catName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_');
+      
+      List<String> subCats = _subcategoriesMap[catId] ?? _subcategoriesMap['default']!;
+
+      for (String subName in subCats) {
+        String subId = '${catId}_${subName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_')}';
+        String slug = subName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '-').replaceAll(RegExp(r'-+'), '-');
+        
+        items.add({
+          'subCategoryId': subId,
+          'categoryId': catId,
+          'name': subName,
+          'slug': slug,
+          'isActive': true,
+          'sortOrder': sortCounter++,
+          'createdBySeeder': true,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
     }
 
-    await _commitBatches(items, 'subcategories');
+    await _commitBatches(items, 'subcategories', idGenerator: (i) => items[i]['subCategoryId']);
   }
 
   Future<void> seedBanners() async {
     final titles = [
       'Mango Pickle Season', 'Summer Honey Festival', 'Traditional Homemade Snacks', 
       'Healthy Homemade Living', 'Organic Goodness Delivered', 'Festival Sweet Collections',
-      'Weekend Special Offers', 'Grandma\'s Best Recipes', 'Pure Forest Honey', 'Spicy Andhra Powders'
     ];
     
     List<Map<String, dynamic>> banners = [];
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 6; i++) {
       banners.add(MockDataGenerator.generateBannerData(
         i + 1, 
-        titles[i % titles.length] + (i > 9 ? ' $i' : ''), 
+        titles[i % titles.length], 
         'Discover authentic homemade tastes curated for you.', 
         'PREMIUM'
       ));
@@ -177,17 +179,15 @@ class DatabaseSeeder {
   Future<void> seedCollections() async {
     final titles = [
       'Summer Specials', 'Traditional Favorites', 'Festival Sweets', 'Healthy Living', 
-      'Organic Essentials', 'Best Sellers', 'Trending This Week', 'Homemade Classics',
-      'Andhra Special Picks', 'Breakfast Essentials', 'Tea Time Snacks', 'Village Homemade Foods'
     ];
     List<Map<String, dynamic>> items = [];
     
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 4; i++) {
       items.add({
-        'title': titles[i % titles.length] + ' $i',
+        'title': titles[i % titles.length],
         'subtitle': 'Curated selections just for you',
         'bannerImage': ImageConstants.collectionBanners[i % ImageConstants.collectionBanners.length],
-        'productIds': [], // Populated dynamically in real app
+        'productIds': [],
         'isActive': true,
         'createdBySeeder': true,
       });
@@ -215,14 +215,14 @@ class DatabaseSeeder {
   }
 
   Future<void> seedHomeSections() async {
-    final sectionTypes = ['heroBanner', 'categories', 'featuredStores', 'trendingProducts', 'recommendedProducts', 'collections', 'trustStrip'];
+    final sectionTypes = ['heroBanner', 'categories', 'featuredStores', 'trendingProducts'];
     
     List<Map<String, dynamic>> items = [];
-    for (int i = 0; i < 15; i++) {
-      String type = sectionTypes[i % sectionTypes.length];
+    for (int i = 0; i < sectionTypes.length; i++) {
+      String type = sectionTypes[i];
       items.add({
         'type': type,
-        'title': 'Discover $type ${i + 1}',
+        'title': 'Discover $type',
         'subtitle': 'Handpicked premium items',
         'order': i + 1,
         'isActive': true,
@@ -234,28 +234,43 @@ class DatabaseSeeder {
   }
 
   Future<void> seedStoresAndProducts() async {
-    // Generate 100 stores, 10 products each = 1000 products
     List<Map<String, dynamic>> stores = [];
     List<Map<String, dynamic>> products = [];
-    final categoryKeys = ImageConstants.categoryImages.keys.toList();
 
-    for (int s = 0; s < 100; s++) {
+    // 20 Stores, ~20 products each
+    for (int s = 0; s < 20; s++) {
       String storeId = 'mock_store_$s';
       String ownerId = 'mock_owner_$s';
       var storeData = MockDataGenerator.generateStoreData(storeId, ownerId);
       stores.add(storeData);
 
-      for (int p = 0; p < 10; p++) {
+      // We select 2-3 random categories for this store to specialize in
+      List<String> storeCategories = [];
+      for (int i = 0; i < 3; i++) {
+        storeCategories.add(_mainCategories[_random.nextInt(_mainCategories.length)]);
+      }
+      storeCategories = storeCategories.toSet().toList(); // Unique
+
+      for (int p = 0; p < 20; p++) {
         String productId = 'mock_prod_${s}_$p';
-        String catName = categoryKeys[(s + p) % categoryKeys.length];
-        String catId = catName.toLowerCase().replaceAll(' ', '_');
+        String catName = storeCategories[_random.nextInt(storeCategories.length)];
+        String catId = catName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_');
+        
+        List<String> availableSubs = _subcategoriesMap[catId] ?? _subcategoriesMap['default']!;
+        
+        // Pick 2 random subcategories
+        availableSubs.shuffle();
+        List<String> selectedSubs = availableSubs.take(2).map((subName) {
+           return '${catId}_${subName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_')}';
+        }).toList();
 
         products.add(MockDataGenerator.generateProductData(
           productId: productId,
           storeId: storeId,
           storeName: storeData['storeName'],
           categoryId: catId,
-          subCategoryId: '${catId}_sub_1',
+          categoryName: catName,
+          subCategoryIds: selectedSubs,
         ));
       }
     }
@@ -264,7 +279,6 @@ class DatabaseSeeder {
     await _commitBatches(products, 'products', idGenerator: (i) => products[i]['productId']);
   }
 
-  /// Master method to run the entire seeder
   Future<void> runFullSeed() async {
     debugPrint("Starting full database seed...");
     await seedCategories();

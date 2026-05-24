@@ -21,10 +21,10 @@ class SearchUtils {
     }
 
     // 2. Generate multi-word prefixes (e.g. "wild h", "wild ho")
-    // For combinations starting with subsequent words, like "forest honey"
+    // Limit to max 3 word combinations to prevent massive array sizes that exceed Firestore 1MiB limit.
     for (int i = 0; i < words.length; i++) {
       String phrase = '';
-      for (int j = i; j < words.length; j++) {
+      for (int j = i; j < words.length && j < i + 3; j++) {
         if (phrase.isEmpty) {
           phrase = words[j];
         } else {

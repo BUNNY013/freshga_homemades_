@@ -16,24 +16,28 @@ class StoreStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 6,
+      runSpacing: 4,
       children: [
-        const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
-        const SizedBox(width: 4),
-        Text(
-          "${store.rating} (${store.reviewsCount})",
-          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              "${store.rating} (${store.reviewsCount})",
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+            ),
+          ],
         ),
-        const SizedBox(width: 12),
         const Text("•", style: TextStyle(color: AppColors.textSecondary)),
-        const SizedBox(width: 12),
         Text(
           "${_formatNumber(store.followers)} Followers",
           style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
         ),
-        const SizedBox(width: 12),
         const Text("•", style: TextStyle(color: AppColors.textSecondary)),
-        const SizedBox(width: 12),
         Text(
           "${_formatNumber(store.totalOrders)}+ Orders",
           style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),

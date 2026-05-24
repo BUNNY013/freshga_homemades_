@@ -11,11 +11,18 @@ class ProductModel {
   final double rating;
   final int reviewsCount;
   final String weight; // e.g., "250g"
+  final String categoryId;
+  final String categoryName;
+  final List<String> subCategoryIds;
+  final List<String> tags;
+  final List<String> searchKeywords;
 
   ProductModel({
     required this.id, required this.storeId, required this.storeName, required this.name, required this.description,
     required this.price, required this.originalPrice, required this.imageUrl, 
     required this.isTrending, required this.rating, required this.reviewsCount, required this.weight,
+    required this.categoryId, required this.categoryName, required this.subCategoryIds,
+    required this.tags, required this.searchKeywords,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json, String documentId) {
@@ -54,6 +61,11 @@ class ProductModel {
       rating: (json['rating'] ?? 0.0).toDouble(),
       reviewsCount: json['totalReviews'] ?? json['reviewsCount'] ?? 0,
       weight: variantWeight,
+      categoryId: json['categoryId'] ?? '',
+      categoryName: json['categoryName'] ?? '',
+      subCategoryIds: List<String>.from(json['subCategoryIds'] ?? []),
+      tags: List<String>.from(json['tags'] ?? []),
+      searchKeywords: List<String>.from(json['searchKeywords'] ?? []),
     );
   }
 
@@ -69,6 +81,11 @@ class ProductModel {
       'isTrending': isTrending,
       'rating': rating,
       'totalReviews': reviewsCount,
+      'categoryId': categoryId,
+      'categoryName': categoryName,
+      'subCategoryIds': subCategoryIds,
+      'tags': tags,
+      'searchKeywords': searchKeywords,
     };
   }
 }
