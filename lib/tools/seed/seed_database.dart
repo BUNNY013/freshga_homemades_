@@ -17,6 +17,7 @@ class DatabaseSeeder {
     'collections',
     'trust_features',
     'home_sections',
+    'store_updates',
   ];
 
   final List<String> _mainCategories = [
@@ -279,6 +280,131 @@ class DatabaseSeeder {
     await _commitBatches(products, 'products', idGenerator: (i) => products[i]['productId']);
   }
 
+  Future<void> seedStoreUpdates() async {
+    debugPrint("Seeding store updates...");
+    final storesSnapshot = await _db.collection('stores').where('createdBySeeder', isEqualTo: true).get();
+    final productsSnapshot = await _db.collection('products').where('createdBySeeder', isEqualTo: true).get();
+    
+    if (storesSnapshot.docs.isEmpty) return;
+
+    List<Map<String, dynamic>> updates = [];
+
+    // Group products by storeId
+    Map<String, List<QueryDocumentSnapshot>> storeProducts = {};
+    for (var doc in productsSnapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      String sId = data['storeId'] ?? '';
+      storeProducts.putIfAbsent(sId, () => []).add(doc);
+    }
+
+    for (var storeDoc in storesSnapshot.docs) {
+      final storeData = storeDoc.data() as Map<String, dynamic>;
+      final products = storeProducts[storeDoc.id] ?? [];
+
+      for (int i = 0; i < 25; i++) {
+        int roll = _random.nextInt(100);
+        String type;
+        String title = '';
+        String description = '';
+        String badgeText = '';
+        String ctaText = '';
+        String? productId;
+        String? productName;
+        double price = 0;
+        double discountPrice = 0;
+        String imageUrl = storeData['storeBanner'] ?? storeData['storeLogo'] ?? '';
+
+        var p = products.isNotEmpty ? products[_random.nextInt(products.length)].data() as Map<String, dynamic>? : null;
+
+        if (roll < 40) {
+          type = 'new_launch';
+          badgeText = 'New Launch';
+          ctaText = 'Buy Now';
+          if (p != null) {
+            productId = p['productId'];
+            productName = p['name'];
+            price = (p['price'] ?? 0).toDouble();
+            discountPrice = (p['discountPrice'] ?? 0).toDouble();
+            title = "$productName Fresh Batch Available!";
+            description = "We just finished preparing a fresh batch of $productName. Order now while stocks last!";
+            imageUrl = (p['images'] as List).isNotEmpty ? p['images'][0] : imageUrl;
+          } else {
+            title = "New Product Launched!";
+            description = "Check out our latest homemade creation, prepared with love and authentic ingredients.";
+          }
+        } else if (roll < 60) {
+          type = 'restock';
+          badgeText = 'Restocked';
+          ctaText = 'Order Again';
+          if (p != null) {
+            productId = p['productId'];
+            productName = p['name'];
+            price = (p['price'] ?? 0).toDouble();
+            discountPrice = (p['discountPrice'] ?? 0).toDouble();
+            title = "$productName is Back in Stock!";
+            description = "You asked, we listened! $productName is back in stock. Grab yours before it runs out again.";
+            imageUrl = (p['images'] as List).isNotEmpty ? p['images'][0] : imageUrl;
+          } else {
+            title = "Favorites Restocked!";
+            description = "Your favorite homemade treats are back in stock. Order now!";
+          }
+        } else if (roll < 80) {
+          type = 'offer';
+          badgeText = 'Offer';
+          ctaText = 'Claim Offer';
+          if (p != null) {
+            productId = p['productId'];
+            productName = p['name'];
+            price = (p['price'] ?? 0).toDouble();
+            discountPrice = price * 0.9;
+            title = "10% OFF on $productName!";
+            description = "Special weekend offer! Get 10% off on your favorite $productName. Use code FRESH10.";
+            imageUrl = (p['images'] as List).isNotEmpty ? p['images'][0] : imageUrl;
+          } else {
+            title = "Weekend Special Discount!";
+            description = "Get 10% off on all orders this weekend. Limited time offer!";
+          }
+        } else {
+          type = 'community_update';
+          badgeText = 'Update';
+          ctaText = 'View Store';
+          title = "Fresh season updates from ${storeData['storeName']}";
+          description = "We are preparing exciting new recipes this season. Stay tuned for our upcoming launches!";
+        }
+
+        final daysAgo = _random.nextInt(30);
+        final hoursAgo = _random.nextInt(24);
+        final date = DateTime.now().subtract(Duration(days: daysAgo, hours: hoursAgo));
+
+        String updateId = _db.collection('store_updates').doc().id;
+
+        updates.add({
+          'updateId': updateId,
+          'storeId': storeDoc.id,
+          'storeName': storeData['storeName'] ?? '',
+          'storeLogo': storeData['storeLogo'] ?? '',
+          'storeBanner': storeData['storeBanner'] ?? '',
+          'type': type,
+          'title': title,
+          'description': description,
+          'imageUrl': imageUrl,
+          if (productId != null) 'productId': productId,
+          if (productName != null) 'productName': productName,
+          'price': price,
+          'discountPrice': discountPrice,
+          'ctaText': ctaText,
+          'badgeText': badgeText,
+          'isActive': true,
+          'createdBySeeder': true,
+          'createdAt': Timestamp.fromDate(date),
+          'updatedAt': Timestamp.fromDate(date),
+        });
+      }
+    }
+
+    await _commitBatches(updates, 'store_updates', idGenerator: (i) => updates[i]['updateId']);
+  }
+
   Future<void> runFullSeed() async {
     debugPrint("Starting full database seed...");
     await seedCategories();
@@ -288,6 +414,7 @@ class DatabaseSeeder {
     await seedTrustFeatures();
     await seedHomeSections();
     await seedStoresAndProducts();
+    await seedStoreUpdates();
     debugPrint("Finished database seed.");
   }
 }

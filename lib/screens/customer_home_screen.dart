@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import 'home/home_feed_view.dart';
 import 'explore/explore_screen.dart';
+import '../presentation/screens/following/following_screen.dart';
 import 'dev/seeder_screen.dart';
 import '../presentation/widgets/cart/floating_cart_bar.dart';
 
@@ -19,7 +20,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   final List<Widget> _pages = [
     const HomeFeedView(),
     const ExploreScreen(),
-    const Center(child: Text("Following Updates")),
+    const FollowingScreen(),
     const Center(child: Text("Orders")),
     const SeederScreen(), // Temp replacement for Profile to allow testing
   ];

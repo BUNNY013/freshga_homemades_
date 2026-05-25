@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../tools/seed/seed_database.dart';
+import 'package:provider/provider.dart';
+import '../../providers/following_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SeederScreen extends StatefulWidget {
   const SeederScreen({super.key});
@@ -56,6 +59,27 @@ class _SeederScreenState extends State<SeederScreen> {
       _setStatus('✅ Successfully reseeded the database!');
     } catch (e) {
       _setStatus('❌ Error reseeding database: $e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleMockFollowStores() async {
+    setState(() => _isLoading = true);
+    _setStatus('Mocking follow for first 5 stores...');
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('stores').limit(5).get();
+      final storeIds = snapshot.docs.map((d) => d.id).toList();
+      if (storeIds.isNotEmpty) {
+        if (mounted) {
+          await context.read<FollowingProvider>().mockFollowStoresForTesting(storeIds);
+        }
+        _setStatus('✅ Now following ${storeIds.length} stores. Go to Following tab!');
+      } else {
+        _setStatus('❌ No stores found to follow.');
+      }
+    } catch (e) {
+      _setStatus('❌ Error mocking follow: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -138,6 +162,17 @@ class _SeederScreenState extends State<SeederScreen> {
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Colors.blue.shade700,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: _handleMockFollowStores,
+                icon: const Icon(Icons.favorite),
+                label: const Text('Test: Follow 5 Stores'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.pink,
                   foregroundColor: Colors.white,
                 ),
               ),

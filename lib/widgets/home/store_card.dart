@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../models/store_model.dart';
 import '../../presentation/screens/store/store_screen.dart';
+import '../../presentation/widgets/store/follow_button.dart';
 import 'loading_shimmers.dart';
 
 class StoreCard extends StatelessWidget {
@@ -27,7 +28,7 @@ class StoreCard extends StatelessWidget {
         );
       },
       child: Container(
-        width: 200, // Increased width for a wider, rectangular store feel
+        width: 200,
         margin: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
         color: Colors.white,
@@ -98,20 +99,7 @@ class StoreCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         // Follow Button
-                        OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFF1E7036)),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text(
-                            "Follow",
-                            style: TextStyle(color: Color(0xFF1E7036), fontSize: 10, fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                        FollowButton.fromStore(store, isCompact: true),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -124,7 +112,7 @@ class StoreCard extends StatelessWidget {
           // Overlapping Logo
           Positioned(
             left: 12,
-            top: 90 - 22, // Banner height - logo radius
+            top: 90 - 22,
             child: Container(
               padding: const EdgeInsets.all(2),
               decoration: const BoxDecoration(

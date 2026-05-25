@@ -11,7 +11,6 @@ import '../../providers/collection_provider.dart';
 import 'dynamic_section_renderer.dart';
 import '../../widgets/home/home_header.dart';
 import '../../widgets/home/search_bar_widget.dart';
-import '../../widgets/home/floating_cart_bar.dart';
 
 class HomeFeedView extends StatefulWidget {
   const HomeFeedView({super.key});
@@ -111,7 +110,6 @@ class _HomeFeedViewState extends State<HomeFeedView> {
               ],
             ),
           ),
-          const FloatingCartBar(),
         ],
       ),
     );

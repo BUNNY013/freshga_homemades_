@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../models/product_model.dart';
 import '../../presentation/screens/product/product_details_screen.dart';
+import '../../providers/cart_provider.dart';
 import 'loading_shimmers.dart';
 
 class ProductCard extends StatelessWidget {
@@ -134,7 +136,22 @@ class ProductCard extends StatelessWidget {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        if (product.variants.isNotEmpty) {
+                          context.read<CartProvider>().addToCart(
+                            product: product,
+                            variant: product.variants.first,
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("${product.name} added to cart", style: const TextStyle(color: Colors.white)),
+                              duration: const Duration(seconds: 2),
+                              backgroundColor: AppColors.primaryGreen,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(

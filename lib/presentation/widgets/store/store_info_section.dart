@@ -50,7 +50,7 @@ class StoreInfoSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const FollowButton(), // Using the green filled FollowButton
+              FollowButton.fromStore(store),
             ],
           ),
           

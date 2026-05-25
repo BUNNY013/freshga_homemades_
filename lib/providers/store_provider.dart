@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/store_model.dart';
 import '../models/product_model.dart';
 import '../services/store_service.dart';
@@ -12,6 +14,7 @@ class StoreProvider with ChangeNotifier {
   StoreModel? _currentStore;
   bool _isLoadingStore = false;
   String? _storeError;
+  StreamSubscription<DocumentSnapshot>? _storeSubscription;
 
   StoreModel? get currentStore => _currentStore;
   bool get isLoadingStore => _isLoadingStore;
@@ -27,6 +30,7 @@ class StoreProvider with ChangeNotifier {
   // Home Screen Featured Stores State
   List<StoreModel> _stores = [];
   bool _isLoadingFeatured = false;
+  StreamSubscription<QuerySnapshot>? _featuredStoresSubscription;
   
   List<StoreModel> get stores => _stores;
   bool get isLoading => _isLoadingFeatured;
@@ -116,6 +120,15 @@ class StoreProvider with ChangeNotifier {
         _storeError = "Store not found";
       } else {
         await loadAllStoreProducts(storeId);
+        
+        // Listen for realtime updates (like followers count)
+        _storeSubscription?.cancel();
+        _storeSubscription = FirebaseFirestore.instance.collection('stores').doc(storeId).snapshots().listen((snapshot) {
+          if (snapshot.exists) {
+            _currentStore = StoreModel.fromJson(snapshot.data() as Map<String, dynamic>, snapshot.id);
+            notifyListeners();
+          }
+        });
       }
     } catch (e) {
       _storeError = e.toString();
@@ -146,6 +159,17 @@ class StoreProvider with ChangeNotifier {
 
     try {
       _stores = await _service.getFeaturedStores();
+      
+      // Setup realtime listener for featured stores
+      _featuredStoresSubscription?.cancel();
+      _featuredStoresSubscription = FirebaseFirestore.instance.collection('stores')
+          .where('isActive', isEqualTo: true)
+          .where('isFeatured', isEqualTo: true)
+          .limit(10)
+          .snapshots().listen((snapshot) {
+        _stores = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+        notifyListeners();
+      });
     } catch (e) {
       debugPrint("Error loading featured stores: $e");
     } finally {
@@ -209,15 +233,13 @@ class StoreProvider with ChangeNotifier {
   }
 
   void toggleFollow(String userId) {
-    if (_currentStore == null) return;
-    
-    _isFollowing = !_isFollowing;
-    notifyListeners();
+    // This is deprecated in favor of FollowingProvider's global toggleFollow
+  }
 
-    if (_isFollowing) {
-      _service.followStore(_currentStore!.id, userId);
-    } else {
-      _service.unfollowStore(_currentStore!.id, userId);
-    }
+  @override
+  void dispose() {
+    _storeSubscription?.cancel();
+    _featuredStoresSubscription?.cancel();
+    super.dispose();
   }
 }
