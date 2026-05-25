@@ -7,6 +7,8 @@ import '../../widgets/search/recent_search_tile.dart';
 import '../../widgets/search/search_loading_shimmer.dart';
 import 'search_results_screen.dart';
 
+import '../../presentation/widgets/cart/floating_cart_bar.dart';
+
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
 
@@ -47,86 +49,91 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Consumer<SearchProvider>(
-          builder: (context, searchProvider, child) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Custom Search AppBar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () => Navigator.pop(context),
-                        borderRadius: BorderRadius.circular(20),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Container(
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.background,
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: Colors.grey.shade200),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Consumer<SearchProvider>(
+              builder: (context, searchProvider, child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Custom Search AppBar
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      child: Row(
+                        children: [
+                          InkWell(
+                            onTap: () => Navigator.pop(context),
+                            borderRadius: BorderRadius.circular(20),
+                            child: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                            ),
                           ),
-                          child: Row(
-                            children: [
-                              const SizedBox(width: 16),
-                              const Icon(Icons.search_rounded, color: AppColors.textPrimary, size: 20),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextField(
-                                  controller: _searchController,
-                                  focusNode: _focusNode,
-                                  style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
-                                  decoration: const InputDecoration(
-                                    hintText: "Search products, stores...",
-                                    hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.zero,
-                                  ),
-                                  onChanged: (val) {
-                                    searchProvider.onSearchQueryChanged(val);
-                                  },
-                                  onSubmitted: (val) => _onSearchSubmitted(val, searchProvider),
-                                  textInputAction: TextInputAction.search,
-                                ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Container(
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: AppColors.background,
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(color: Colors.grey.shade200),
                               ),
-                              if (_searchController.text.isNotEmpty)
-                                InkWell(
-                                  onTap: () {
-                                    _searchController.clear();
-                                    searchProvider.clearSearch();
-                                    _focusNode.requestFocus();
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(12.0),
-                                    child: Icon(Icons.cancel, color: Colors.grey, size: 18),
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 16),
+                                  const Icon(Icons.search_rounded, color: AppColors.textPrimary, size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _searchController,
+                                      focusNode: _focusNode,
+                                      style: const TextStyle(fontSize: 15, color: AppColors.textPrimary),
+                                      decoration: const InputDecoration(
+                                        hintText: "Search products, stores...",
+                                        hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                                        border: InputBorder.none,
+                                        isDense: true,
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
+                                      onChanged: (val) {
+                                        searchProvider.onSearchQueryChanged(val);
+                                      },
+                                      onSubmitted: (val) => _onSearchSubmitted(val, searchProvider),
+                                      textInputAction: TextInputAction.search,
+                                    ),
                                   ),
-                                ),
-                            ],
+                                  if (_searchController.text.isNotEmpty)
+                                    InkWell(
+                                      onTap: () {
+                                        _searchController.clear();
+                                        searchProvider.clearSearch();
+                                        _focusNode.requestFocus();
+                                      },
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(12.0),
+                                        child: Icon(Icons.cancel, color: Colors.grey, size: 18),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                
-                // Content Area
-                Expanded(
-                  child: _buildContent(searchProvider),
-                ),
-              ],
-            );
-          },
-        ),
+                    ),
+                    
+                    // Content Area
+                    Expanded(
+                      child: _buildContent(searchProvider),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          const FloatingCartBar(),
+        ],
       ),
     );
   }

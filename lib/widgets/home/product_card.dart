@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../models/product_model.dart';
+import '../../presentation/screens/product/product_details_screen.dart';
 import 'loading_shimmers.dart';
 
 class ProductCard extends StatelessWidget {
@@ -11,9 +12,18 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      decoration: BoxDecoration(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailsScreen(productId: product.id),
+          ),
+        );
+      },
+      child: Container(
+        width: 160,
+        decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -147,6 +157,7 @@ class ProductCard extends StatelessWidget {
             ),
           )
         ],
+      ),
       ),
     );
   }

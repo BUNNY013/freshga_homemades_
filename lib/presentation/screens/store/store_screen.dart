@@ -12,6 +12,7 @@ import '../../widgets/store/dynamic_category_chips.dart';
 import '../../widgets/store/dynamic_subcategory_chips.dart';
 import '../../widgets/store/sorting_bar.dart';
 import '../../../widgets/home/product_card.dart';
+import '../../widgets/cart/floating_cart_bar.dart';
 
 class StoreScreen extends StatefulWidget {
   final String storeId;
@@ -44,47 +45,52 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Consumer<StoreProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoadingStore) {
-            return const StoreLoadingShimmer();
-          }
+      body: Stack(
+        children: [
+          Consumer<StoreProvider>(
+            builder: (context, provider, child) {
+              if (provider.isLoadingStore) {
+                return const StoreLoadingShimmer();
+              }
 
-          if (provider.storeError != null) {
-            return _buildErrorState(provider.storeError!);
-          }
+              if (provider.storeError != null) {
+                return _buildErrorState(provider.storeError!);
+              }
 
-          if (provider.currentStore == null) {
-            return _buildErrorState("Store not found");
-          }
+              if (provider.currentStore == null) {
+                return _buildErrorState("Store not found");
+              }
 
-          final store = provider.currentStore!;
+              final store = provider.currentStore!;
 
-          return NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                StoreHeader(store: store),
-                SliverToBoxAdapter(
-                  child: StoreInfoSection(store: store),
+              return NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    StoreHeader(store: store),
+                    SliverToBoxAdapter(
+                      child: StoreInfoSection(store: store),
+                    ),
+                    SliverPersistentHeader(
+                      delegate: StoreTabBarDelegate(_tabController),
+                      pinned: true,
+                    ),
+                  ];
+                },
+                body: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // 1. Shop Tab
+                    _buildShopTab(provider),
+                    
+                    // 2. About Tab
+                    AboutStoreSection(store: store),
+                  ],
                 ),
-                SliverPersistentHeader(
-                  delegate: StoreTabBarDelegate(_tabController),
-                  pinned: true,
-                ),
-              ];
+              );
             },
-            body: TabBarView(
-              controller: _tabController,
-              children: [
-                // 1. Shop Tab
-                _buildShopTab(provider),
-                
-                // 2. About Tab
-                AboutStoreSection(store: store),
-              ],
-            ),
-          );
-        },
+          ),
+          const FloatingCartBar(),
+        ],
       ),
     );
   }

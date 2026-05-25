@@ -74,6 +74,33 @@ class MockDataGenerator {
     final searchableText = "$name $storeName $categoryName $categoryId ${subCategoryIds.join(' ')} ${selectedTags.join(' ')}";
     final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
 
+    final totalReviews = _random.nextInt(200) + 10;
+    
+    int count5 = (totalReviews * (0.5 + _random.nextDouble() * 0.3)).toInt();
+    int count4 = (totalReviews * (0.1 + _random.nextDouble() * 0.2)).toInt();
+    int count3 = (totalReviews * (0.05 + _random.nextDouble() * 0.1)).toInt();
+    int count2 = (totalReviews * (0.01 + _random.nextDouble() * 0.05)).toInt();
+    int count1 = totalReviews - (count5 + count4 + count3 + count2);
+    if (count1 < 0) count1 = 0;
+
+    final ratingCounts = {
+      "5": count5,
+      "4": count4,
+      "3": count3,
+      "2": count2,
+      "1": count1
+    };
+
+    double calculatedRating = totalReviews > 0 ? (count5 * 5 + count4 * 4 + count3 * 3 + count2 * 2 + count1 * 1) / totalReviews : 0.0;
+
+    final allHighlights = ["Pure & Natural", "Great Taste", "Good Packaging", "Value for Money", "Authentic Recipe", "Fresh Ingredients"];
+    allHighlights.shuffle();
+    final numHighlights = _random.nextInt(3) + 2;
+    final ratingHighlights = <String, int>{};
+    for (int i = 0; i < numHighlights; i++) {
+      ratingHighlights[allHighlights[i]] = _random.nextInt(totalReviews);
+    }
+
     return {
       'productId': productId,
       'storeId': storeId,
@@ -125,14 +152,18 @@ class MockDataGenerator {
       ],
       'ingredients': ['Ingredient 1', 'Ingredient 2', 'Traditional Spices'],
       'tags': selectedTags,
-      'rating': double.parse((3.8 + _random.nextDouble() * 1.2).toStringAsFixed(1)),
-      'totalReviews': _random.nextInt(200),
+      'rating': double.parse(calculatedRating.toStringAsFixed(1)),
+      'totalReviews': totalReviews,
+      'ratingCounts': ratingCounts,
+      'ratingHighlights': ratingHighlights,
       'totalOrders': _random.nextInt(1000),
       'likes': _random.nextInt(500),
       'wishlistCount': _random.nextInt(100),
       'isFeatured': _random.nextDouble() > 0.8,
       'isTrending': _random.nextDouble() > 0.7,
       'isActive': true,
+      'shelfLife': '${_random.nextInt(4) + 2} Months',
+      'dispatchTime': '${_random.nextInt(3) + 1} Days',
       'searchKeywords': searchKeywords,
       'createdBySeeder': true,
       'createdAt': FieldValue.serverTimestamp(),

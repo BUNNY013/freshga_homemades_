@@ -49,7 +49,7 @@ class DynamicSectionRenderer extends StatelessWidget {
       case 'recommendedProducts':
         return Consumer<ProductProvider>(
           builder: (context, provider, child) {
-            if (provider.isLoading) return const SectionShimmer();
+            if (provider.isLoadingTrending) return const SectionShimmer();
             return TrendingProductsSection(products: provider.trendingProducts, title: section.title);
           },
         );

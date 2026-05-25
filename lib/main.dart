@@ -13,6 +13,8 @@ import 'providers/store_provider.dart';
 import 'providers/product_provider.dart';
 import 'providers/collection_provider.dart';
 import 'providers/search_provider.dart';
+import 'providers/cart_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -29,6 +31,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CollectionProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()),
       ],
       child: const MyApp(),
     ),

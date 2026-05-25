@@ -4,6 +4,7 @@ import '../core/theme/app_colors.dart';
 import 'home/home_feed_view.dart';
 import 'explore/explore_screen.dart';
 import 'dev/seeder_screen.dart';
+import '../presentation/widgets/cart/floating_cart_bar.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -27,7 +28,12 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: _pages[_currentIndex],
+      body: Stack(
+        children: [
+          _pages[_currentIndex],
+          const FloatingCartBar(),
+        ],
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
