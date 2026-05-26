@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/theme/app_colors.dart';
 import 'home/home_feed_view.dart';
-import 'explore/explore_screen.dart';
+import 'categories/categories_screen.dart';
 import '../presentation/screens/following/following_screen.dart';
 import 'dev/seeder_screen.dart';
 import '../presentation/widgets/cart/floating_cart_bar.dart';
@@ -19,7 +19,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   final List<Widget> _pages = [
     const HomeFeedView(),
-    const ExploreScreen(),
+    const CategoriesScreen(),
     const FollowingScreen(),
     const Center(child: Text("Orders")),
     const SeederScreen(), // Temp replacement for Profile to allow testing
@@ -67,9 +67,9 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search_rounded),
-              activeIcon: Icon(Icons.search_rounded),
-              label: 'Explore',
+              icon: Icon(Icons.grid_view_outlined),
+              activeIcon: Icon(Icons.grid_view_rounded),
+              label: 'Categories',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.favorite_border_rounded),

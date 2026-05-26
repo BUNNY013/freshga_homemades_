@@ -16,6 +16,14 @@ class ProductService {
     }
   }
   
+  Stream<List<ProductModel>> streamProductsByCategory(String categoryId) {
+    return _firestore.collection('products')
+        .where('categoryId', isEqualTo: categoryId)
+        .where('isActive', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => ProductModel.fromJson(doc.data(), doc.id)).toList());
+  }
+
   Future<ProductModel?> getProduct(String id) async {
     try {
       final doc = await _firestore.collection('products').doc(id).get();

@@ -45,6 +45,24 @@ class StoreService {
     }
   }
 
+  Future<List<StoreModel>> getStoresByIds(List<String> storeIds) async {
+    if (storeIds.isEmpty) return [];
+    try {
+      List<StoreModel> results = [];
+      for (var i = 0; i < storeIds.length; i += 10) {
+        var chunk = storeIds.sublist(i, i + 10 > storeIds.length ? storeIds.length : i + 10);
+        var snapshot = await _firestore.collection('stores')
+            .where(FieldPath.documentId, whereIn: chunk)
+            .get();
+        results.addAll(snapshot.docs.map((d) => StoreModel.fromJson(d.data(), d.id)).toList());
+      }
+      return results;
+    } catch (e) {
+      print('Error getting stores by ids: $e');
+      return [];
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getSubcategoriesByIds(List<String> subCategoryIds) async {
     if (subCategoryIds.isEmpty) return [];
     try {

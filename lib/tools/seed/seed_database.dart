@@ -18,6 +18,7 @@ class DatabaseSeeder {
     'trust_features',
     'home_sections',
     'store_updates',
+    'appConfig',
   ];
 
   final List<String> _mainCategories = [
@@ -234,6 +235,21 @@ class DatabaseSeeder {
     await _commitBatches(items, 'home_sections');
   }
 
+  Future<void> seedAppConfig() async {
+    final bannerData = {
+      'title': "Can’t find what you’re looking for?",
+      'subtitle': "Request a product from your favourite stores.",
+      'buttonText': "Request Now",
+      'imageUrl': "https://firebasestorage.googleapis.com/v0/b/freshga-homemades.firebasestorage.app/o/mock_data%2Fcategories%2Fpickles.png?alt=media",
+      'isActive': true,
+      'link': "",
+      'createdBySeeder': true,
+    };
+
+    await _db.collection('appConfig').doc('categories_banner').set(bannerData);
+    debugPrint('Seeded appConfig/categories_banner');
+  }
+
   Future<void> seedStoresAndProducts() async {
     List<Map<String, dynamic>> stores = [];
     List<Map<String, dynamic>> products = [];
@@ -413,6 +429,7 @@ class DatabaseSeeder {
     await seedCollections();
     await seedTrustFeatures();
     await seedHomeSections();
+    await seedAppConfig();
     await seedStoresAndProducts();
     await seedStoreUpdates();
     debugPrint("Finished database seed.");

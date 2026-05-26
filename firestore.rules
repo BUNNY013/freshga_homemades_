@@ -77,6 +77,10 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    match /sub_categories/{document} {
+      allow read, write: if true;
+    }
+
     match /banners/{document} {
       allow read, write: if true;
     }
@@ -94,6 +98,10 @@ service cloud.firestore {
     }
 
     match /store_updates/{document} {
+      allow read, write: if true;
+    }
+
+    match /appConfig/{document} {
       allow read, write: if true;
     }
 
