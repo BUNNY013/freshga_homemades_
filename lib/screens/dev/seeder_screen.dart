@@ -4,6 +4,7 @@ import '../../tools/seed/seed_database.dart';
 import 'package:provider/provider.dart';
 import '../../providers/following_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../tools/seed/run_seeders.dart' as new_seeders;
 
 class SeederScreen extends StatefulWidget {
   const SeederScreen({super.key});
@@ -21,6 +22,19 @@ class _SeederScreenState extends State<SeederScreen> {
     setState(() {
       _statusMessage = message;
     });
+  }
+
+  Future<void> _handleSeedCategories() async {
+    setState(() => _isLoading = true);
+    _setStatus('Seeding new categories & tags...');
+    try {
+      await new_seeders.runSeeders();
+      _setStatus('✅ Successfully seeded new Categories, SubCategories, and Tags!');
+    } catch (e) {
+      _setStatus('❌ Error: \$e');
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _handleSeedDatabase() async {
@@ -134,9 +148,20 @@ class _SeederScreenState extends State<SeederScreen> {
               const Center(child: CircularProgressIndicator())
             else ...[
               ElevatedButton.icon(
+                onPressed: _handleSeedCategories,
+                icon: const Icon(Icons.category_rounded),
+                label: const Text('Seed Categories & Tags (New)'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.orange.shade700,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
                 onPressed: _handleSeedDatabase,
                 icon: const Icon(Icons.add_circle_outline),
-                label: const Text('Seed Database'),
+                label: const Text('Seed Stores & Products'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: AppColors.primaryGreen,
@@ -158,7 +183,7 @@ class _SeederScreenState extends State<SeederScreen> {
               ElevatedButton.icon(
                 onPressed: _handleReseedDatabase,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Reseed Database'),
+                label: const Text('Reseed Stores & Products'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Colors.blue.shade700,

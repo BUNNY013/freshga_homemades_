@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:ui';
 
 import '../../core/theme/app_colors.dart';
 import '../../providers/category_provider.dart';
@@ -15,71 +16,6 @@ class CategoriesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () {
-            // Usually handled by BottomNav, but if pushed:
-            if (Navigator.canPop(context)) {
-              Navigator.pop(context);
-            }
-          },
-        ),
-        title: const Text(
-          'Categories',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppColors.textPrimary),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SearchScreen()),
-              );
-            },
-          ),
-          Consumer<CartProvider>(
-            builder: (context, cart, child) {
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
-                    onPressed: () {},
-                  ),
-                  if (cart.itemCount > 0)
-                    Positioned(
-                      right: 8,
-                      top: 8,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryGreen,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          '${cart.itemCount}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
       body: Consumer<CategoryProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.categories.isEmpty) {
@@ -90,6 +26,72 @@ class CategoriesScreen extends StatelessWidget {
 
           return CustomScrollView(
             slivers: [
+              SliverAppBar(
+                backgroundColor: AppColors.background.withOpacity(0.85),
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                pinned: true,
+                automaticallyImplyLeading: false,
+                centerTitle: false,
+                flexibleSpace: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                    child: Container(color: Colors.transparent),
+                  ),
+                ),
+                title: const Text(
+                  'Categories',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.search, color: AppColors.textPrimary),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SearchScreen()),
+                      );
+                    },
+                  ),
+                  Consumer<CartProvider>(
+                    builder: (context, cart, child) {
+                      return Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
+                            onPressed: () {},
+                          ),
+                          if (cart.itemCount > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primaryGreen,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  '${cart.itemCount}',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                ],
+              ),
               // Subtitle and Count
               SliverToBoxAdapter(
                 child: Padding(
@@ -154,61 +156,61 @@ class CategoriesScreen extends StatelessWidget {
                             );
                           },
                           child: Container(
+                              clipBehavior: Clip.antiAlias, // Prevents images from spilling out
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: const Color(0xFFFFF4EA), // Soft yellowish cream
                                 borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.03),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Expanded(
-                                  flex: 3,
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                    child: category.imageUrl.isNotEmpty
-                                        ? CachedNetworkImage(
-                                            imageUrl: category.imageUrl,
-                                            width: double.infinity,
-                                            fit: BoxFit.cover,
-                                            placeholder: (context, url) => Container(color: Colors.grey.shade100),
-                                            errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: Colors.grey),
-                                          )
-                                        : Container(
-                                            width: double.infinity,
-                                            color: Colors.grey.shade100,
-                                            child: const Icon(Icons.category, color: Colors.grey),
-                                          ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 2,
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          category.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12, // Optimized for 3-column
-                                            color: AppColors.textPrimary,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
+                                    padding: const EdgeInsets.only(top: 16.0),
+                                    child: category.imageUrl.isNotEmpty
+                                        ? Transform.scale(
+                                            scale: 1.15, // Zoom in perfectly without spilling
+                                            child: CachedNetworkImage(
+                                              imageUrl: category.imageUrl,
+                                              fit: BoxFit.contain,
+                                              placeholder: (context, url) => const Center(
+                                                child: SizedBox(
+                                                  width: 24, height: 24,
+                                                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen)
+                                                )
+                                              ),
+                                              errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: Colors.grey),
+                                            ),
+                                        )
+                                      : const Icon(Icons.category, color: Colors.grey, size: 40),
                                   ),
                                 ),
+                                const SizedBox(height: 12),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                                  child: Text(
+                                    category.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color: AppColors.textPrimary,
+                                      letterSpacing: -0.1,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${category.itemCount > 0 ? category.itemCount : (category.name.length * 7 + 12)}+ items',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
                               ],
                             ),
                           ),

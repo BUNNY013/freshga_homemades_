@@ -9,8 +9,8 @@ import '../../services/category_service.dart';
 import '../../services/product_service.dart';
 import '../../services/store_service.dart';
 import '../search/search_screen.dart';
+import '../../presentation/widgets/product/freshga_product_card.dart';
 import 'widgets/category_hero_card.dart';
-import 'widgets/discovery_product_card.dart';
 import 'widgets/discovery_store_card.dart';
 import 'widgets/filter_sort_bar.dart';
 import 'widgets/subcategory_chips_row.dart';
@@ -120,22 +120,32 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
                         children: [
                           _buildTabSwitcher(),
                           CategoryHeroCard(category: _category!, isStoresTab: isStoresTab),
-                          SubcategoryChipsRow(
-                            categoryId: widget.categoryId,
-                            selectedSubCategoryId: _selectedSubCategoryId,
-                            onSelected: (id) {
-                              setState(() {
-                                _selectedSubCategoryId = id;
-                              });
-                            },
-                          ),
-                          FilterSortBar(
-                            appliedFiltersCount: _appliedFilters,
-                            currentSort: _currentSort,
-                            onFilterTap: _showFilterSheet,
-                            onSortTap: _showSortSheet,
-                          ),
                         ],
+                      ),
+                    ),
+                    SliverPersistentHeader(
+                      pinned: true,
+                      delegate: _StickyHeaderDelegate(
+                        height: 190.0, // Subcategory chips (~130px) + Compact Filter Bar (~60px)
+                        child: Column(
+                          children: [
+                            SubcategoryChipsRow(
+                              categoryId: widget.categoryId,
+                              selectedSubCategoryId: _selectedSubCategoryId,
+                              onSelected: (id) {
+                                setState(() {
+                                  _selectedSubCategoryId = id;
+                                });
+                              },
+                            ),
+                            FilterSortBar(
+                              appliedFiltersCount: _appliedFilters,
+                              currentSort: _currentSort,
+                              onFilterTap: _showFilterSheet,
+                              onSortTap: _showSortSheet,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     if (!isStoresTab)
@@ -294,11 +304,11 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
           crossAxisCount: 2,
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
-          childAspectRatio: 0.55,
+          childAspectRatio: 0.48,
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
-            return DiscoveryProductCard(product: products[index]);
+            return FreshgaProductCard(product: products[index]);
           },
           childCount: products.length,
         ),
@@ -470,5 +480,31 @@ class _StoresFetcherState extends State<_StoresFetcher> {
         );
       },
     );
+  }
+}
+
+class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double height;
+
+  _StickyHeaderDelegate({required this.child, required this.height});
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: AppColors.background,
+      child: child,
+    );
+  }
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  bool shouldRebuild(covariant _StickyHeaderDelegate oldDelegate) {
+    return oldDelegate.child != child || oldDelegate.height != height;
   }
 }

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/store_model.dart';
-import '../../../models/product_model.dart';
-import '../../../services/store_service.dart';
 import '../../../presentation/widgets/store/follow_button.dart';
 import '../../../presentation/screens/store/store_screen.dart';
 
@@ -29,148 +27,222 @@ class DiscoveryStoreCard extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 16,
               offset: const Offset(0, 4),
             ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
           ],
-          border: Border.all(color: Colors.grey.shade100),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo
+                // ── Left accent bar ────────────────────────────────────────
                 Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.grey.shade200),
-                    image: store.logoUrl.isNotEmpty
-                        ? DecorationImage(
-                            image: CachedNetworkImageProvider(store.logoUrl),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
+                  width: 5,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.primaryLight, AppColors.primaryDark],
+                    ),
                   ),
-                  child: store.logoUrl.isEmpty ? const Icon(Icons.store, color: Colors.grey) : null,
                 ),
-                const SizedBox(width: 12),
-                // Store Info
+
+                // ── Card body ──────────────────────────────────────────────
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              store.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimary,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Top row: avatar + info + follow ───────────────
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+
+                            // ── Logo avatar ────────────────────────────
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Container(
+                                  width: 58,
+                                  height: 58,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: store.logoUrl.isEmpty
+                                        ? const LinearGradient(
+                                            colors: [AppColors.primaryLight, AppColors.primaryGreen],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          )
+                                        : null,
+                                    border: Border.all(
+                                      color: AppColors.primaryGreen.withOpacity(0.25),
+                                      width: 2.5,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primaryGreen.withOpacity(0.15),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                    image: store.logoUrl.isNotEmpty
+                                        ? DecorationImage(
+                                            image: CachedNetworkImageProvider(store.logoUrl),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
+                                  ),
+                                  child: store.logoUrl.isEmpty
+                                      ? const Icon(Icons.storefront_rounded, color: Colors.white, size: 26)
+                                      : null,
+                                ),
+                                if (store.isVerified)
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.verified_rounded,
+                                        size: 14,
+                                        color: AppColors.primaryGreen,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+
+                            const SizedBox(width: 14),
+
+                            // ── Store name + rating + followers ────────
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    store.name,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.textPrimary,
+                                      letterSpacing: -0.2,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.goldenYellow.withOpacity(0.12),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.star_rounded, size: 12, color: AppColors.goldenYellow),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              "${store.rating}",
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.textPrimary,
+                                              ),
+                                            ),
+                                            Text(
+                                              " (${store.reviewsCount})",
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500,
+                                                color: AppColors.textSecondary.withOpacity(0.8),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryGreen.withOpacity(0.08),
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.people_alt_rounded, size: 11, color: AppColors.primaryGreen),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              _formatFollowers(store.followers),
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.primaryGreen,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ),
-                          if (store.isVerified)
-                            const Padding(
-                              padding: EdgeInsets.only(left: 4.0),
-                              child: Icon(Icons.verified, color: AppColors.primaryGreen, size: 16),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.star_rounded, size: 14, color: AppColors.goldenYellow),
-                          const SizedBox(width: 4),
-                          Text(
-                            "${store.rating} (${store.reviewsCount})",
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                          ),
-                          const Text(" • ", style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          Text(
-                            "${_formatFollowers(store.followers)} Followers",
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        store.description.isNotEmpty ? store.description : "Traditional recipes made with natural ingredients.",
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textSecondary,
-                          height: 1.3,
+
+                            const SizedBox(width: 10),
+
+                            // ── Follow button ──────────────────────────
+                            FollowButton.fromStore(store, isCompact: false),
+                          ],
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+
+                        // ── Categories text ────────────────────────────────
+                        if (store.categories.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            store.categories.take(4).join('  ·  '),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary.withOpacity(0.75),
+                              letterSpacing: 0.2,
+                              height: 1.4,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                // Follow Button
-                FollowButton.fromStore(store, isCompact: true),
               ],
             ),
-            const SizedBox(height: 16),
-            // Tags
-            if (store.categories.isNotEmpty) ...[
-              Wrap(
-                spacing: 8,
-                children: store.categories.take(3).map((tag) => Text(
-                  tag,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                  ),
-                )).toList(),
-              ),
-              const SizedBox(height: 12),
-            ],
-            // 3 Preview Products
-            FutureBuilder<List<ProductModel>>(
-              future: StoreService().getStoreProducts(store.storeId.isNotEmpty ? store.storeId : store.id, limit: 3),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const SizedBox();
-                }
-                final products = snapshot.data!;
-                return Row(
-                  children: products.map((p) => Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(right: p == products.last ? 0 : 8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: p.imageUrl.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: p.imageUrl,
-                                height: 70,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(height: 70, color: Colors.grey.shade200),
-                      ),
-                    ),
-                  )).toList(),
-                );
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );

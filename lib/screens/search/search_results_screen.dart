@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../providers/search_provider.dart';
-import '../../widgets/search/product_search_card.dart';
+import '../../presentation/widgets/product/freshga_product_card.dart';
 import '../../widgets/search/store_search_card.dart';
 import '../../widgets/search/search_loading_shimmer.dart';
 
@@ -112,13 +112,13 @@ class SearchResultsScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.7,
+          childAspectRatio: 0.48,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
         itemCount: provider.searchResultsProducts.length,
         itemBuilder: (context, index) {
-          return ProductSearchCard(product: provider.searchResultsProducts[index]);
+          return FreshgaProductCard(product: provider.searchResultsProducts[index]);
         },
       ),
     );

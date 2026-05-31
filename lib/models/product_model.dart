@@ -64,6 +64,7 @@ class ProductModel {
   final Map<String, int> ratingHighlights;
   final String shelfLife;
   final String dispatchTime;
+  final bool isStoreVerified;
 
   ProductModel({
     required this.id, required this.storeId, required this.storeName, required this.name, required this.description,
@@ -72,6 +73,7 @@ class ProductModel {
     required this.categoryId, required this.categoryName, required this.subCategoryIds,
     required this.tags, required this.searchKeywords, required this.ingredients, required this.variants,
     required this.ratingCounts, required this.ratingHighlights, required this.shelfLife, required this.dispatchTime,
+    this.isStoreVerified = false,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json, String documentId) {
@@ -117,6 +119,7 @@ class ProductModel {
       ratingHighlights: Map<String, int>.from(json['ratingHighlights'] ?? {}),
       shelfLife: json['shelfLife'] ?? '3 Months',
       dispatchTime: json['dispatchTime'] ?? '2 Days',
+      isStoreVerified: json['isStoreVerified'] ?? false,
     );
   }
 

@@ -35,7 +35,7 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
           _buildHeroBanner(),
           const SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
+              padding: EdgeInsets.fromLTRB(16, 16, 16, 12),
               child: Text(
                 'Browse Sub Categories',
                 style: TextStyle(
@@ -123,7 +123,6 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Container(
           width: double.infinity,
-          height: 160,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             color: const Color(0xFFF9F5EC), // Warm background color from image
@@ -135,76 +134,75 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
               ),
             ],
           ),
-          child: Stack(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Image on the right
-              if (widget.category.imageUrl.isNotEmpty)
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(16),
-                      bottomRight: Radius.circular(16),
-                    ),
+              // Text Content (Takes available space naturally)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 8, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        widget.category.name,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF1E3A2F), // Dark green text from image
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (widget.category.description.isNotEmpty) ...[
+                        Text(
+                          widget.category.description,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF4A5D54),
+                            height: 1.4,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE2F0DE), // Light green pill
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${widget.category.itemCount}+ Items',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E5B42), // Dark green text for pill
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Fixed 4:3 landscape ratio space for banner image
+              if ((widget.category.banner?['url']?.toString() ?? '').isNotEmpty)
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topRight: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                  child: SizedBox(
+                    width: 186, // Perfect 4:3 Landscape ratio (140 * 1.33)
+                    height: 140,
                     child: CachedNetworkImage(
-                      imageUrl: widget.category.imageUrl,
-                      width: 180,
-                      fit: BoxFit.cover,
+                      imageUrl: widget.category.banner!['url'].toString(),
+                      fit: BoxFit.contain, // Float naturally without zooming
                     ),
                   ),
                 ),
-              // Text Content
-              Positioned(
-                left: 20,
-                top: 24,
-                bottom: 20,
-                right: 180, // Prevent overlap with image
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      widget.category.name,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF1E3A2F), // Dark green text from image
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    if (widget.category.description.isNotEmpty) ...[
-                      Text(
-                        widget.category.description,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF4A5D54),
-                          height: 1.4,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE2F0DE), // Light green pill
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${widget.category.itemCount}+ Items',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2E5B42), // Dark green text for pill
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
@@ -308,9 +306,19 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
                   border: Border.all(color: AppColors.primaryGreen.withOpacity(0.3), width: 1.5),
                   color: Colors.transparent,
                 ),
-                child: const Center(
-                  child: Icon(Icons.inventory_2_outlined, color: AppColors.primaryGreen, size: 28),
-                ),
+                child: (widget.category.image?['url']?.toString() ?? '').isNotEmpty
+                    ? ClipOval(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CachedNetworkImage(
+                            imageUrl: widget.category.image!['url'].toString(),
+                            fit: BoxFit.contain, 
+                          ),
+                        ),
+                      )
+                    : const Center(
+                        child: Icon(Icons.inventory_2_outlined, color: AppColors.primaryGreen, size: 28),
+                      ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -327,7 +335,7 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      "Request a product from your favourite stores.",
+                      "Request ${widget.category.name.toLowerCase()} from your favourite stores.",
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
@@ -383,10 +391,11 @@ class _SubCategoryCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.grey.withOpacity(0.15)), // Faint border like screenshot
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.02),
@@ -395,29 +404,25 @@ class _SubCategoryCard extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12), // Restored padding for a larger card feel
         child: Row(
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+            SizedBox(
+              width: 64, // Increased image size
+              height: 64,
               child: subCategory.imageUrl.isNotEmpty
                   ? CachedNetworkImage(
                       imageUrl: subCategory.imageUrl,
-                      width: 70,
-                      height: 70,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: Colors.grey.shade100),
-                      errorWidget: (context, url, error) => Container(
-                        color: Colors.grey.shade100,
-                        child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                      fit: BoxFit.contain, // Float naturally
+                      placeholder: (context, url) => const Center(
+                        child: SizedBox(
+                          width: 20, height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen)
+                        )
                       ),
+                      errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: Colors.grey),
                     )
-                  : Container(
-                      width: 70,
-                      height: 70,
-                      color: Colors.grey.shade100,
-                      child: const Icon(Icons.category, color: Colors.grey),
-                    ),
+                  : const Icon(Icons.category, color: Colors.grey, size: 30),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -427,12 +432,13 @@ class _SubCategoryCard extends StatelessWidget {
                   Text(
                     subCategory.name,
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
                       color: AppColors.textPrimary,
+                      letterSpacing: -0.2, // Gives a tighter, more modern look
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   StreamBuilder<int>(
                     stream: categoryService.streamSubCategoryProductCount(category.id, subCategory.id),
                     builder: (context, snapshot) {
@@ -440,7 +446,8 @@ class _SubCategoryCard extends StatelessWidget {
                       return Text(
                         '$count+ Items',
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
                           color: AppColors.textSecondary,
                         ),
                       );
