@@ -5,7 +5,7 @@ import 'dart:async';
 
 import '../core/theme/app_colors.dart';
 import '../services/auth_service.dart';
-import 'location_permission_screen.dart';
+import 'auth_wrapper.dart';
 
 class OTPScreen extends StatefulWidget {
   final String verificationId;
@@ -75,10 +75,10 @@ class _OTPScreenState extends State<OTPScreen> {
         _isLoading = false;
       });
 
-      // Proceed to Location Selection if new, or Home if returning.
+      // Proceed to AuthWrapper to handle routing logic (Location vs Home)
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const LocationPermissionScreen()),
+        MaterialPageRoute(builder: (_) => const AuthWrapper()),
         (route) => false,
       );
     } catch (e) {

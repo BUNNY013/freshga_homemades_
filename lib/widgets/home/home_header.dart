@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 
+import 'package:provider/provider.dart';
+import '../../../providers/customer_provider.dart';
+import '../../../screens/location_search_screen.dart';
+
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
@@ -11,37 +15,56 @@ class HomeHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Row(
-            children: [
-              const Icon(Icons.location_on, color: AppColors.primaryGreen, size: 24),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Delivery to",
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          "Banjara Hills, Hyderabad",
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontSize: 14,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LocationSearchScreen()),
+              );
+            },
+            child: Row(
+              children: [
+                const Icon(Icons.location_on, color: AppColors.primaryGreen, size: 24),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Consumer<CustomerProvider>(
+                    builder: (context, customerProvider, child) {
+                      final customer = customerProvider.currentCustomer;
+                      final city = customer?.city ?? 'Select Location';
+                      final state = customer?.state ?? '';
+                      final displayText = state.isNotEmpty ? '$city, $state' : city;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Delivery to",
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: 12,
+                              color: AppColors.textSecondary,
+                            ),
                           ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const Icon(Icons.keyboard_arrow_down, size: 20),
-                      ],
-                    ),
-                  ],
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  displayText,
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontSize: 14,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const Icon(Icons.keyboard_arrow_down, size: 20),
+                            ],
+                          ),
+                        ],
+                      );
+                    }
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         Row(

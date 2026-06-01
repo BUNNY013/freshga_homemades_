@@ -36,6 +36,14 @@ service cloud.firestore {
     }
 
     // =========================
+    // CUSTOMERS
+    // =========================
+
+    match /customers/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // =========================
     // SUPPLIER APPLICATIONS
     // =========================
 
