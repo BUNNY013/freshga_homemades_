@@ -23,7 +23,9 @@ class SectionTitle extends StatelessWidget {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                    letterSpacing: -0.5,
                   ),
                 ),
                 if (subtitle != null) ...[
@@ -42,7 +44,7 @@ class SectionTitle extends StatelessWidget {
             GestureDetector(
               onTap: onSeeAll,
               child: Text(
-                "See all",
+                "View all",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.primaryGreen,
                   fontWeight: FontWeight.w600,

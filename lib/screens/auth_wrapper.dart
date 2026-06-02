@@ -36,7 +36,7 @@ class AuthWrapper extends StatelessWidget {
                 return const LocationSetupScreen();
               }
 
-              return const CustomerHomeScreen();
+              return CustomerHomeScreen(key: CustomerHomeScreen.globalKey);
             },
           );
         }

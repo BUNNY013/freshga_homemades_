@@ -17,7 +17,7 @@ class TrendingProductsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionTitle(title: title, onSeeAll: () {}),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         SizedBox(
           height: 250,
           child: ListView.builder(

@@ -23,7 +23,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
       children: [
         CarouselSlider(
           options: CarouselOptions(
-            height: 190.0,
+            height: 170.0,
             autoPlay: true,
             enlargeCenterPage: true,
             viewportFraction: 0.92,
@@ -63,7 +63,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                         ],
                       ),
                     ),
-                    padding: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -92,7 +92,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                             banner.title!.replaceAll('\\n', '\n'),
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 22,
+                              fontSize: 18,
                               fontWeight: FontWeight.w800,
                               height: 1.2,
                             ),
@@ -106,13 +106,13 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                             banner.subtitle!.replaceAll('\\n', '\n'),
                             style: const TextStyle(
                               color: Colors.white70,
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: FontWeight.w400,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                         ],
                         if (banner.buttonText != null && banner.buttonText!.isNotEmpty)
                           ElevatedButton(
@@ -123,17 +123,17 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF1E7036), // FreshGa Green
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(6),
                               ),
                             ),
                             child: Text(
                               banner.buttonText!,
                               style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -143,24 +143,6 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                   ),
                 );
               },
-            );
-          }).toList(),
-        ),
-        const SizedBox(height: 12),
-        // Pagination Dots
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: widget.banners.asMap().entries.map((entry) {
-            return Container(
-              width: _currentIndex == entry.key ? 20.0 : 8.0,
-              height: 8.0,
-              margin: const EdgeInsets.symmetric(horizontal: 4.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4.0),
-                color: _currentIndex == entry.key
-                    ? const Color(0xFF1E7036) // Active dot color
-                    : Colors.grey.shade300,   // Inactive dot color
-              ),
             );
           }).toList(),
         ),

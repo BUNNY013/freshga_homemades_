@@ -93,8 +93,16 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final section = homeProvider.sections[index];
+                          
+                          // Dynamically reduce padding around the Trust Strip to keep it tight
+                          bool nextIsTrust = index < homeProvider.sections.length - 1 && homeProvider.sections[index + 1].type == 'trustStrip';
+                          double bottomGap = 24.0; // Default gap between major sections
+                          if (section.type == 'trustStrip' || nextIsTrust) {
+                            bottomGap = 8.0;
+                          }
+
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 32.0),
+                            padding: EdgeInsets.only(bottom: bottomGap),
                             child: DynamicSectionRenderer(section: section),
                           );
                         },
@@ -117,19 +125,20 @@ class _HomeFeedViewState extends State<HomeFeedView> {
 
   Widget _buildStickyHeader(BuildContext context) {
     return SliverAppBar(
-      pinned: true,
+      pinned: false,
       floating: true,
+      snap: true,
       backgroundColor: AppColors.background,
       elevation: 0,
       scrolledUnderElevation: 4,
       shadowColor: AppColors.textSecondary.withOpacity(0.2),
       titleSpacing: 16,
-      toolbarHeight: 120,
+      toolbarHeight: 110,
       title: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           HomeHeader(),
-          SizedBox(height: 16),
+          SizedBox(height: 12),
           SearchBarWidget(),
         ],
       ),

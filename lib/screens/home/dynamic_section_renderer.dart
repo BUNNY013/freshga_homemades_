@@ -13,6 +13,9 @@ import '../../widgets/home/trending_products_section.dart';
 import '../../widgets/home/collections_section.dart';
 import '../../widgets/home/trust_strip_section.dart';
 import '../../widgets/home/loading_shimmers.dart';
+import '../categories/categories_screen.dart';
+import '../categories/category_discovery_screen.dart';
+import '../customer_home_screen.dart';
 
 class DynamicSectionRenderer extends StatelessWidget {
   final HomeSectionModel section;
@@ -35,7 +38,21 @@ class DynamicSectionRenderer extends StatelessWidget {
         return Consumer<CategoryProvider>(
           builder: (context, provider, child) {
             if (provider.isLoading) return const SectionShimmer();
-            return CategoriesSection(categories: provider.categories, title: section.title);
+            return CategoriesSection(
+              categories: provider.categories, 
+              title: section.title,
+              onViewAll: () {
+                CustomerHomeScreen.globalKey.currentState?.switchTab(1);
+              },
+              onCategoryTap: (category) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CategoryDiscoveryScreen(category: category),
+                  ),
+                );
+              },
+            );
           },
         );
       case 'featuredStores':

@@ -10,12 +10,20 @@ import '../presentation/widgets/cart/floating_cart_bar.dart';
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
 
+  static final GlobalKey<_CustomerHomeScreenState> globalKey = GlobalKey<_CustomerHomeScreenState>();
+
   @override
   State<CustomerHomeScreen> createState() => _CustomerHomeScreenState();
 }
 
 class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
   int _currentIndex = 0;
+
+  void switchTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
 
   final List<Widget> _pages = [
     const HomeFeedView(),

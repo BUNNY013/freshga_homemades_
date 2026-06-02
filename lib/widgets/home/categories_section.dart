@@ -7,8 +7,16 @@ import 'section_title.dart';
 class CategoriesSection extends StatelessWidget {
   final List<CategoryModel> categories;
   final String title;
+  final VoidCallback? onViewAll;
+  final Function(CategoryModel)? onCategoryTap;
 
-  const CategoriesSection({super.key, required this.categories, required this.title});
+  const CategoriesSection({
+    super.key, 
+    required this.categories, 
+    required this.title, 
+    this.onViewAll,
+    this.onCategoryTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,21 +25,29 @@ class CategoriesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionTitle(title: title),
-        const SizedBox(height: 16),
+        SectionTitle(title: title, onSeeAll: onViewAll),
+        const SizedBox(height: 12),
         SizedBox(
-          height: 100,
+          height: 110,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             itemCount: categories.length,
             itemBuilder: (context, index) {
               final cat = categories[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  children: [
-                    Container(
+              return GestureDetector(
+                onTap: () {
+                  if (onCategoryTap != null) {
+                    onCategoryTap!(cat);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: SizedBox(
+                    width: 72,
+                    child: Column(
+                      children: [
+                        Container(
                       width: 70,
                       height: 70,
                       decoration: BoxDecoration(
@@ -55,13 +71,20 @@ class CategoriesSection extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       cat.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 11,
+                        height: 1.2,
                         fontWeight: FontWeight.w500,
                         color: AppColors.textPrimary,
                       ),
                     ),
                   ],
                 ),
+              ),
+              ),
               );
             },
           ),

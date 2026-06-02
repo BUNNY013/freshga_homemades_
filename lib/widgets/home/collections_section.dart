@@ -18,7 +18,7 @@ class CollectionsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionTitle(title: title),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         ...collections.map((col) => _buildCollection(context, col)).toList(),
       ],
     );

@@ -7,8 +7,8 @@ class TrustStripSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         color: const Color(0xFFF6F8F3), // Light greenish background from UI
         borderRadius: BorderRadius.circular(12),
@@ -20,27 +20,27 @@ class TrustStripSection extends StatelessWidget {
           children: [
             const SizedBox(width: 16),
             const _TrustItem(
-              icon: Icons.shield_outlined,
-              title: "Verified Sellers",
-              subtitle: "100% trusted",
+              icon: Icons.soup_kitchen_outlined,
+              title: "100% Homemade",
+              subtitle: "Authentic & Pure",
             ),
             _buildDivider(),
             const _TrustItem(
-              icon: Icons.eco_outlined, // Closest to leaf icon
-              title: "No Preservatives",
-              subtitle: "Homemade & Pure",
+              icon: Icons.local_dining_outlined,
+              title: "Freshly Prepared",
+              subtitle: "Made to order",
             ),
             _buildDivider(),
             const _TrustItem(
-              icon: Icons.inventory_2_outlined,
-              title: "Eco Packaging",
-              subtitle: "Better for Earth",
+              icon: Icons.verified_user_outlined,
+              title: "Verified Makers",
+              subtitle: "Quality checked",
             ),
             _buildDivider(),
             const _TrustItem(
-              icon: Icons.schedule_send_outlined, // Clock/Dispatch icon
-              title: "On-time Dispatch",
-              subtitle: "Fresh to you",
+              icon: Icons.home_outlined, 
+              title: "Direct from Home",
+              subtitle: "To your doorstep",
             ),
             const SizedBox(width: 16),
           ],
@@ -51,9 +51,9 @@ class TrustStripSection extends StatelessWidget {
 
   Widget _buildDivider() {
     return Container(
-      height: 30,
+      height: 16,
       width: 1,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 12),
       color: Colors.grey.shade300,
     );
   }
@@ -75,24 +75,24 @@ class _TrustItem extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: const Color(0xFF1E7036), size: 24), // FreshGa Green
-        const SizedBox(width: 8),
+        Icon(icon, color: const Color(0xFF1E7036), size: 18), // FreshGa Green
+        const SizedBox(width: 6),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               title,
               style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
                 color: Color(0xFF1E7036),
               ),
             ),
-            const SizedBox(height: 2),
             Text(
               subtitle,
               style: const TextStyle(
-                fontSize: 10,
+                fontSize: 9,
                 color: AppColors.textSecondary,
               ),
             ),
