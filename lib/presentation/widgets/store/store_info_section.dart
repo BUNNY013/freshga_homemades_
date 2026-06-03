@@ -68,7 +68,7 @@ class StoreInfoSection extends StatelessWidget {
             children: [
               _buildInfoBadge(Icons.eco_outlined, "100% Natural", "No preservatives"),
               _buildInfoBadge(Icons.access_time_outlined, store.dispatchTime, "Dispatch Time"),
-              _buildInfoBadge(Icons.location_on_outlined, "Bangalore,", "Karnataka"),
+              _buildInfoBadge(Icons.location_on_outlined, "${store.city},", store.state.isNotEmpty ? store.state : "Location"),
             ],
           ),
           const SizedBox(height: 16),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/store_model.dart';
 import 'section_title.dart';
 import 'store_card.dart';
+import '../../presentation/screens/store/store_list_screen.dart';
 
 class FeaturedStoresSection extends StatelessWidget {
   final List<StoreModel> stores;
@@ -16,10 +17,23 @@ class FeaturedStoresSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SectionTitle(title: title, onSeeAll: () {}),
+        SectionTitle(
+          title: title, 
+          onSeeAll: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StoreListScreen(
+                  title: title,
+                  stores: stores,
+                ),
+              ),
+            );
+          }
+        ),
         const SizedBox(height: 12),
         SizedBox(
-          height: 190, // Adjusted for the mini StoreCard design
+          height: 250, // Adjusted for the compact StoreCard design
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),

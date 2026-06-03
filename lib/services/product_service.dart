@@ -10,9 +10,38 @@ class ProductService {
           .where('isTrending', isEqualTo: true)
           .limit(10)
           .get();
-      return snapshot.docs.map((doc) => ProductModel.fromJson(doc.data(), doc.id)).toList();
+      return snapshot.docs.map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
     } catch (e) {
       throw Exception('Failed to load trending products: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> getDiscoveryFeedProducts({DocumentSnapshot? startAfter, int limit = 10}) async {
+    try {
+      // Temporarily removed .where('isActive', isEqualTo: true) to avoid Firestore missing composite index error
+      Query query = _firestore.collection('products')
+          .orderBy('createdAt', descending: true)
+          .limit(limit);
+
+      if (startAfter != null) {
+        query = query.startAfterDocument(startAfter);
+      }
+
+      final snapshot = await query.get();
+      
+      final products = snapshot.docs.map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+
+      return {
+        'products': products,
+        'lastDoc': lastDoc,
+      };
+    } catch (e) {
+      print('Error getting discovery products: $e');
+      return {
+        'products': <ProductModel>[],
+        'lastDoc': null,
+      };
     }
   }
   

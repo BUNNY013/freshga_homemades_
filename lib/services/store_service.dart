@@ -12,9 +12,58 @@ class StoreService {
           .orderBy('rating', descending: true)
           .limit(10)
           .get();
-      return snapshot.docs.map((doc) => StoreModel.fromJson(doc.data(), doc.id)).toList();
+      return snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
     } catch (e) {
       throw Exception('Failed to load featured stores: $e');
+    }
+  }
+
+  Future<List<StoreModel>> getLocalStores(String city, String state) async {
+    try {
+      // Primary query: Match exactly by City
+      Query query = _firestore.collection('stores')
+          .where('isActive', isEqualTo: true)
+          .where('city', isEqualTo: city);
+          
+      final snapshot = await query.limit(10).get();
+      
+      List<StoreModel> stores = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      
+      // Fallback: If less than 3 stores in city, broaden to State
+      if (stores.length < 3) {
+        final stateQuery = await _firestore.collection('stores')
+            .where('isActive', isEqualTo: true)
+            .where('state', isEqualTo: state)
+            .limit(10)
+            .get();
+            
+        final stateStores = stateQuery.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+        
+        // Merge without duplicates
+        for (var store in stateStores) {
+          if (!stores.any((s) => s.id == store.id)) {
+            stores.add(store);
+          }
+        }
+      }
+      return stores;
+    } catch (e) {
+      print('Error loading local stores: $e');
+      return [];
+    }
+  }
+
+  Future<List<StoreModel>> getNewStores() async {
+    try {
+      final snapshot = await _firestore.collection('stores')
+          .where('isActive', isEqualTo: true)
+          .orderBy('createdAt', descending: true)
+          .limit(10)
+          .get();
+      return snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+    } catch (e) {
+      print('Error loading new stores: $e');
+      return [];
     }
   }
 
@@ -54,7 +103,7 @@ class StoreService {
         var snapshot = await _firestore.collection('stores')
             .where(FieldPath.documentId, whereIn: chunk)
             .get();
-        results.addAll(snapshot.docs.map((d) => StoreModel.fromJson(d.data(), d.id)).toList());
+        results.addAll(snapshot.docs.map((d) => StoreModel.fromJson(d.data() as Map<String, dynamic>, d.id)).toList());
       }
       return results;
     } catch (e) {

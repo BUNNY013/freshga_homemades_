@@ -8,8 +8,9 @@ import 'loading_shimmers.dart';
 
 class StoreCard extends StatelessWidget {
   final StoreModel store;
+  final bool isFullWidth;
 
-  const StoreCard({super.key, required this.store});
+  const StoreCard({super.key, required this.store, this.isFullWidth = false});
 
   String _formatFollowers(int count) {
     if (count >= 1000) {
@@ -28,121 +29,148 @@ class StoreCard extends StatelessWidget {
         );
       },
       child: Container(
-        width: 200,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
+        width: isFullWidth ? double.infinity : 250, // Expand if full width
+        margin: EdgeInsets.symmetric(horizontal: isFullWidth ? 16 : 8, vertical: isFullWidth ? 8 : 4),
         decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textSecondary.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Banner
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: store.bannerUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: store.bannerUrl,
-                        height: 90,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const ShimmerLoading(width: double.infinity, height: 90),
-                        errorWidget: (context, url, error) => Container(height: 90, color: Colors.grey.shade200),
-                      )
-                    : Container(
-                        height: 90,
-                        width: double.infinity,
-                        color: Colors.grey.shade200,
-                      ),
-              ),
-              // Space for overlapping logo
-              const SizedBox(height: 28),
-              
-              // Store Info
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      store.name,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Followers
-                        Expanded(
-                          child: Text(
-                            "${_formatFollowers(store.followers)} Followers",
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textSecondary.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Banner + Logo Stack
+            SizedBox(
+              height: isFullWidth ? 150 : 110, // Taller stack to accommodate larger logo
+              child: Stack(
+                children: [
+                  // Banner Image
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    child: store.bannerUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: store.bannerUrl,
+                            height: isFullWidth ? 110 : 85,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => ShimmerLoading(width: double.infinity, height: isFullWidth ? 110 : 85),
+                            errorWidget: (context, url, error) => Container(height: isFullWidth ? 110 : 85, color: Colors.grey.shade200),
+                          )
+                        : Container(
+                            height: isFullWidth ? 110 : 85,
+                            width: double.infinity,
+                            color: Colors.grey.shade200,
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        // Follow Button
-                        FollowButton.fromStore(store, isCompact: true),
-                      ],
+                  ),
+                  
+                  // Gradient Overlay
+                  Container(
+                    height: isFullWidth ? 110 : 85,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.3),
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.05),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          
-          // Overlapping Logo
-          Positioned(
-            left: 12,
-            top: 90 - 22,
-            child: Container(
-              padding: const EdgeInsets.all(2),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-              child: CircleAvatar(
-                radius: 22,
-                backgroundColor: Colors.grey.shade100,
-                backgroundImage: store.logoUrl.isNotEmpty ? CachedNetworkImageProvider(store.logoUrl) : null,
-                child: store.logoUrl.isEmpty ? const Icon(Icons.store, color: Colors.grey, size: 20) : null,
+                  ),
+                  
+
+
+                  // Overlapping Logo
+                  Positioned(
+                    left: isFullWidth ? 20 : 12,
+                    bottom: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          )
+                        ]
+                      ),
+                      child: CircleAvatar(
+                        radius: isFullWidth ? 38 : 26,
+                        backgroundColor: Colors.grey.shade100,
+                        backgroundImage: store.logoUrl.isNotEmpty ? CachedNetworkImageProvider(store.logoUrl) : null,
+                        child: store.logoUrl.isEmpty ? Icon(Icons.store, color: Colors.grey, size: isFullWidth ? 32 : 20) : null,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          
-          // Heart Icon overlay
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
+            
+            // Store Details
+            Padding(
+              padding: EdgeInsets.fromLTRB(isFullWidth ? 20 : 12, isFullWidth ? 12 : 10, isFullWidth ? 20 : 12, isFullWidth ? 20 : 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Store Name (No verified badge)
+                  Text(
+                    store.name,
+                    style: TextStyle(
+                      fontSize: isFullWidth ? 18 : 15,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  
+                  const SizedBox(height: 4),
+                  
+                  // Rating Row
+                  Row(
+                    children: [
+                      const Icon(Icons.star_rounded, size: 14, color: Colors.orange),
+                      const SizedBox(width: 2),
+                      Text(
+                        store.rating.toStringAsFixed(1),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Followers & Follow Button Row
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          "${_formatFollowers(store.followers)} Followers",
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                        ),
+                      ),
+                      FollowButton.fromStore(store, isCompact: false),
+                    ],
+                  ),
+                ],
               ),
-              child: const Icon(Icons.favorite_border, size: 14, color: AppColors.textSecondary),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 }

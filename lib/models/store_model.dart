@@ -21,6 +21,12 @@ class StoreModel {
   final bool isFeatured;
   final bool isActive;
   final String dispatchTime;
+  
+  // Location
+  final String city;
+  final String state;
+  final String country;
+  final String pincode;
 
   StoreModel({
     required this.id,
@@ -45,6 +51,10 @@ class StoreModel {
     required this.isFeatured,
     required this.isActive,
     required this.dispatchTime,
+    this.city = '',
+    this.state = '',
+    this.country = '',
+    this.pincode = '',
   });
 
   factory StoreModel.fromJson(Map<String, dynamic> json, String documentId) {
@@ -71,6 +81,10 @@ class StoreModel {
       isFeatured: json['isFeatured'] ?? false,
       isActive: json['isActive'] ?? true,
       dispatchTime: json['dispatchTime'] ?? '24 hours',
+      city: json['city'] ?? '',
+      state: json['state'] ?? '',
+      country: json['country'] ?? '',
+      pincode: json['pincode'] ?? '',
     );
   }
 
@@ -97,6 +111,10 @@ class StoreModel {
       'isFeatured': isFeatured,
       'isActive': isActive,
       'dispatchTime': dispatchTime,
+      'city': city,
+      'state': state,
+      'country': country,
+      'pincode': pincode,
     };
   }
 }

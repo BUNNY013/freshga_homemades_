@@ -4,13 +4,26 @@ import '../models/home_section_model.dart';
 class HomeSectionService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<List<HomeSectionModel>> getActiveSections() async {
+  Future<Map<String, dynamic>> getActiveSections({DocumentSnapshot? startAfter, int limit = 3}) async {
     try {
-      final snapshot = await _firestore.collection('home_sections')
+      Query query = _firestore.collection('home_sections')
           .where('isActive', isEqualTo: true)
           .orderBy('order')
-          .get();
-      return snapshot.docs.map((doc) => HomeSectionModel.fromJson(doc.data(), doc.id)).toList();
+          .limit(limit);
+
+      if (startAfter != null) {
+        query = query.startAfterDocument(startAfter);
+      }
+
+      final snapshot = await query.get();
+      
+      final sections = snapshot.docs.map((doc) => HomeSectionModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+
+      return {
+        'sections': sections,
+        'lastDoc': lastDoc,
+      };
     } catch (e) {
       throw Exception('Failed to load home sections: $e');
     }

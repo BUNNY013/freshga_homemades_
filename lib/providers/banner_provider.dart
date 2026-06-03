@@ -12,6 +12,8 @@ class BannerProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> loadBanners() async {
+    if (_banners.isNotEmpty) return; // Prevent redundant reads
+
     _isLoading = true;
     notifyListeners();
     try {

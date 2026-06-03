@@ -35,6 +35,26 @@ class StoreProvider with ChangeNotifier {
   List<StoreModel> get stores => _stores;
   bool get isLoading => _isLoadingFeatured;
 
+  // Local Stores State
+  List<StoreModel> _localStores = [];
+  bool _isLoadingLocal = false;
+  bool _isLocalExpandedToState = false;
+  String _localCity = '';
+  String _localState = '';
+  
+  List<StoreModel> get localStores => _localStores;
+  bool get isLoadingLocal => _isLoadingLocal;
+  bool get isLocalExpandedToState => _isLocalExpandedToState;
+  String get localCity => _localCity;
+  String get localState => _localState;
+
+  // New Stores State
+  List<StoreModel> _newStores = [];
+  bool _isLoadingNew = false;
+  
+  List<StoreModel> get newStores => _newStores;
+  bool get isLoadingNew => _isLoadingNew;
+
   // Dynamic Categories extracted from products
   // Format: categoryId -> categoryName
   final Map<String, String> _availableCategories = {};
@@ -154,12 +174,12 @@ class StoreProvider with ChangeNotifier {
   }
 
   Future<void> loadFeaturedStores() async {
+    if (_stores.isNotEmpty) return; // Prevent redundant reads
+
     _isLoadingFeatured = true;
     notifyListeners();
 
     try {
-      _stores = await _service.getFeaturedStores();
-      
       // Setup realtime listener for featured stores
       _featuredStoresSubscription?.cancel();
       _featuredStoresSubscription = FirebaseFirestore.instance.collection('stores')
@@ -168,12 +188,49 @@ class StoreProvider with ChangeNotifier {
           .limit(10)
           .snapshots().listen((snapshot) {
         _stores = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+        _isLoadingFeatured = false;
         notifyListeners();
       });
     } catch (e) {
       debugPrint("Error loading featured stores: $e");
-    } finally {
       _isLoadingFeatured = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadLocalStores(String city, String state) async {
+    if (city.isEmpty && state.isEmpty) return;
+    
+    _isLoadingLocal = true;
+    _localCity = city;
+    _localState = state;
+    _isLocalExpandedToState = false;
+    notifyListeners();
+
+    try {
+      _localStores = await _service.getLocalStores(city, state);
+      // Check if we fell back to state-wide by verifying if any returned store is outside the requested city
+      if (_localStores.isNotEmpty) {
+        _isLocalExpandedToState = _localStores.any((s) => s.city.toLowerCase() != city.toLowerCase());
+      }
+    } catch (e) {
+      debugPrint("Error loading local stores: $e");
+    } finally {
+      _isLoadingLocal = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadNewStores() async {
+    _isLoadingNew = true;
+    notifyListeners();
+
+    try {
+      _newStores = await _service.getNewStores();
+    } catch (e) {
+      debugPrint("Error loading new stores: $e");
+    } finally {
+      _isLoadingNew = false;
       notifyListeners();
     }
   }

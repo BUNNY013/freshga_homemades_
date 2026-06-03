@@ -54,6 +54,75 @@ class ProductProvider with ChangeNotifier {
     return variants[_selectedVariantIndex].price;
   }
 
+  // Discovery Feed State
+  List<ProductModel> _discoveryProducts = [];
+  bool _isLoadingDiscovery = false;
+  bool _isPaginatingDiscovery = false;
+  bool _hasMoreDiscovery = true;
+  dynamic _lastDiscoveryDoc;
+
+  List<ProductModel> get discoveryProducts => _discoveryProducts;
+  bool get isLoadingDiscovery => _isLoadingDiscovery;
+  bool get isPaginatingDiscovery => _isPaginatingDiscovery;
+  bool get hasMoreDiscovery => _hasMoreDiscovery;
+
+  Future<void> loadDiscoveryFeed({bool refresh = false}) async {
+    if (refresh) {
+      _lastDiscoveryDoc = null;
+      _hasMoreDiscovery = true;
+      _discoveryProducts.clear();
+    } else if (_discoveryProducts.isNotEmpty) {
+      return; // Already loaded
+    }
+
+    _isLoadingDiscovery = true;
+    notifyListeners();
+
+    try {
+      final result = await _service.getDiscoveryFeedProducts(limit: 6);
+      _discoveryProducts = List<ProductModel>.from(result['products']);
+      _lastDiscoveryDoc = result['lastDoc'];
+      
+      if (_discoveryProducts.length < 6) {
+        _hasMoreDiscovery = false;
+      }
+    } catch (e) {
+      debugPrint('Error loading discovery feed: $e');
+    } finally {
+      _isLoadingDiscovery = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMoreDiscoveryFeed() async {
+    if (_isPaginatingDiscovery || !_hasMoreDiscovery) return;
+
+    _isPaginatingDiscovery = true;
+    notifyListeners();
+
+    try {
+      final result = await _service.getDiscoveryFeedProducts(
+        startAfter: _lastDiscoveryDoc,
+        limit: 6,
+      );
+      
+      final newProducts = List<ProductModel>.from(result['products']);
+      if (newProducts.isNotEmpty) {
+        _discoveryProducts.addAll(newProducts);
+        _lastDiscoveryDoc = result['lastDoc'];
+      }
+      
+      if (newProducts.length < 6) {
+        _hasMoreDiscovery = false;
+      }
+    } catch (e) {
+      debugPrint('Error paginating discovery feed: $e');
+    } finally {
+      _isPaginatingDiscovery = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> loadTrendingProducts() async {
     _isLoadingTrending = true;
     notifyListeners();

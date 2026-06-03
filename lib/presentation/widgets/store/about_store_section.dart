@@ -70,7 +70,7 @@ class AboutStoreSection extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    _buildDetailRow(Icons.location_on_outlined, "Pickup Location", "Bangalore, Karnataka"),
+                    _buildDetailRow(Icons.location_on_outlined, "Pickup Location", "${store.city}, ${store.state}"),
                     _buildDetailRow(Icons.category_outlined, "Categories", store.categories.join(', ')),
                   ],
                 ),

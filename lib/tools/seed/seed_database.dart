@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:math';
 import 'data/image_constants.dart';
 import 'data/mock_data_generator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DatabaseSeeder {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -19,6 +20,7 @@ class DatabaseSeeder {
     'home_sections',
     'store_updates',
     'appConfig',
+    'followers',
   ];
 
   final List<String> _mainCategories = [
@@ -217,15 +219,23 @@ class DatabaseSeeder {
   }
 
   Future<void> seedHomeSections() async {
-    final sectionTypes = ['heroBanner', 'categories', 'featuredStores', 'trendingProducts'];
+    final sectionsData = [
+      {'type': 'heroBanner', 'title': ''},
+      {'type': 'categories', 'title': 'Shop by Categories'},
+      {'type': 'trustStrip', 'title': ''},
+      {'type': 'followingStores', 'title': 'Following Stores'},
+      {'type': 'storeUpdates', 'title': 'Latest From Stores You Follow'},
+      {'type': 'localBrands', 'title': 'Homemade Brands Around You'},
+      {'type': 'newStores', 'title': 'New Homemade Brands'},
+      {'type': 'featuredStores', 'title': 'Featured Stores'},
+    ];
     
     List<Map<String, dynamic>> items = [];
-    for (int i = 0; i < sectionTypes.length; i++) {
-      String type = sectionTypes[i];
+    for (int i = 0; i < sectionsData.length; i++) {
       items.add({
-        'type': type,
-        'title': 'Discover $type',
-        'subtitle': 'Handpicked premium items',
+        'type': sectionsData[i]['type'],
+        'title': sectionsData[i]['title'],
+        'subtitle': '',
         'order': i + 1,
         'isActive': true,
         'createdBySeeder': true,
@@ -432,6 +442,49 @@ class DatabaseSeeder {
     await seedAppConfig();
     await seedStoresAndProducts();
     await seedStoreUpdates();
+    await seedFollowers();
     debugPrint("Finished database seed.");
+  }
+
+  Future<void> seedFollowers() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      debugPrint("No logged in user found. Skipping followers seed.");
+      return;
+    }
+
+    final storeSnapshot = await _db.collection('stores').where('createdBySeeder', isEqualTo: true).limit(5).get();
+    if (storeSnapshot.docs.isEmpty) return;
+
+    WriteBatch batch = _db.batch();
+    
+    for (var doc in storeSnapshot.docs) {
+      final storeData = doc.data();
+      final userStoreRef = _db.collection('users').doc(user.uid).collection('followingStores').doc(doc.id);
+      final storeFollowerRef = _db.collection('stores').doc(doc.id).collection('followers').doc(user.uid);
+      final storeRef = _db.collection('stores').doc(doc.id);
+
+      batch.set(userStoreRef, {
+        'storeId': doc.id,
+        'storeName': storeData['storeName'] ?? '',
+        'storeLogo': storeData['logo'] ?? '',
+        'followedAt': FieldValue.serverTimestamp(),
+        'notificationsEnabled': true,
+        'createdBySeeder': true,
+      });
+
+      batch.set(storeFollowerRef, {
+        'userId': user.uid,
+        'userName': user.displayName ?? 'Customer',
+        'userProfileImage': user.photoURL ?? '',
+        'followedAt': FieldValue.serverTimestamp(),
+        'createdBySeeder': true,
+      });
+
+      batch.update(storeRef, {'followers': FieldValue.increment(1)});
+    }
+
+    await batch.commit();
+    debugPrint("Seeded mock followers for user ${user.uid}");
   }
 }

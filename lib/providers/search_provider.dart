@@ -86,7 +86,11 @@ class SearchProvider with ChangeNotifier {
       return;
     }
 
-    _isLoading = true;
+    // Only show the shimmer loader if we are starting from an empty state
+    // This allows seamless replacement of old suggestions without layout flicker
+    if (_productSuggestions.isEmpty && _storeSuggestions.isEmpty) {
+      _isLoading = true;
+    }
     notifyListeners();
 
     if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -125,8 +129,22 @@ class SearchProvider with ChangeNotifier {
         _searchService.searchStores(query),
       ]);
       
-      _searchResultsProducts = futures[0] as List<ProductModel>;
-      _searchResultsStores = futures[1] as List<StoreModel>;
+      List<ProductModel> products = futures[0] as List<ProductModel>;
+      List<StoreModel> baselineStores = futures[1] as List<StoreModel>;
+
+      // If we found products, make sure their parent stores are also displayed
+      // in the "Stores" tab, even if the store name didn't explicitly match the query.
+      final existingStoreIds = baselineStores.map((s) => s.id).toSet();
+      final productStoreIds = products.map((p) => p.storeId).toSet();
+      final missingStoreIds = productStoreIds.difference(existingStoreIds).toList();
+      
+      if (missingStoreIds.isNotEmpty) {
+        final additionalStores = await _searchService.getStoresByIds(missingStoreIds);
+        baselineStores.addAll(additionalStores);
+      }
+      
+      _searchResultsProducts = products;
+      _searchResultsStores = baselineStores;
     } catch (e) {
        print("Error in performFullSearch: $e");
        _searchResultsProducts = [];

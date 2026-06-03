@@ -45,6 +45,61 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  Widget _buildQuickCategory(String text) {
+    return InkWell(
+      onTap: () {
+        _searchController.text = text;
+        _searchController.selection = TextSelection.fromPosition(TextPosition(offset: _searchController.text.length));
+        final provider = context.read<SearchProvider>();
+        provider.onSearchQueryChanged(text);
+        _onSearchSubmitted(text, provider);
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+      ),
+    );
+  }
+
+  Widget _buildTrendingChip(String text) {
+    // Extract actual search term without emoji (assuming emoji is at index 0 followed by space)
+    final searchTerm = text.contains(' ') ? text.substring(text.indexOf(' ') + 1) : text;
+    
+    return InkWell(
+      onTap: () {
+        _searchController.text = searchTerm;
+        _searchController.selection = TextSelection.fromPosition(TextPosition(offset: _searchController.text.length));
+        final provider = context.read<SearchProvider>();
+        provider.onSearchQueryChanged(searchTerm);
+        _onSearchSubmitted(searchTerm, provider);
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            )
+          ]
+        ),
+        child: Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,18 +121,17 @@ class _SearchScreenState extends State<SearchScreen> {
                             onTap: () => Navigator.pop(context),
                             borderRadius: BorderRadius.circular(20),
                             child: const Padding(
-                              padding: EdgeInsets.all(8.0),
+                              padding: EdgeInsets.only(right: 12.0, top: 8.0, bottom: 8.0),
                               child: Icon(Icons.arrow_back, color: AppColors.textPrimary),
                             ),
                           ),
-                          const SizedBox(width: 8),
                           Expanded(
                             child: Container(
-                              height: 48,
+                              height: 50,
                               decoration: BoxDecoration(
-                                color: AppColors.background,
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.grey.shade200),
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: Colors.grey.shade300, width: 1.2),
                               ),
                               child: Row(
                                 children: [
@@ -153,44 +207,36 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     if (_searchController.text.isEmpty) {
-      // Show Recent Searches
-      if (searchProvider.recentSearches.isEmpty) {
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.search_rounded, size: 64, color: Colors.black12),
-              SizedBox(height: 16),
-              Text("Search for homemade goodness", style: TextStyle(color: AppColors.textSecondary)),
-            ],
-          ),
-        );
-      }
-
       return ListView(
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Recent Searches", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
-                InkWell(
-                  onTap: () => searchProvider.clearRecentSearches(),
-                  child: const Text("Clear all", style: TextStyle(fontSize: 12, color: AppColors.primaryGreen, fontWeight: FontWeight.w600)),
-                ),
-              ],
+          // Recent Searches (if any)
+          if (searchProvider.recentSearches.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Recent Searches", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
+                  InkWell(
+                    onTap: () => searchProvider.clearRecentSearches(),
+                    child: const Text("Clear all", style: TextStyle(fontSize: 12, color: AppColors.primaryGreen, fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
             ),
-          ),
-          ...searchProvider.recentSearches.map((query) => RecentSearchTile(
-            query: query,
-            onTap: () {
-              _searchController.text = query;
-              _searchController.selection = TextSelection.fromPosition(TextPosition(offset: query.length));
-              _onSearchSubmitted(query, searchProvider);
-            },
-            onRemove: () => searchProvider.removeRecentSearch(query),
-          )),
+            ...searchProvider.recentSearches.map((query) => RecentSearchTile(
+              query: query,
+              onTap: () {
+                _searchController.text = query;
+                _searchController.selection = TextSelection.fromPosition(TextPosition(offset: query.length));
+                _onSearchSubmitted(query, searchProvider);
+              },
+              onRemove: () => searchProvider.removeRecentSearch(query),
+            )),
+            const Divider(height: 32, thickness: 6, color: Color(0xFFF5F5F5)), // Section separator
+          ],
+
+
         ],
       );
     }

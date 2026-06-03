@@ -93,6 +93,25 @@ class SearchService {
     }
   }
 
+  /// Fetch specific stores by their IDs (useful for aggregating stores from product results)
+  Future<List<StoreModel>> getStoresByIds(List<String> storeIds) async {
+    if (storeIds.isEmpty) return [];
+    
+    try {
+      // If > 10, chunk the requests because whereIn has a limit of 10
+      List<StoreModel> stores = [];
+      for (var i = 0; i < storeIds.length; i += 10) {
+        final chunk = storeIds.sublist(i, i + 10 > storeIds.length ? storeIds.length : i + 10);
+        final snapshot = await _firestore.collection('stores').where(FieldPath.documentId, whereIn: chunk).get();
+        stores.addAll(snapshot.docs.map((doc) => StoreModel.fromJson(doc.data(), doc.id)));
+      }
+      return stores;
+    } catch (e) {
+      print("Error fetching stores by ids: $e");
+      return [];
+    }
+  }
+
   /// ONE-TIME ADMIN UTILITY:
   /// Run this once to populate 'searchKeywords' field in all existing stores.
   Future<void> populateStoreSearchKeywords() async {

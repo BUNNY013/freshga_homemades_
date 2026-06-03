@@ -23,11 +23,21 @@ class MockDataGenerator {
     return name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '-').replaceAll(RegExp(r'-+'), '-');
   }
 
+  // Mock Locations
+  static const List<Map<String, String>> mockLocations = [
+    {'city': 'Hyderabad', 'state': 'Telangana', 'country': 'India', 'pincode': '500081'},
+    {'city': 'Gudlavalleru', 'state': 'Andhra Pradesh', 'country': 'India', 'pincode': '521356'},
+    {'city': 'Vijayawada', 'state': 'Andhra Pradesh', 'country': 'India', 'pincode': '520001'},
+    {'city': 'Bangalore', 'state': 'Karnataka', 'country': 'India', 'pincode': '560001'},
+    {'city': 'Chennai', 'state': 'Tamil Nadu', 'country': 'India', 'pincode': '600001'},
+  ];
+
   static Map<String, dynamic> generateStoreData(String storeId, String ownerId) {
     final name = generateStoreName();
     final categories = ['Pickles', 'Snacks'];
     final searchableText = "$name ${categories.join(' ')}";
     final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
+    final loc = mockLocations[_random.nextInt(mockLocations.length)];
     
     return {
       'storeId': storeId,
@@ -47,11 +57,15 @@ class MockDataGenerator {
       'rating': double.parse((3.5 + _random.nextDouble() * 1.5).toStringAsFixed(1)),
       'totalReviews': _random.nextInt(500),
       'totalOrders': _random.nextInt(2000),
-      'verified': true, // Enforced premium verification as requested
+      'verified': true,
       'isFeatured': _random.nextDouble() > 0.5,
       'isActive': true,
       'dispatchTime': '${_random.nextInt(2) + 1}-${_random.nextInt(3) + 3} Days',
       'searchKeywords': searchKeywords,
+      'city': loc['city'],
+      'state': loc['state'],
+      'country': loc['country'],
+      'pincode': loc['pincode'],
       'createdBySeeder': true,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),

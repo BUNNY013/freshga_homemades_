@@ -12,6 +12,8 @@ class CollectionProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   Future<void> loadCollections() async {
+    if (_collections.isNotEmpty) return; // Prevent redundant reads
+
     _isLoading = true;
     notifyListeners();
     try {

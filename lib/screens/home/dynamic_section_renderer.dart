@@ -9,7 +9,10 @@ import '../../providers/collection_provider.dart';
 import '../../widgets/home/hero_banner_carousel.dart';
 import '../../widgets/home/categories_section.dart';
 import '../../widgets/home/featured_stores_section.dart';
-import '../../widgets/home/trending_products_section.dart';
+import '../../widgets/home/following_stores_section.dart';
+import '../../widgets/home/store_updates_section.dart';
+import '../../widgets/home/local_brands_section.dart';
+import '../../widgets/home/new_stores_section.dart';
 import '../../widgets/home/collections_section.dart';
 import '../../widgets/home/trust_strip_section.dart';
 import '../../widgets/home/loading_shimmers.dart';
@@ -55,19 +58,19 @@ class DynamicSectionRenderer extends StatelessWidget {
             );
           },
         );
+      case 'followingStores':
+        return FollowingStoresSection(title: section.title);
+      case 'storeUpdates':
+        return StoreUpdatesSection(title: section.title);
+      case 'localBrands':
+        return LocalBrandsSection(title: section.title);
+      case 'newStores':
+        return NewStoresSection(title: section.title);
       case 'featuredStores':
         return Consumer<StoreProvider>(
           builder: (context, provider, child) {
             if (provider.isLoading) return const SectionShimmer();
             return FeaturedStoresSection(stores: provider.stores, title: section.title);
-          },
-        );
-      case 'trendingProducts':
-      case 'recommendedProducts':
-        return Consumer<ProductProvider>(
-          builder: (context, provider, child) {
-            if (provider.isLoadingTrending) return const SectionShimmer();
-            return TrendingProductsSection(products: provider.trendingProducts, title: section.title);
           },
         );
       case 'collections':
