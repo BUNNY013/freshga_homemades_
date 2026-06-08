@@ -11,19 +11,20 @@ class StoreHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      expandedHeight: 250.0, // 220 banner + 30 overlap area
-      pinned: true,
+      expandedHeight: 220.0, // 170 banner + 50 overlap area
+      pinned: false,
+      stretch: true, // Enables the premium stretch-to-zoom effect when pulling down
       backgroundColor: Colors.white,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.3), // Transparent premium look
             shape: BoxShape.circle,
           ),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 20),
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24), // Bigger icon
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -32,12 +33,12 @@ class StoreHeader extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.share_outlined, color: AppColors.textPrimary, size: 20),
+              icon: const Icon(Icons.share_outlined, color: Colors.white, size: 24),
               onPressed: () {},
             ),
           ),
@@ -45,19 +46,50 @@ class StoreHeader extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
               shape: BoxShape.circle,
             ),
-            child: IconButton(
-              icon: const Icon(Icons.more_horiz, color: AppColors.textPrimary, size: 20),
-              onPressed: () {},
+            child: PopupMenuButton<String>(
+              icon: const Icon(Icons.more_horiz, color: Colors.white, size: 24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              position: PopupMenuPosition.under,
+              elevation: 4,
+              color: Colors.white,
+              onSelected: (value) {
+                // Handle menu actions here
+                if (value == 'report') {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Report submitted. Our team will review this store.'),
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'report',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.flag_outlined, size: 20, color: Colors.redAccent),
+                      const SizedBox(width: 12),
+                      const Text('Report Store', style: TextStyle(color: Colors.redAccent)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        collapseMode: CollapseMode.none, // Allows the background to scroll smoothly in sync with the list
+        stretchModes: const [
+          StretchMode.zoomBackground,
+          StretchMode.blurBackground,
+        ],
+        collapseMode: CollapseMode.parallax, // Parallax scrolling effect
         background: Stack(
           fit: StackFit.expand,
           clipBehavior: Clip.none,
@@ -67,7 +99,7 @@ class StoreHeader extends StatelessWidget {
               top: 0,
               left: 0,
               right: 0,
-              bottom: 30, // Leave 30px at bottom for white overlap area
+              bottom: 50, // Leave 50px at bottom for white overlap area
               child: CachedNetworkImage(
                 imageUrl: store.bannerUrl,
                 fit: BoxFit.cover,
@@ -80,7 +112,7 @@ class StoreHeader extends StatelessWidget {
               top: 0,
               left: 0,
               right: 0,
-              bottom: 30,
+              bottom: 50,
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -100,20 +132,27 @@ class StoreHeader extends StatelessWidget {
               bottom: 0,
               left: 0,
               right: 0,
-              height: 30,
-              child: Container(color: Colors.white),
+              height: 50,
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+              ),
             ),
             // Logo positioned to overlap perfectly
             Positioned(
-              left: 16,
+              left: 0,
+              right: 0,
               bottom: 0, // Logo rests exactly at the boundary of StoreInfoSection
-              child: Container(
-                width: 90,
-                height: 90,
+              child: Center(
+                child: Container(
+                width: 100,
+                height: 100,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 3),
+                  border: Border.all(color: Colors.white, width: 4),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.08),
@@ -131,6 +170,7 @@ class StoreHeader extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
             ),
           ],
         ),

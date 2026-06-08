@@ -120,10 +120,15 @@ class StoreService {
       List<Map<String, dynamic>> results = [];
       for (var i = 0; i < subCategoryIds.length; i += 10) {
         var chunk = subCategoryIds.sublist(i, i + 10 > subCategoryIds.length ? subCategoryIds.length : i + 10);
-        var snapshot = await _firestore.collection('subcategories')
-            .where('subCategoryId', whereIn: chunk)
+        var snapshot = await _firestore.collection('sub_categories')
+            .where(FieldPath.documentId, whereIn: chunk)
             .get();
-        results.addAll(snapshot.docs.map((d) => d.data()).toList());
+        // Since we are querying by documentId, ensure the subCategoryId is correctly mapped
+        results.addAll(snapshot.docs.map((d) {
+          final data = d.data();
+          data['subCategoryId'] = d.id;
+          return data;
+        }).toList());
       }
       return results;
     } catch (e) {

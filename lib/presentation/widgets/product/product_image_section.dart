@@ -6,47 +6,75 @@ import '../../../models/product_model.dart';
 import '../../../providers/product_provider.dart';
 import '../../screens/product/product_images_fullscreen_screen.dart';
 
-class ProductImageSection extends StatelessWidget {
+class ProductImageSection extends StatefulWidget {
   final ProductModel product;
 
   const ProductImageSection({super.key, required this.product});
 
   @override
+  State<ProductImageSection> createState() => _ProductImageSectionState();
+}
+
+class _ProductImageSectionState extends State<ProductImageSection> {
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    List<String> displayImages = widget.product.images.isNotEmpty 
+        ? widget.product.images 
+        : [widget.product.imageUrl];
+
     return Stack(
       children: [
-        // Immersive Image
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ProductImagesFullscreenScreen(product: product),
-              ),
-            );
-          },
-          child: Hero(
-            tag: 'product_image_${product.id}',
-            child: Container(
-              height: 400, // Large immersive size
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
+        // Immersive Image Slideshow
+        AspectRatio(
+          aspectRatio: 4 / 3, // Premium 4:3 ratio matching product cards
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+            itemCount: displayImages.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ProductImagesFullscreenScreen(product: widget.product),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: index == 0 ? 'product_image_${widget.product.id}' : 'product_image_${widget.product.id}_$index',
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: CachedNetworkImage(
+                      imageUrl: displayImages[index],
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(color: Colors.grey.shade50),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey.shade50,
+                        child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: CachedNetworkImage(
-                imageUrl: product.imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(color: Colors.grey.shade200),
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.grey.shade200,
-                  child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
-                ),
-              ),
-            ),
+              );
+            },
           ),
         ),
         
@@ -70,91 +98,30 @@ class ProductImageSection extends StatelessWidget {
           ),
         ),
 
-        // Floating Action Buttons (Top)
-        Positioned(
-          top: MediaQuery.of(context).padding.top + 8,
-          left: 16,
-          right: 16,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildGlassButton(
-                icon: Icons.arrow_back,
-                onTap: () => Navigator.pop(context),
-              ),
-              Row(
-                children: [
-                  Consumer<ProductProvider>(
-                    builder: (context, provider, child) {
-                      return _buildGlassButton(
-                        icon: provider.isWishlisted ? Icons.favorite : Icons.favorite_border,
-                        iconColor: provider.isWishlisted ? Colors.red : Colors.white,
-                        onTap: () => provider.toggleWishlist(),
-                      );
-                    },
+        // Dots Indicator
+        if (displayImages.length > 1)
+          Positioned(
+            bottom: 12,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(displayImages.length, (index) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  width: _currentIndex == index ? 8 : 6,
+                  height: _currentIndex == index ? 8 : 6,
+                  decoration: BoxDecoration(
+                    color: _currentIndex == index ? AppColors.primaryGreen : Colors.white.withOpacity(0.5),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: 12),
-                  _buildGlassButton(
-                    icon: Icons.share_outlined,
-                    onTap: () {
-                      // Share action
-                    },
-                  ),
-                  const SizedBox(width: 12),
-                  _buildGlassButton(
-                    icon: Icons.shopping_cart_outlined,
-                    hasBadge: true,
-                    onTap: () {
-                      // Navigate to cart
-                    },
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildGlassButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    Color iconColor = Colors.white,
-    bool hasBadge = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+                );
+              }),
             ),
-            child: Icon(icon, color: iconColor, size: 22),
           ),
-          if (hasBadge)
-            Positioned(
-              right: -2,
-              top: -2,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryGreen,
-                  shape: BoxShape.circle,
-                ),
-                child: const Text(
-                  '2', // Dummy cart count
-                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-              ),
-            )
-        ],
-      ),
+
+      ],
     );
   }
 }

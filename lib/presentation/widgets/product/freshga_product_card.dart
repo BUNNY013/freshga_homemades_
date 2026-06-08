@@ -6,6 +6,7 @@ import '../../../models/product_model.dart';
 import '../../../providers/cart_provider.dart';
 import '../../../providers/product_provider.dart';
 import '../../screens/product/product_details_screen.dart';
+import '../store/variant_selection_bottom_sheet.dart';
 
 class FreshgaProductCard extends StatefulWidget {
   final ProductModel product;
@@ -34,6 +35,17 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
 
   void _addToCart() async {
     if (widget.product.variants.isEmpty) return;
+
+    if (widget.product.variants.length > 1) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (ctx) => VariantSelectionBottomSheet(product: widget.product),
+      );
+      return;
+    }
+
     setState(() => _isAdding = true);
     try {
       await Future.delayed(const Duration(milliseconds: 400));
@@ -129,29 +141,7 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
                           ),
                   ),
 
-                  // Discount badge (top-left)
-                  if (hasDiscount && discountPercentage > 0)
-                    Positioned(
-                      top: 10,
-                      left: 10,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade600,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          "$discountPercentage% OFF",
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ),
-                    ),
+
 
                   // Wishlist button (top-right)
                   Positioned(
@@ -191,63 +181,7 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
                     ),
                   ),
 
-                  // Add button (bottom-right overlay on image)
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: isOutOfStock ? null : _addToCart,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: isOutOfStock
-                              ? Colors.grey.shade200
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: _isAdding
-                            ? const SizedBox(
-                                width: 14,
-                                height: 14,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      AppColors.primaryGreen),
-                                ),
-                              )
-                            : Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (!isOutOfStock)
-                                    const Icon(Icons.add,
-                                        color: AppColors.primaryGreen,
-                                        size: 15),
-                                  if (!isOutOfStock)
-                                    const SizedBox(width: 3),
-                                  Text(
-                                    isOutOfStock ? "Out of Stock" : "Add",
-                                    style: TextStyle(
-                                      color: isOutOfStock
-                                          ? Colors.grey.shade600
-                                          : AppColors.primaryGreen,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
             ),
@@ -358,67 +292,130 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
 
                     // Price block
                     Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              "₹${widget.product.price.toStringAsFixed(0)}",
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.primaryGreen,
-                                height: 1.1,
-                              ),
-                            ),
+                        Text(
+                          "₹${widget.product.price.toStringAsFixed(0)}",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primaryGreen,
+                            height: 1.1,
                           ),
                         ),
                         if (hasDiscount) ...[
-                          const SizedBox(width: 5),
+                          const SizedBox(width: 4),
                           Text(
                             "₹${widget.product.originalPrice.toStringAsFixed(0)}",
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade400,
+                              color: Colors.grey.shade500,
                               decoration: TextDecoration.lineThrough,
+                              height: 1.2,
                             ),
                           ),
                         ],
                       ],
                     ),
-
-                    // Variants chip
-                    if (hasMultipleVariants) ...[
-                      const SizedBox(height: 6),
+                    if (hasDiscount && discountPercentage > 0) ...[
+                      const SizedBox(height: 4),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryGreen.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(6),
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Colors.red.shade100),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.inventory_2_outlined,
-                                size: 11, color: AppColors.primaryGreen),
-                            const SizedBox(width: 4),
-                            Text(
-                              "${widget.product.variants.length} sizes available",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryGreen,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          "$discountPercentage% OFF",
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.red.shade600,
+                          ),
                         ),
                       ),
                     ],
+                    const Spacer(),
+
+                    // Variants chip and Add Button Row
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Variants chip
+                        if (hasMultipleVariants)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryGreen.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.inventory_2_outlined,
+                                    size: 11, color: AppColors.primaryGreen),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "${widget.product.variants.length} sizes",
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primaryGreen,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          const SizedBox(), // Empty space if no variants
+
+                        // Light Theme Add Button
+                        GestureDetector(
+                          onTap: isOutOfStock ? null : _addToCart,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isOutOfStock ? Colors.grey.shade100 : Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isOutOfStock ? Colors.grey.shade300 : AppColors.primaryGreen.withOpacity(0.3),
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryGreen.withOpacity(0.05),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: _isAdding
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGreen),
+                                    ),
+                                  )
+                                : Text(
+                                    isOutOfStock ? "SOLD OUT" : "ADD",
+                                    style: TextStyle(
+                                      color: isOutOfStock ? Colors.grey.shade500 : AppColors.primaryGreen,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

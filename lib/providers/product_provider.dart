@@ -21,6 +21,9 @@ class ProductProvider with ChangeNotifier {
   List<ProductModel> _suggestedProducts = [];
   bool _isLoadingSuggested = false;
 
+  List<ProductModel> _storeProducts = [];
+  bool _isLoadingStoreProducts = false;
+
   // Interaction states
   int _selectedVariantIndex = 0;
   int _quantity = 1;
@@ -33,6 +36,8 @@ class ProductProvider with ChangeNotifier {
   bool get isLoadingSimilar => _isLoadingSimilar;
   List<ProductModel> get suggestedProducts => _suggestedProducts;
   bool get isLoadingSuggested => _isLoadingSuggested;
+  List<ProductModel> get storeProducts => _storeProducts;
+  bool get isLoadingStoreProducts => _isLoadingStoreProducts;
 
   int get selectedVariantIndex => _selectedVariantIndex;
   int get quantity => _quantity;
@@ -55,11 +60,13 @@ class ProductProvider with ChangeNotifier {
   }
 
   // Discovery Feed State
+  List<ProductModel> _allDiscoveryProducts = [];
   List<ProductModel> _discoveryProducts = [];
   bool _isLoadingDiscovery = false;
   bool _isPaginatingDiscovery = false;
   bool _hasMoreDiscovery = true;
-  dynamic _lastDiscoveryDoc;
+  int _currentDiscoveryPage = 0;
+  final int _discoveryPageSize = 6;
 
   List<ProductModel> get discoveryProducts => _discoveryProducts;
   bool get isLoadingDiscovery => _isLoadingDiscovery;
@@ -68,9 +75,10 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> loadDiscoveryFeed({bool refresh = false}) async {
     if (refresh) {
-      _lastDiscoveryDoc = null;
       _hasMoreDiscovery = true;
       _discoveryProducts.clear();
+      _allDiscoveryProducts.clear();
+      _currentDiscoveryPage = 0;
     } else if (_discoveryProducts.isNotEmpty) {
       return; // Already loaded
     }
@@ -79,18 +87,40 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _service.getDiscoveryFeedProducts(limit: 6);
-      _discoveryProducts = List<ProductModel>.from(result['products']);
-      _lastDiscoveryDoc = result['lastDoc'];
-      
-      if (_discoveryProducts.length < 6) {
-        _hasMoreDiscovery = false;
+      if (_allDiscoveryProducts.isEmpty) {
+        // Fetch a large pool of products and shuffle them
+        _allDiscoveryProducts = await _service.getRandomDiscoveryProducts(limit: 50);
       }
+      
+      _loadNextDiscoveryChunk();
+      
     } catch (e) {
       debugPrint('Error loading discovery feed: $e');
     } finally {
       _isLoadingDiscovery = false;
       notifyListeners();
+    }
+  }
+
+  void _loadNextDiscoveryChunk() {
+    final startIndex = _currentDiscoveryPage * _discoveryPageSize;
+    final endIndex = startIndex + _discoveryPageSize;
+    
+    if (startIndex >= _allDiscoveryProducts.length) {
+      _hasMoreDiscovery = false;
+      return;
+    }
+    
+    final chunk = _allDiscoveryProducts.sublist(
+      startIndex, 
+      endIndex > _allDiscoveryProducts.length ? _allDiscoveryProducts.length : endIndex
+    );
+    
+    _discoveryProducts.addAll(chunk);
+    _currentDiscoveryPage++;
+    
+    if (endIndex >= _allDiscoveryProducts.length) {
+      _hasMoreDiscovery = false;
     }
   }
 
@@ -100,27 +130,13 @@ class ProductProvider with ChangeNotifier {
     _isPaginatingDiscovery = true;
     notifyListeners();
 
-    try {
-      final result = await _service.getDiscoveryFeedProducts(
-        startAfter: _lastDiscoveryDoc,
-        limit: 6,
-      );
-      
-      final newProducts = List<ProductModel>.from(result['products']);
-      if (newProducts.isNotEmpty) {
-        _discoveryProducts.addAll(newProducts);
-        _lastDiscoveryDoc = result['lastDoc'];
-      }
-      
-      if (newProducts.length < 6) {
-        _hasMoreDiscovery = false;
-      }
-    } catch (e) {
-      debugPrint('Error paginating discovery feed: $e');
-    } finally {
-      _isPaginatingDiscovery = false;
-      notifyListeners();
-    }
+    // Small delay to make pagination feel smooth
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    _loadNextDiscoveryChunk();
+
+    _isPaginatingDiscovery = false;
+    notifyListeners();
   }
 
   Future<void> loadTrendingProducts() async {
@@ -160,21 +176,25 @@ class ProductProvider with ChangeNotifier {
   Future<void> _fetchRecommendations(ProductModel product) async {
     _isLoadingSimilar = true;
     _isLoadingSuggested = true;
+    _isLoadingStoreProducts = true;
     notifyListeners();
 
     try {
       final similarFuture = _service.getSimilarProducts(product);
       final suggestedFuture = _service.getSuggestedProducts(product);
+      final storeProductsFuture = _service.getStoreProducts(product.storeId, excludeProductId: product.id);
 
-      final results = await Future.wait([similarFuture, suggestedFuture]);
+      final results = await Future.wait([similarFuture, suggestedFuture, storeProductsFuture]);
       
       _similarProducts = results[0];
       _suggestedProducts = results[1];
+      _storeProducts = results[2];
     } catch (e) {
       debugPrint('Error loading recommendations: $e');
     } finally {
       _isLoadingSimilar = false;
       _isLoadingSuggested = false;
+      _isLoadingStoreProducts = false;
       notifyListeners();
     }
   }

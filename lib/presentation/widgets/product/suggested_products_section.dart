@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/product_provider.dart';
-import '../../../widgets/home/product_card.dart';
+import 'freshga_product_card.dart';
+import '../../screens/product/product_list_screen.dart';
 
 class SuggestedProductsSection extends StatelessWidget {
   const SuggestedProductsSection({super.key});
@@ -27,33 +28,56 @@ class SuggestedProductsSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "You may also like",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "You may also like",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "Handpicked for you",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    "Handpicked for you",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ProductListScreen(
+                            title: "You may also like",
+                            products: provider.suggestedProducts,
+                          ),
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primaryGreen,
                     ),
+                    child: const Text("View More"),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 260,
+              height: 360,
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 scrollDirection: Axis.horizontal,
@@ -62,9 +86,9 @@ class SuggestedProductsSection extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: SizedBox(
-                      width: 160,
-                      child: ProductCard(product: provider.suggestedProducts[index]),
+                    child: FreshgaProductCard(
+                      product: provider.suggestedProducts[index],
+                      width: 180,
                     ),
                   );
                 },

@@ -30,7 +30,7 @@ class CustomerHomeScreenState extends State<CustomerHomeScreen> {
     const CategoriesScreen(),
     const FollowingScreen(),
     const Center(child: Text("Orders")),
-    const SeederScreen(), // Temp replacement for Profile to allow testing
+    const Center(child: Text("Profile coming soon...")), // const SeederScreen(), // Temp replacement for Profile to allow testing
   ];
 
   @override

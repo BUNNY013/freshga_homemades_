@@ -160,9 +160,11 @@ class StoreCard extends StatelessWidget {
                         child: Text(
                           "${_formatFollowers(store.followers)} Followers",
                           style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      FollowButton.fromStore(store, isCompact: false),
+                      FollowButton.fromStore(store, isCompact: false, showNotificationBell: false),
                     ],
                   ),
                 ],

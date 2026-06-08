@@ -13,39 +13,49 @@ class IngredientsSection extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Ingredients",
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5EBE1), // Light beige background
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "INGREDIENTS",
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w900,
+              color: Color(0xFF4B8B4D), // Muted green matching the design
+              letterSpacing: 1.2,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        ...product.ingredients.map((ingredient) => Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(Icons.eco, color: AppColors.primaryGreen, size: 20),
-              const SizedBox(width: 12),
-              Expanded(
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 12,
+            children: product.ingredients.map((ingredient) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
                 child: Text(
                   ingredient,
                   style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
                   ),
                 ),
-              ),
-            ],
+              );
+            }).toList(),
           ),
-        )),
-      ],
+        ],
+      ),
     );
   }
 }

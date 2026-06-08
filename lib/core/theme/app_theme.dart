@@ -18,27 +18,27 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       
       // Typography
-      textTheme: GoogleFonts.outfitTextTheme().copyWith(
-        displayLarge: GoogleFonts.outfit(
+      textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
+        displayLarge: GoogleFonts.plusJakartaSans(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
-        displayMedium: GoogleFonts.outfit(
+        displayMedium: GoogleFonts.plusJakartaSans(
           fontSize: 28,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
-        titleLarge: GoogleFonts.outfit(
+        titleLarge: GoogleFonts.plusJakartaSans(
           fontSize: 22,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        bodyLarge: GoogleFonts.inter(
+        bodyLarge: GoogleFonts.plusJakartaSans(
           fontSize: 16,
           color: AppColors.textPrimary,
         ),
-        bodyMedium: GoogleFonts.inter(
+        bodyMedium: GoogleFonts.plusJakartaSans(
           fontSize: 14,
           color: AppColors.textSecondary,
         ),
@@ -50,9 +50,9 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: GoogleFonts.outfit(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
       ),
@@ -67,9 +67,9 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: GoogleFonts.outfit(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -95,7 +95,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.error),
         ),
-        hintStyle: GoogleFonts.inter(
+        hintStyle: GoogleFonts.plusJakartaSans(
           color: AppColors.textSecondary.withOpacity(0.5),
         ),
       ),

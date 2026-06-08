@@ -15,15 +15,7 @@ class VariantSelector extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Select Size",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
+
             Wrap(
               spacing: 12,
               runSpacing: 12,
@@ -52,17 +44,8 @@ class VariantSelector extends StatelessWidget {
                           variant.label,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                            color: isSelected ? AppColors.primaryGreen : AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "₹${price.toInt()}",
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: isSelected ? AppColors.primaryGreen : AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                            color: isSelected ? const Color(0xFF1B5E20) : Colors.grey.shade700,
                           ),
                         ),
                       ],

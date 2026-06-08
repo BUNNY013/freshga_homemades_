@@ -100,7 +100,11 @@ class StoreProvider with ChangeNotifier {
 
     // 3. Subcategory Filter
     if (_selectedSubcategory != "All") {
-      result = result.where((p) => p.subCategoryIds.contains(_selectedSubcategory)).toList();
+      if (_selectedSubcategory == "Other") {
+        result = result.where((p) => p.subCategoryIds.isEmpty).toList();
+      } else {
+        result = result.where((p) => p.subCategoryIds.contains(_selectedSubcategory)).toList();
+      }
     }
 
     // 4. Sorting
@@ -187,7 +191,9 @@ class StoreProvider with ChangeNotifier {
           .where('isFeatured', isEqualTo: true)
           .limit(10)
           .snapshots().listen((snapshot) {
-        _stores = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+        final list = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+        list.shuffle();
+        _stores = list;
         _isLoadingFeatured = false;
         notifyListeners();
       });
@@ -209,6 +215,7 @@ class StoreProvider with ChangeNotifier {
 
     try {
       _localStores = await _service.getLocalStores(city, state);
+      _localStores.shuffle();
       // Check if we fell back to state-wide by verifying if any returned store is outside the requested city
       if (_localStores.isNotEmpty) {
         _isLocalExpandedToState = _localStores.any((s) => s.city.toLowerCase() != city.toLowerCase());
@@ -227,6 +234,7 @@ class StoreProvider with ChangeNotifier {
 
     try {
       _newStores = await _service.getNewStores();
+      _newStores.shuffle();
     } catch (e) {
       debugPrint("Error loading new stores: $e");
     } finally {

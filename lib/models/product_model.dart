@@ -49,6 +49,7 @@ class ProductModel {
   final double price;
   final double originalPrice;
   final String imageUrl;
+  final List<String> images;
   final bool isTrending;
   final double rating;
   final int reviewsCount;
@@ -68,7 +69,7 @@ class ProductModel {
 
   ProductModel({
     required this.id, required this.storeId, required this.storeName, required this.name, required this.description,
-    required this.price, required this.originalPrice, required this.imageUrl, 
+    required this.price, required this.originalPrice, required this.imageUrl, required this.images,
     required this.isTrending, required this.rating, required this.reviewsCount, required this.weight,
     required this.categoryId, required this.categoryName, required this.subCategoryIds,
     required this.tags, required this.searchKeywords, required this.ingredients, required this.variants,
@@ -77,10 +78,15 @@ class ProductModel {
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json, String documentId) {
-    // Safely extract from Vendor App schema
-    List<dynamic> images = json['images'] ?? [];
-    String firstImage = images.isNotEmpty ? images.first.toString() : '';
-    if (firstImage.isEmpty) firstImage = json['imageUrl'] ?? '';
+    List<dynamic> rawImages = json['images'] ?? [];
+    List<String> images = rawImages.map((e) => e.toString()).toList();
+    String firstImage = images.isNotEmpty ? images.first : '';
+    if (firstImage.isEmpty) {
+        firstImage = json['imageUrl'] ?? '';
+        if (firstImage.isNotEmpty) {
+            images = [firstImage];
+        }
+    }
 
     List<ProductVariantModel> parsedVariants = (json['variants'] as List<dynamic>? ?? [])
         .map((e) => ProductVariantModel.fromJson(Map<String, dynamic>.from(e)))
@@ -104,6 +110,7 @@ class ProductModel {
       price: currentPrice,
       originalPrice: originalPrice,
       imageUrl: firstImage,
+      images: images,
       isTrending: json['isTrending'] ?? false,
       rating: (json['rating'] ?? 0.0).toDouble(),
       reviewsCount: json['totalReviews'] ?? json['reviewsCount'] ?? 0,
@@ -132,6 +139,7 @@ class ProductModel {
       'price': price,
       'originalPrice': originalPrice,
       'imageUrl': imageUrl,
+      'images': images,
       'isTrending': isTrending,
       'rating': rating,
       'totalReviews': reviewsCount,

@@ -16,32 +16,21 @@ class ProductService {
     }
   }
 
-  Future<Map<String, dynamic>> getDiscoveryFeedProducts({DocumentSnapshot? startAfter, int limit = 10}) async {
+  Future<List<ProductModel>> getRandomDiscoveryProducts({int limit = 50}) async {
     try {
-      // Temporarily removed .where('isActive', isEqualTo: true) to avoid Firestore missing composite index error
-      Query query = _firestore.collection('products')
-          .orderBy('createdAt', descending: true)
-          .limit(limit);
-
-      if (startAfter != null) {
-        query = query.startAfterDocument(startAfter);
-      }
-
-      final snapshot = await query.get();
-      
+      final snapshot = await _firestore.collection('products')
+          .limit(limit)
+          .get();
+          
       final products = snapshot.docs.map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
-      final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
-
-      return {
-        'products': products,
-        'lastDoc': lastDoc,
-      };
+      
+      // Shuffle the list to make the feed dynamic and different every time
+      products.shuffle();
+      
+      return products;
     } catch (e) {
-      print('Error getting discovery products: $e');
-      return {
-        'products': <ProductModel>[],
-        'lastDoc': null,
-      };
+      print('Error getting random discovery products: $e');
+      return [];
     }
   }
   
@@ -132,6 +121,29 @@ class ProductService {
       return products.take(10).toList();
     } catch (e) {
       print('Error getting suggested products: $e');
+      return [];
+    }
+  }
+
+  Future<List<ProductModel>> getStoreProducts(String storeId, {String? excludeProductId, int limit = 10}) async {
+    try {
+      final snapshot = await _firestore.collection('products')
+          .where('storeId', isEqualTo: storeId)
+          .where('isActive', isEqualTo: true)
+          .limit(limit + 1) // +1 in case we need to filter out the excluded one
+          .get();
+
+      List<ProductModel> products = snapshot.docs
+          .map((doc) => ProductModel.fromJson(doc.data(), doc.id))
+          .toList();
+
+      if (excludeProductId != null) {
+        products.removeWhere((p) => p.id == excludeProductId);
+      }
+
+      return products.take(limit).toList();
+    } catch (e) {
+      print('Error getting store products: $e');
       return [];
     }
   }

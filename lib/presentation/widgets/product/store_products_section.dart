@@ -5,14 +5,14 @@ import '../../../providers/product_provider.dart';
 import 'freshga_product_card.dart';
 import '../../screens/product/product_list_screen.dart';
 
-class SimilarProductsSection extends StatelessWidget {
-  const SimilarProductsSection({super.key});
+class StoreProductsSection extends StatelessWidget {
+  const StoreProductsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ProductProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoadingSimilar) {
+        if (provider.isLoadingStoreProducts) {
           return const SizedBox(
             height: 250,
             child: Center(
@@ -21,7 +21,7 @@ class SimilarProductsSection extends StatelessWidget {
           );
         }
 
-        if (provider.similarProducts.isEmpty) {
+        if (provider.storeProducts.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -34,7 +34,7 @@ class SimilarProductsSection extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    "Similar Products",
+                    "More from this store",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -47,8 +47,8 @@ class SimilarProductsSection extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => ProductListScreen(
-                            title: "Similar Products",
-                            products: provider.similarProducts,
+                            title: "More from this store",
+                            products: provider.storeProducts,
                           ),
                         ),
                       );
@@ -68,12 +68,12 @@ class SimilarProductsSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
-                itemCount: provider.similarProducts.length,
+                itemCount: provider.storeProducts.length,
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: FreshgaProductCard(
-                      product: provider.similarProducts[index],
+                      product: provider.storeProducts[index],
                       width: 180,
                     ),
                   );

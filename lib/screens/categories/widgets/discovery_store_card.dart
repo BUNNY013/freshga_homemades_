@@ -112,23 +112,6 @@ class DiscoveryStoreCard extends StatelessWidget {
                                       ? const Icon(Icons.storefront_rounded, color: Colors.white, size: 26)
                                       : null,
                                 ),
-                                if (store.isVerified)
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(2),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.verified_rounded,
-                                        size: 14,
-                                        color: AppColors.primaryGreen,
-                                      ),
-                                    ),
-                                  ),
                               ],
                             ),
 
