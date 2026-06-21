@@ -286,8 +286,41 @@ class _CartScreenState extends State<CartScreen> {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {
-                            // Proceed to checkout for this specific store
+                          onPressed: () async {
+                            showDialog(
+                               context: context,
+                               barrierDismissible: false,
+                               builder: (c) => const Center(child: CircularProgressIndicator()),
+                            );
+                            
+                            final messages = await cartProvider.validateCartForCheckout(storeId);
+                            if (!context.mounted) return;
+                            Navigator.pop(context); // pop loading
+                            
+                            if (messages.isNotEmpty) {
+                               showDialog(
+                                  context: context,
+                                  builder: (c) => AlertDialog(
+                                     title: const Text('Cart Updated', style: TextStyle(fontWeight: FontWeight.bold)),
+                                     content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: messages.map((m) => Padding(
+                                          padding: const EdgeInsets.only(bottom: 8.0),
+                                          child: Text('• $m', style: const TextStyle(fontSize: 14)),
+                                        )).toList(),
+                                     ),
+                                     actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(c), 
+                                          child: const Text('Review Cart')
+                                        ),
+                                     ],
+                                  ),
+                               );
+                            } else {
+                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Proceeding to checkout... (Placeholder)')));
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryGreen,

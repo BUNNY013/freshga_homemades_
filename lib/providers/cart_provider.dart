@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cart_item_model.dart';
 import '../models/product_model.dart';
+import '../services/product_service.dart';
 
 class CartProvider with ChangeNotifier {
   static const String _cartPrefsKey = 'freshga_cart_items';
@@ -192,5 +193,60 @@ class CartProvider with ChangeNotifier {
 
   CartItemModel? getCartItem(String productId, String variantId) {
     return _items[_generateCartItemId(productId, variantId)];
+  }
+
+  Future<List<String>> validateCartForCheckout(String storeId) async {
+    final storeItems = _items.values.where((item) => item.storeId == storeId).toList();
+    if (storeItems.isEmpty) return [];
+
+    List<String> messages = [];
+    final productService = ProductService();
+
+    for (var item in storeItems) {
+      try {
+        final liveProduct = await productService.getProduct(item.productId);
+        if (liveProduct == null || !liveProduct.status.startsWith('Live')) {
+           _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
+           messages.add('${item.productName} is no longer available.');
+           continue;
+        }
+
+        final variant = liveProduct.variants.firstWhere(
+           (v) => v.id == item.variantId,
+           orElse: () => ProductVariantModel(id: '', label: '', price: 0, discountPrice: 0, stock: 0, inStock: false, isArchived: true)
+        );
+
+        if (variant.id.isEmpty || variant.isArchived) {
+           _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
+           messages.add('${item.productName} (${item.variantLabel}) is no longer available.');
+           continue;
+        }
+
+        double livePrice = variant.discountPrice > 0 ? variant.discountPrice : variant.price;
+        if (livePrice != item.price) {
+           _items.update(item.cartItemId, (i) => i.copyWith(price: livePrice));
+           messages.add('${item.productName} price changed from ₹${item.price.toInt()} to ₹${livePrice.toInt()}.');
+        }
+
+        if (!variant.inStock || variant.stock < item.quantity) {
+           if (variant.stock > 0) {
+              _items.update(item.cartItemId, (i) => i.copyWith(quantity: variant.stock));
+              messages.add('Only ${variant.stock} left for ${item.productName}. Quantity updated.');
+           } else {
+              _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
+              messages.add('${item.productName} is out of stock.');
+           }
+        }
+      } catch (e) {
+        debugPrint('Validation failed for ${item.productId}: $e');
+      }
+    }
+
+    if (messages.isNotEmpty) {
+      _saveCart();
+      notifyListeners();
+    }
+    
+    return messages;
   }
 }

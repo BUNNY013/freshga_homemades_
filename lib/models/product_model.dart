@@ -5,6 +5,7 @@ class ProductVariantModel {
   final double discountPrice;
   final int stock;
   final bool inStock;
+  final bool isArchived;
 
   ProductVariantModel({
     required this.id,
@@ -13,6 +14,7 @@ class ProductVariantModel {
     required this.discountPrice,
     required this.stock,
     required this.inStock,
+    this.isArchived = false,
   });
 
   factory ProductVariantModel.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class ProductVariantModel {
       discountPrice: (json['discountPrice'] ?? 0.0).toDouble(),
       stock: json['stock'] ?? 0,
       inStock: json['inStock'] ?? true,
+      isArchived: json['isArchived'] ?? false,
     );
   }
 
@@ -36,6 +39,7 @@ class ProductVariantModel {
       'discountPrice': discountPrice,
       'stock': stock,
       'inStock': inStock,
+      'isArchived': isArchived,
     };
   }
 }
@@ -66,6 +70,7 @@ class ProductModel {
   final String shelfLife;
   final String dispatchTime;
   final bool isStoreVerified;
+  final String status;
 
   ProductModel({
     required this.id, required this.storeId, required this.storeName, required this.name, required this.description,
@@ -75,6 +80,7 @@ class ProductModel {
     required this.tags, required this.searchKeywords, required this.ingredients, required this.variants,
     required this.ratingCounts, required this.ratingHighlights, required this.shelfLife, required this.dispatchTime,
     this.isStoreVerified = false,
+    this.status = 'Live',
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json, String documentId) {
@@ -90,6 +96,7 @@ class ProductModel {
 
     List<ProductVariantModel> parsedVariants = (json['variants'] as List<dynamic>? ?? [])
         .map((e) => ProductVariantModel.fromJson(Map<String, dynamic>.from(e)))
+        .where((v) => !v.isArchived)
         .toList();
 
     final firstVariant = parsedVariants.isNotEmpty ? parsedVariants.first : null;
@@ -127,6 +134,7 @@ class ProductModel {
       shelfLife: json['shelfLife'] ?? '3 Months',
       dispatchTime: json['dispatchTime'] ?? '2 Days',
       isStoreVerified: json['isStoreVerified'] ?? false,
+      status: json['status'] ?? 'Live',
     );
   }
 
@@ -154,6 +162,7 @@ class ProductModel {
       'ratingHighlights': ratingHighlights,
       'shelfLife': shelfLife,
       'dispatchTime': dispatchTime,
+      'status': status,
     };
   }
 }
