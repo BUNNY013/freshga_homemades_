@@ -102,8 +102,18 @@ class SearchProvider with ChangeNotifier {
   Future<void> _fetchSuggestions(String query) async {
     try {
       final results = await _searchService.getLiveSuggestions(query);
-      _productSuggestions = (results['products'] as List<dynamic>).cast<ProductModel>();
-      _storeSuggestions = (results['stores'] as List<dynamic>).cast<StoreModel>();
+      final rawProducts = (results['products'] as List<dynamic>).cast<ProductModel>();
+      final rawStores = (results['stores'] as List<dynamic>).cast<StoreModel>();
+      
+      // Filter out paused stores
+      _storeSuggestions = rawStores.where((s) => s.isActive).toList();
+      
+      // For products, we don't have their stores fetched in suggestions perfectly without an extra call,
+      // but we can filter out any products whose store is in rawStores and is paused.
+      // A better approach for suggestions is to just accept they might show up, or filter if we know.
+      // Let's filter out products if their store is in the fetched stores and is paused.
+      final pausedStoreIdsInSuggestions = rawStores.where((s) => !s.isActive).map((s) => s.id).toSet();
+      _productSuggestions = rawProducts.where((p) => !pausedStoreIdsInSuggestions.contains(p.storeId)).toList();
     } catch (e) {
       print("Error fetching suggestions in provider: $e");
       _productSuggestions = [];
@@ -143,8 +153,11 @@ class SearchProvider with ChangeNotifier {
         baselineStores.addAll(additionalStores);
       }
       
-      _searchResultsProducts = products;
-      _searchResultsStores = baselineStores;
+      // Filter out paused stores and their products
+      final activeStoreIds = baselineStores.where((s) => s.isActive).map((s) => s.id).toSet();
+      
+      _searchResultsProducts = products.where((p) => activeStoreIds.contains(p.storeId)).toList();
+      _searchResultsStores = baselineStores.where((s) => s.isActive).toList();
     } catch (e) {
        print("Error in performFullSearch: $e");
        _searchResultsProducts = [];

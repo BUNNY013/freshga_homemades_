@@ -147,6 +147,36 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             ),
                             const SizedBox(height: 16),
                           ],
+                          
+                          if (!provider.isStoreActive || product.status == 'Unavailable') ...[
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF2F2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.info_outline, color: Color(0xFFDC2626), size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      !provider.isStoreActive 
+                                          ? "${product.storeName} is currently on a break and not accepting orders. Please check back later."
+                                          : "This product is currently unavailable. Please check back later.",
+                                      style: const TextStyle(
+                                        color: Color(0xFF991B1B),
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
 
                           // Title
                           Text(

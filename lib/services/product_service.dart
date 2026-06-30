@@ -7,6 +7,7 @@ class ProductService {
   Future<List<ProductModel>> getTrendingProducts() async {
     try {
       final snapshot = await _firestore.collection('products')
+          .where('isActive', isEqualTo: true)
           .where('isTrending', isEqualTo: true)
           .limit(10)
           .get();
@@ -19,6 +20,7 @@ class ProductService {
   Future<List<ProductModel>> getRandomDiscoveryProducts({int limit = 50}) async {
     try {
       final snapshot = await _firestore.collection('products')
+          .where('isActive', isEqualTo: true)
           .limit(limit)
           .get();
           
@@ -62,6 +64,7 @@ class ProductService {
       // as Firestore cannot efficiently do "where in array" and "sort by overlap".
       final snapshot = await _firestore.collection('products')
           .where('categoryId', isEqualTo: product.categoryId)
+          .where('isActive', isEqualTo: true)
           .where(FieldPath.documentId, isNotEqualTo: product.id)
           .limit(20) // Fetch some to sort in memory
           .get();
@@ -99,6 +102,7 @@ class ProductService {
       // Suggested products: high ratings, best selling, or related tags.
       // We will query for high rating products, then rank them by tag similarity.
       final snapshot = await _firestore.collection('products')
+          .where('isActive', isEqualTo: true)
           .where('rating', isGreaterThanOrEqualTo: 4.5)
           .where(FieldPath.documentId, isNotEqualTo: product.id)
           .limit(20)
@@ -129,7 +133,7 @@ class ProductService {
     try {
       final snapshot = await _firestore.collection('products')
           .where('storeId', isEqualTo: storeId)
-          .where('isActive', isEqualTo: true)
+          .where('status', whereIn: ['Live', 'Live + Draft Changes', 'Live + Update Pending', 'Unavailable'])
           .limit(limit + 1) // +1 in case we need to filter out the excluded one
           .get();
 

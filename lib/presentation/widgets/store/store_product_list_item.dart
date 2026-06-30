@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/cart_provider.dart';
+import '../../../providers/store_provider.dart';
 import '../../screens/product/product_details_screen.dart';
 import 'variant_selection_bottom_sheet.dart';
 
@@ -60,9 +61,13 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
 
   @override
   Widget build(BuildContext context) {
+    final storeProvider = context.watch<StoreProvider>();
+    final bool isStoreActive = storeProvider.currentStore?.isActive ?? true;
+    
     final bool hasMultipleVariants = widget.product.variants.length > 1;
     final bool isOutOfStock = widget.product.variants.isNotEmpty && !widget.product.variants.first.inStock;
     final bool hasDiscount = widget.product.originalPrice > widget.product.price;
+    final bool isProductUnavailable = widget.product.status == 'Unavailable';
     final int discountPercentage = hasDiscount
         ? (((widget.product.originalPrice - widget.product.price) / widget.product.originalPrice) * 100).round()
         : 0;
@@ -70,7 +75,18 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
     final String sizeLabel = widget.product.variants.isNotEmpty ? widget.product.variants.first.label : widget.product.weight;
 
     return GestureDetector(
-      onTap: () {
+      onTap: (!isStoreActive || isProductUnavailable) ? () {
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(
+            content: Text(!isStoreActive 
+                ? "This store is currently on a break and not accepting orders."
+                : "This product is currently unavailable."),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } : () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -263,7 +279,7 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(10),
-                          onTap: isOutOfStock ? null : _addToCart,
+                          onTap: (isOutOfStock || !isStoreActive || isProductUnavailable) ? null : _addToCart,
                           child: Center(
                             child: _isAdding
                                 ? const SizedBox(
@@ -278,15 +294,19 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        isOutOfStock ? "SOLD OUT" : "ADD",
+                                        !isStoreActive 
+                                            ? "PAUSED" 
+                                            : (isProductUnavailable ? "UNAVAILABLE" : (isOutOfStock ? "SOLD OUT" : "ADD")),
                                         style: TextStyle(
-                                          color: isOutOfStock ? Colors.grey : AppColors.primaryGreen,
+                                          color: isProductUnavailable 
+                                              ? Colors.red 
+                                              : ((!isStoreActive || isOutOfStock) ? Colors.grey : AppColors.primaryGreen),
                                           fontWeight: FontWeight.w800,
                                           fontSize: 14,
                                           letterSpacing: 0.5,
                                         ),
                                       ),
-                                      if (!isOutOfStock && hasMultipleVariants) ...[
+                                      if (!isOutOfStock && !isProductUnavailable && hasMultipleVariants) ...[
                                         const SizedBox(width: 4),
                                         const Icon(Icons.add, color: AppColors.primaryGreen, size: 14),
                                       ]

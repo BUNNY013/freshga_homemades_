@@ -22,6 +22,7 @@ class SearchService {
       final futures = await Future.wait([
         _firestore
             .collection('products')
+            .where('isActive', isEqualTo: true)
             .where('searchKeywords', arrayContains: lowercaseQuery)
             .limit(5)
             .get(),
@@ -54,6 +55,7 @@ class SearchService {
     try {
       Query q = _firestore
           .collection('products')
+          .where('isActive', isEqualTo: true)
           .where('searchKeywords', arrayContains: lowercaseQuery)
           .limit(20);
 

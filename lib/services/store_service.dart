@@ -84,7 +84,7 @@ class StoreService {
     try {
       final snapshot = await _firestore.collection('products')
           .where('storeId', isEqualTo: storeId)
-          .where('isActive', isEqualTo: true)
+          .where('status', whereIn: ['Live', 'Live + Draft Changes', 'Live + Update Pending', 'Unavailable'])
           .limit(500) // Safe limit for homemade stores
           .get();
       return snapshot.docs.map((doc) => ProductModel.fromJson(doc.data(), doc.id)).toList();
@@ -141,7 +141,7 @@ class StoreService {
     try {
       Query query = _firestore.collection('products')
           .where('storeId', isEqualTo: storeId)
-          .where('isActive', isEqualTo: true)
+          .where('status', whereIn: ['Live', 'Live + Draft Changes', 'Live + Update Pending', 'Unavailable'])
           .orderBy('createdAt', descending: true)
           .limit(limit);
 
@@ -161,7 +161,7 @@ class StoreService {
     try {
       final snapshot = await _firestore.collection('products')
           .where('storeId', isEqualTo: storeId)
-          .where('isActive', isEqualTo: true)
+          .where('status', whereIn: ['Live', 'Live + Draft Changes', 'Live + Update Pending', 'Unavailable'])
           .where('isFeatured', isEqualTo: true)
           .limit(10)
           .get();

@@ -133,12 +133,36 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 headerSliverBuilder: (context, innerBoxIsScrolled) {
                   return [
                     StoreHeader(store: store),
+                    if (!store.isActive)
+                      SliverToBoxAdapter(
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                          color: const Color(0xFFFEF2F2), // Light red bg
+                          child: Row(
+                            children: [
+                              const Icon(Icons.info_outline, color: Color(0xFFDC2626), size: 20), // Red icon
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  "${store.name} is currently on a break and not accepting orders. Please check back later.",
+                                  style: const TextStyle(
+                                    color: Color(0xFF991B1B), // Dark red text
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     SliverToBoxAdapter(
                       child: StoreInfoSection(store: store),
                     ),
                     SliverPersistentHeader(
                       delegate: StoreTabBarDelegate(_tabController),
-                      pinned: false, // Let the TabBar scroll away as requested
+                      pinned: false,
                     ),
                   ];
                 },

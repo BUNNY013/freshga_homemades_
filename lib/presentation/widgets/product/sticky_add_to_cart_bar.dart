@@ -66,7 +66,7 @@ class StickyAddToCartBar extends StatelessWidget {
                 child: SizedBox(
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: isAdding ? null : () {
+                    onPressed: isAdding || !provider.isStoreActive || provider.currentProduct?.status == 'Unavailable' ? null : () {
                       final product = provider.currentProduct;
                       if (product == null || provider.variants.isEmpty) return;
                       
@@ -99,7 +99,9 @@ class StickyAddToCartBar extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreen,
+                      backgroundColor: provider.currentProduct?.status == 'Unavailable' 
+                          ? Colors.red.shade400 
+                          : (!provider.isStoreActive ? Colors.grey.shade400 : AppColors.primaryGreen),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -117,9 +119,11 @@ class StickyAddToCartBar extends StatelessWidget {
                             children: [
                               const Icon(Icons.shopping_cart_outlined, size: 20),
                               const SizedBox(width: 8),
-                              const Text(
-                                "Add to Cart",
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              Text(
+                                !provider.isStoreActive 
+                                    ? "Store Paused" 
+                                    : (provider.currentProduct?.status == 'Unavailable' ? "Unavailable" : "Add to Cart"),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               const Spacer(),
                               Text(

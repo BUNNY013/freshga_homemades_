@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product_model.dart';
 import '../services/product_service.dart';
 
@@ -14,6 +15,7 @@ class ProductProvider with ChangeNotifier {
   // New states for product details
   ProductModel? _currentProduct;
   bool _isLoadingProduct = false;
+  bool _isStoreActive = true;
   
   List<ProductModel> _similarProducts = [];
   bool _isLoadingSimilar = false;
@@ -32,6 +34,7 @@ class ProductProvider with ChangeNotifier {
 
   ProductModel? get currentProduct => _currentProduct;
   bool get isLoadingProduct => _isLoadingProduct;
+  bool get isStoreActive => _isStoreActive;
   List<ProductModel> get similarProducts => _similarProducts;
   bool get isLoadingSimilar => _isLoadingSimilar;
   List<ProductModel> get suggestedProducts => _suggestedProducts;
@@ -162,6 +165,13 @@ class ProductProvider with ChangeNotifier {
     try {
       _currentProduct = await _service.getProduct(productId);
       if (_currentProduct != null) {
+        try {
+          final storeDoc = await FirebaseFirestore.instance.collection('stores').doc(_currentProduct!.storeId).get();
+          _isStoreActive = storeDoc.data()?['isActive'] ?? true;
+        } catch (e) {
+          _isStoreActive = true;
+        }
+        
         // Fetch recommendations in parallel
         _fetchRecommendations(_currentProduct!);
       }
