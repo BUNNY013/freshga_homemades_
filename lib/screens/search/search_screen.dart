@@ -7,6 +7,8 @@ import '../../widgets/search/recent_search_tile.dart';
 import '../../widgets/search/search_loading_shimmer.dart';
 import 'search_results_screen.dart';
 
+import '../../presentation/screens/store/store_screen.dart';
+import '../../presentation/screens/product/product_details_screen.dart';
 import '../../presentation/widgets/cart/floating_cart_bar.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -263,23 +265,35 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Text("Suggestions", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textPrimary)),
           ),
         
-        // Products
-        ...searchProvider.productSuggestions.map((p) => SuggestionTile(
-          title: p.name,
-          isStore: false,
+        // Stores (Accounts) appear first (Instagram-style)
+        ...searchProvider.storeSuggestions.map((s) => SuggestionTile(
+          title: s.name,
+          subtitle: "@${s.storeSlug}",
+          imageUrl: s.logoUrl,
+          isStore: true,
           onTap: () {
-            _searchController.text = p.name;
-            _onSearchSubmitted(p.name, searchProvider);
+            // Save search to history but navigate directly to store
+            searchProvider.saveRecentSearch("@${s.storeSlug}");
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => StoreScreen(storeId: s.id)),
+            );
           },
         )),
         
-        // Stores
-        ...searchProvider.storeSuggestions.map((s) => SuggestionTile(
-          title: s.name,
-          isStore: true,
+        // Products appear below stores
+        ...searchProvider.productSuggestions.map((p) => SuggestionTile(
+          title: p.name,
+          subtitle: p.storeName,
+          imageUrl: p.images.isNotEmpty ? p.images.first : null,
+          isStore: false,
           onTap: () {
-            _searchController.text = s.name;
-            _onSearchSubmitted(s.name, searchProvider);
+            // Save search to history but navigate directly to product
+            searchProvider.saveRecentSearch(p.name);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ProductDetailsScreen(productId: p.id)),
+            );
           },
         )),
 

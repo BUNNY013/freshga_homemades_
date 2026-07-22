@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cart_item_model.dart';
 import '../models/product_model.dart';
+import '../models/address_model.dart';
 import '../services/product_service.dart';
+import '../services/store_service.dart';
 
 class CartProvider with ChangeNotifier {
   static const String _cartPrefsKey = 'freshga_cart_items';
@@ -61,10 +63,15 @@ class CartProvider with ChangeNotifier {
     final cartItemId = _generateCartItemId(product.id, variant.id);
 
     if (_items.containsKey(cartItemId)) {
+      final currentQty = _items[cartItemId]!.quantity;
+      final newQty = currentQty + quantity;
+      
+      if (newQty > 10) return; // Hard bulk limit
+
       _items.update(
         cartItemId,
         (existingCartItem) => existingCartItem.copyWith(
-          quantity: existingCartItem.quantity + quantity,
+          quantity: newQty,
         ),
       );
     } else {
@@ -100,6 +107,8 @@ class CartProvider with ChangeNotifier {
 
   void incrementQuantity(String cartItemId) {
     if (_items.containsKey(cartItemId)) {
+      if (_items[cartItemId]!.quantity >= 10) return; // Hard bulk limit
+      
       _items.update(
         cartItemId,
         (existingCartItem) => existingCartItem.copyWith(
@@ -202,13 +211,13 @@ class CartProvider with ChangeNotifier {
     List<String> messages = [];
     final productService = ProductService();
 
-    for (var item in storeItems) {
+    await Future.wait(storeItems.map((item) async {
       try {
         final liveProduct = await productService.getProduct(item.productId);
         if (liveProduct == null || !liveProduct.status.startsWith('Live')) {
            _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
            messages.add('${item.productName} is no longer available.');
-           continue;
+           return;
         }
 
         final variant = liveProduct.variants.firstWhere(
@@ -219,7 +228,7 @@ class CartProvider with ChangeNotifier {
         if (variant.id.isEmpty || variant.isArchived) {
            _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
            messages.add('${item.productName} (${item.variantLabel}) is no longer available.');
-           continue;
+           return;
         }
 
         double livePrice = variant.discountPrice > 0 ? variant.discountPrice : variant.price;
@@ -228,19 +237,19 @@ class CartProvider with ChangeNotifier {
            messages.add('${item.productName} price changed from ₹${item.price.toInt()} to ₹${livePrice.toInt()}.');
         }
 
-        if (!variant.inStock || variant.stock < item.quantity) {
-           if (variant.stock > 0) {
-              _items.update(item.cartItemId, (i) => i.copyWith(quantity: variant.stock));
-              messages.add('Only ${variant.stock} left for ${item.productName}. Quantity updated.');
-           } else {
+        if (!variant.inStock) {
+           if (item.isAvailable) {
               _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
-              messages.add('${item.productName} is out of stock.');
+              messages.add('${item.productName} is currently unavailable.');
            }
+        } else if (!item.isAvailable) {
+           _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: true));
+           messages.add('${item.productName} is now available again.');
         }
       } catch (e) {
         debugPrint('Validation failed for ${item.productId}: $e');
       }
-    }
+    }));
 
     if (messages.isNotEmpty) {
       _saveCart();
@@ -248,5 +257,24 @@ class CartProvider with ChangeNotifier {
     }
     
     return messages;
+  }
+
+  Future<String?> validateCheckoutAddress(String storeId, AddressModel deliveryAddress) async {
+    try {
+      final storeService = StoreService();
+      final store = await storeService.getStore(storeId);
+      if (store == null) return "Store not found.";
+
+      if (!store.canSellPanIndia) {
+        // Enrolled ID logic: Can only sell within their own state
+        if (store.state.toLowerCase() != deliveryAddress.state.toLowerCase()) {
+          return "This store is an Enrolled ID vendor and can only ship within ${store.state}. Please choose a different delivery address or remove items from this store.";
+        }
+      }
+      return null; // Valid
+    } catch (e) {
+      debugPrint("Error validating address: $e");
+      return "An error occurred while validating the delivery address.";
+    }
   }
 }

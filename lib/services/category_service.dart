@@ -8,8 +8,8 @@ class CategoryService {
   Future<List<CategoryModel>> getActiveCategories() async {
     try {
       final snapshot = await _firestore.collection('categories')
-          .where('isActive', isEqualTo: true)
-          .orderBy('sortOrder')
+          .where('status', isEqualTo: 'active')
+          .orderBy('displayIndex')
           .get();
       return snapshot.docs.map((doc) => CategoryModel.fromJson(doc.data(), doc.id)).toList();
     } catch (e) {
@@ -19,8 +19,8 @@ class CategoryService {
 
   Stream<List<CategoryModel>> streamActiveCategories() {
     return _firestore.collection('categories')
-        .where('isActive', isEqualTo: true)
-        .orderBy('sortOrder')
+        .where('status', isEqualTo: 'active')
+        .orderBy('displayIndex')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => CategoryModel.fromJson(doc.data(), doc.id)).toList());
   }
@@ -40,8 +40,8 @@ class CategoryService {
   Stream<List<SubCategoryModel>> streamSubCategories(String categoryId) {
     return _firestore.collection('sub_categories')
         .where('categoryId', isEqualTo: categoryId)
-        .where('isActive', isEqualTo: true)
-        .orderBy('sortOrder')
+        .where('status', isEqualTo: 'active')
+        .orderBy('displayIndex')
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => SubCategoryModel.fromJson(doc.data(), doc.id)).toList());
   }

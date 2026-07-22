@@ -33,23 +33,19 @@ class CategorySeeder {
           name: rawName,
           slug: slug,
           description: 'Explore the best homemade $rawName',
-          imageUrl: 'https://placehold.co/400x400/2E7D32/FFFFFF/png?text=${Uri.encodeComponent(rawName)}', // Fallback
           image: {
             'url': 'https://placehold.co/400x400/2E7D32/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
-            'thumb': 'https://placehold.co/150x150/2E7D32/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
-            'medium': 'https://placehold.co/400x400/2E7D32/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
-            'large': 'https://placehold.co/800x800/2E7D32/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
+            'storagePath': '',
           },
           banner: {
-            'url': 'https://placehold.co/800x600/1B5E20/FFFFFF/png?text=${Uri.encodeComponent(rawName)}', // Perfect 4:3 Ratio for Discovery Banner
-            'mobile': 'https://placehold.co/800x450/1B5E20/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
-            'desktop': 'https://placehold.co/1600x400/1B5E20/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
+            'url': 'https://placehold.co/800x600/1B5E20/FFFFFF/png?text=${Uri.encodeComponent(rawName)}', 
           },
-          themeColor: '#2E7D32',
           itemCount: 0,
-          isActive: true,
+          status: 'active',
           isFeatured: sortOrder <= 5, // feature first 5
-          sortOrder: sortOrder,
+          displayIndex: sortOrder,
+          analytics: {'productsCount': 0, 'storesCount': 0},
+          metadata: {'createdBy': 'seeder', 'updatedBy': 'seeder'},
           searchKeywords: keywords,
           createdBySeeder: true,
         );

@@ -10,6 +10,7 @@ import '../../../services/store_service.dart';
 import '../../widgets/cart/multi_store_banner.dart';
 import 'empty_cart_screen.dart';
 import '../store/store_screen.dart';
+import '../checkout/checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -290,7 +291,7 @@ class _CartScreenState extends State<CartScreen> {
                             showDialog(
                                context: context,
                                barrierDismissible: false,
-                               builder: (c) => const Center(child: CircularProgressIndicator()),
+                               builder: (c) => const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen)),
                             );
                             
                             final messages = await cartProvider.validateCartForCheckout(storeId);
@@ -313,13 +314,16 @@ class _CartScreenState extends State<CartScreen> {
                                      actions: [
                                         TextButton(
                                           onPressed: () => Navigator.pop(c), 
-                                          child: const Text('Review Cart')
+                                          child: const Text('Review Cart', style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold))
                                         ),
                                      ],
                                   ),
                                );
                             } else {
-                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Proceeding to checkout... (Placeholder)')));
+                               Navigator.push(
+                                 context,
+                                 MaterialPageRoute(builder: (context) => CheckoutScreen(storeId: storeId)),
+                               );
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -445,7 +449,7 @@ class _CartScreenState extends State<CartScreen> {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
-                          "Out of stock",
+                          "Not available",
                           style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold),
                         ),
                       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/product_provider.dart';
+import '../../../providers/customer_provider.dart';
 import '../../widgets/product/product_image_section.dart';
 import '../../widgets/product/variant_selector.dart';
 import '../../widgets/product/product_highlights.dart';
@@ -116,6 +117,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             return const Center(child: Text("Product not found"));
           }
 
+          final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+          final customerState = customerProvider.currentCustomer?.state;
+
+          final bool isStateRestricted = !product.canSellPanIndia && 
+              product.state.isNotEmpty && 
+              customerState != null && 
+              customerState.isNotEmpty && 
+              product.state.toLowerCase() != customerState.toLowerCase();
+
           return Stack(
             children: [
               CustomScrollView(
@@ -132,6 +142,33 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if (isStateRestricted) ...[
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.location_off_outlined, color: Colors.orange.shade800, size: 20),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      "Not Available in Your State. This product is only available for delivery within ${product.state}.",
+                                      style: TextStyle(
+                                        color: Colors.orange.shade900,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                           // Bestseller
                           if (product.isTrending) ...[
                             Container(

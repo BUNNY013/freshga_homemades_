@@ -71,6 +71,8 @@ class ProductModel {
   final String dispatchTime;
   final bool isStoreVerified;
   final String status;
+  final String state;
+  final bool canSellPanIndia;
 
   ProductModel({
     required this.id, required this.storeId, required this.storeName, required this.name, required this.description,
@@ -81,6 +83,8 @@ class ProductModel {
     required this.ratingCounts, required this.ratingHighlights, required this.shelfLife, required this.dispatchTime,
     this.isStoreVerified = false,
     this.status = 'Live',
+    this.state = '',
+    this.canSellPanIndia = false,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json, String documentId) {
@@ -135,6 +139,8 @@ class ProductModel {
       dispatchTime: json['dispatchTime'] ?? '2 Days',
       isStoreVerified: json['isStoreVerified'] ?? false,
       status: json['status'] ?? 'Live',
+      state: json['state'] ?? '',
+      canSellPanIndia: json['canSellPanIndia'] ?? false,
     );
   }
 
@@ -163,6 +169,8 @@ class ProductModel {
       'shelfLife': shelfLife,
       'dispatchTime': dispatchTime,
       'status': status,
+      'state': state,
+      'canSellPanIndia': canSellPanIndia,
     };
   }
 }

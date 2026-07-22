@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/customer_model.dart';
+import '../models/address_model.dart';
 import '../services/customer_service.dart';
+import '../services/notification_service.dart';
 import 'dart:async';
 
 class CustomerProvider with ChangeNotifier {
@@ -21,6 +23,9 @@ class CustomerProvider with ChangeNotifier {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
         _listenToCustomer(user.uid, user.phoneNumber ?? '');
+        
+        // Initialize push notifications exactly once per login session
+        NotificationService.initialize();
       } else {
         _customerSubscription?.cancel();
         _currentCustomer = null;
@@ -99,6 +104,27 @@ class CustomerProvider with ChangeNotifier {
         source: source,
         recentLocations: updatedRecents,
       );
+    }
+  }
+
+  Future<void> addAddress(AddressModel address) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _customerService.saveAddress(user.uid, address);
+    }
+  }
+
+  Future<void> removeAddress(String addressId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _customerService.removeAddress(user.uid, addressId);
+    }
+  }
+
+  Future<void> updateAddress(AddressModel address) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _customerService.updateAddress(user.uid, address);
     }
   }
 

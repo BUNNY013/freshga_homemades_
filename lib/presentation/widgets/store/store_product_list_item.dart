@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/cart_provider.dart';
 import '../../../providers/store_provider.dart';
+import '../../../providers/customer_provider.dart';
 import '../../screens/product/product_details_screen.dart';
 import 'variant_selection_bottom_sheet.dart';
 
@@ -62,7 +63,19 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
   @override
   Widget build(BuildContext context) {
     final storeProvider = context.watch<StoreProvider>();
+    final customerProvider = context.watch<CustomerProvider>();
+    
     final bool isStoreActive = storeProvider.currentStore?.isActive ?? true;
+    final store = storeProvider.currentStore;
+    final customerState = customerProvider.currentCustomer?.state;
+    
+    final bool isStateRestricted = store != null && 
+        !store.canSellPanIndia && 
+        store.state.isNotEmpty && 
+        customerState != null && 
+        customerState.isNotEmpty && 
+        store.state.toLowerCase() != customerState.toLowerCase();
+    
     
     final bool hasMultipleVariants = widget.product.variants.length > 1;
     final bool isOutOfStock = widget.product.variants.isNotEmpty && !widget.product.variants.first.inStock;
@@ -75,12 +88,14 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
     final String sizeLabel = widget.product.variants.isNotEmpty ? widget.product.variants.first.label : widget.product.weight;
 
     return GestureDetector(
-      onTap: (!isStoreActive || isProductUnavailable) ? () {
+      onTap: (!isStoreActive || isProductUnavailable || isStateRestricted) ? () {
         ScaffoldMessenger.of(context).showSnackBar(
            SnackBar(
-            content: Text(!isStoreActive 
-                ? "This store is currently on a break and not accepting orders."
-                : "This product is currently unavailable."),
+            content: Text(isStateRestricted 
+                ? "This product is not deliverable to your state."
+                : (!isStoreActive 
+                    ? "This store is currently on a break and not accepting orders."
+                    : "This product is currently unavailable.")),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
@@ -279,7 +294,7 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(10),
-                          onTap: (isOutOfStock || !isStoreActive || isProductUnavailable) ? null : _addToCart,
+                          onTap: (isOutOfStock || !isStoreActive || isProductUnavailable || isStateRestricted) ? null : _addToCart,
                           child: Center(
                             child: _isAdding
                                 ? const SizedBox(
@@ -294,11 +309,13 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        !isStoreActive 
-                                            ? "PAUSED" 
-                                            : (isProductUnavailable ? "UNAVAILABLE" : (isOutOfStock ? "SOLD OUT" : "ADD")),
+                                        isStateRestricted 
+                                            ? "UNAVAILABLE" 
+                                            : (!isStoreActive 
+                                                ? "PAUSED" 
+                                                : (isProductUnavailable ? "UNAVAILABLE" : (isOutOfStock ? "SOLD OUT" : "ADD"))),
                                         style: TextStyle(
-                                          color: isProductUnavailable 
+                                          color: (isProductUnavailable || isStateRestricted)
                                               ? Colors.red 
                                               : ((!isStoreActive || isOutOfStock) ? Colors.grey : AppColors.primaryGreen),
                                           fontWeight: FontWeight.w800,
@@ -306,7 +323,7 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
                                           letterSpacing: 0.5,
                                         ),
                                       ),
-                                      if (!isOutOfStock && !isProductUnavailable && hasMultipleVariants) ...[
+                                      if (!isOutOfStock && !isProductUnavailable && !isStateRestricted && hasMultipleVariants) ...[
                                         const SizedBox(width: 4),
                                         const Icon(Icons.add, color: AppColors.primaryGreen, size: 14),
                                       ]

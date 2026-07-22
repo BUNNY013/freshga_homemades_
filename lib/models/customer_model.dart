@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'address_model.dart';
 
 class CustomerModel {
   final String uid;
@@ -8,6 +9,8 @@ class CustomerModel {
   final String? locationSource; // 'gps', 'manual', 'checkout_address'
   final DateTime? locationUpdatedAt;
   final DateTime createdAt;
+  final String? fcmToken;
+  final List<AddressModel>? savedAddresses;
 
   CustomerModel({
     required this.uid,
@@ -17,6 +20,8 @@ class CustomerModel {
     this.locationSource,
     this.locationUpdatedAt,
     required this.createdAt,
+    this.fcmToken,
+    this.savedAddresses,
   });
 
   factory CustomerModel.fromMap(Map<String, dynamic> map, String id) {
@@ -34,6 +39,10 @@ class CustomerModel {
       createdAt: map['createdAt'] != null 
           ? (map['createdAt'] as Timestamp).toDate() 
           : DateTime.now(),
+      fcmToken: map['fcmToken'],
+      savedAddresses: map['savedAddresses'] != null 
+          ? (map['savedAddresses'] as List).map((a) => AddressModel.fromMap(a as Map<String, dynamic>)).toList() 
+          : null,
     );
   }
 
@@ -45,6 +54,8 @@ class CustomerModel {
       if (locationSource != null) 'locationSource': locationSource,
       if (locationUpdatedAt != null) 'locationUpdatedAt': locationUpdatedAt,
       'createdAt': createdAt,
+      if (fcmToken != null) 'fcmToken': fcmToken,
+      if (savedAddresses != null) 'savedAddresses': savedAddresses!.map((a) => a.toMap()).toList(),
     };
   }
 

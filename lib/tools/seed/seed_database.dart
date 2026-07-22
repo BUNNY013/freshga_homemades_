@@ -11,8 +11,8 @@ class DatabaseSeeder {
 
   final List<String> _collectionsToClear = [
     'banners',
-    'categories',
-    'subcategories',
+    // 'categories', // Removed so we don't accidentally wipe categories the user edited in Admin app
+    // 'subcategories', 
     'stores',
     'products',
     'collections',
@@ -264,6 +264,28 @@ class DatabaseSeeder {
     List<Map<String, dynamic>> stores = [];
     List<Map<String, dynamic>> products = [];
 
+    // Fetch real categories and subcategories from the database to map products correctly
+    final catsSnapshot = await _db.collection('categories').get();
+    final subsSnapshot = await _db.collection('sub_categories').get();
+    
+    List<Map<String, dynamic>> realCats = catsSnapshot.docs.map((d) {
+      final data = d.data();
+      data['categoryId'] = d.id;
+      return data;
+    }).toList();
+    
+    List<Map<String, dynamic>> realSubs = subsSnapshot.docs.map((d) {
+      final data = d.data();
+      data['subCategoryId'] = d.id;
+      return data;
+    }).toList();
+
+    // If no real categories exist, we cannot map them properly. Let's fallback to the dummy ones if needed, 
+    // but ideally the user has categories.
+    if (realCats.isEmpty) {
+      debugPrint("WARNING: No real categories found. Products might not map correctly. Run seedCategories first or create them in Admin app.");
+    }
+
     // 20 Stores, ~20 products each
     for (int s = 0; s < 20; s++) {
       String storeId = 'mock_store_$s';
@@ -272,24 +294,48 @@ class DatabaseSeeder {
       stores.add(storeData);
 
       // We select 2-3 random categories for this store to specialize in
-      List<String> storeCategories = [];
-      for (int i = 0; i < 3; i++) {
-        storeCategories.add(_mainCategories[_random.nextInt(_mainCategories.length)]);
+      List<Map<String, dynamic>> storeCategories = [];
+      if (realCats.isNotEmpty) {
+        for (int i = 0; i < 3; i++) {
+          storeCategories.add(realCats[_random.nextInt(realCats.length)]);
+        }
+        // Unique by ID
+        final uniqueCats = <String, Map<String, dynamic>>{};
+        for (var cat in storeCategories) {
+          uniqueCats[cat['categoryId']] = cat;
+        }
+        storeCategories = uniqueCats.values.toList();
       }
-      storeCategories = storeCategories.toSet().toList(); // Unique
 
       for (int p = 0; p < 20; p++) {
         String productId = 'mock_prod_${s}_$p';
-        String catName = storeCategories[_random.nextInt(storeCategories.length)];
-        String catId = catName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_');
         
-        List<String> availableSubs = _subcategoriesMap[catId] ?? _subcategoriesMap['default']!;
-        
-        // Pick 2 random subcategories
-        availableSubs.shuffle();
-        List<String> selectedSubs = availableSubs.take(2).map((subName) {
-           return '${catId}_${subName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_')}';
-        }).toList();
+        String catId = '';
+        String catName = 'Uncategorized';
+        List<String> selectedSubs = [];
+
+        if (storeCategories.isNotEmpty) {
+          final cat = storeCategories[_random.nextInt(storeCategories.length)];
+          catId = cat['categoryId'];
+          catName = cat['name'] ?? 'Unknown';
+          
+          // Find real subcategories that belong to this category
+          List<Map<String, dynamic>> availableSubs = realSubs.where((sub) => sub['categoryId'] == catId).toList();
+          
+          if (availableSubs.isNotEmpty) {
+            availableSubs.shuffle();
+            selectedSubs = availableSubs.take(2).map((sub) => sub['subCategoryId'] as String).toList();
+          }
+        } else {
+          // Fallback logic if db is completely empty
+          catName = _mainCategories[_random.nextInt(_mainCategories.length)];
+          catId = catName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_');
+          List<String> availableSubs = _subcategoriesMap[catId] ?? _subcategoriesMap['default']!;
+          availableSubs.shuffle();
+          selectedSubs = availableSubs.take(2).map((subName) {
+             return '${catId}_${subName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '_').replaceAll(RegExp(r'_+'), '_')}';
+          }).toList();
+        }
 
         products.add(MockDataGenerator.generateProductData(
           productId: productId,
@@ -298,6 +344,8 @@ class DatabaseSeeder {
           categoryId: catId,
           categoryName: catName,
           subCategoryIds: selectedSubs,
+          canSellPanIndia: storeData['canSellPanIndia'] ?? false,
+          state: storeData['state'] ?? '',
         ));
       }
     }
@@ -433,8 +481,8 @@ class DatabaseSeeder {
 
   Future<void> runFullSeed() async {
     debugPrint("Starting full database seed...");
-    await seedCategories();
-    await seedSubcategories();
+    // await seedCategories(); // Disabled to preserve real categories
+    // await seedSubcategories(); // Disabled to preserve real subcategories
     await seedBanners();
     await seedCollections();
     await seedTrustFeatures();

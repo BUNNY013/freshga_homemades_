@@ -43,8 +43,10 @@ class CategoryHeroCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
                 child: CachedNetworkImage(
+                  key: ValueKey(category.imageUrl),
                   imageUrl: category.imageUrl,
                   width: 180,
+                  memCacheWidth: 400,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -54,30 +56,36 @@ class CategoryHeroCard extends StatelessWidget {
             top: 24,
             bottom: 20,
             right: 180,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Homemade\n${category.name}",
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF1E3A2F),
-                    height: 1.2,
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Homemade\n${category.name}",
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1E3A2F),
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  category.description.isNotEmpty ? category.description : "Traditional flavors,\nmade with love \u{1F33F}",
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF4A5D54),
-                    height: 1.4,
+                  const SizedBox(height: 8),
+                  Text(
+                    category.description.isNotEmpty ? category.description : "Traditional flavors,\nmade with love \u{1F33F}",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF4A5D54),
+                      height: 1.4,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

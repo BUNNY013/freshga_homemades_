@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'delivery_area_model.dart';
+
 class StoreModel {
   final String id;
   final String storeId;
@@ -20,13 +23,28 @@ class StoreModel {
   final bool isVerified; // maps to verified
   final bool isFeatured;
   final bool isActive;
+  final bool canSellPanIndia;
   final String dispatchTime;
   
+  // Tax Info
+  final String taxRegistrationType; // 'GSTIN' or 'EnrolmentNumber'
+  final String taxNumber;
+  
   // Location
+  final String businessAddress;
+  final String village;
   final String city;
+  final String district;
   final String state;
   final String country;
   final String pincode;
+  
+  // Shipping & Delivery
+  final Map<String, dynamic> shippingConfig;
+  final List<DeliveryAreaModel> deliveryAreas;
+  
+  // Dates
+  final String createdAt;
 
   StoreModel({
     required this.id,
@@ -50,11 +68,20 @@ class StoreModel {
     required this.isVerified,
     required this.isFeatured,
     required this.isActive,
-    required this.dispatchTime,
+    this.canSellPanIndia = false,
+    this.dispatchTime = '1-2 Days',
+    this.taxRegistrationType = '',
+    this.taxNumber = '',
+    this.businessAddress = '',
+    this.village = '',
     this.city = '',
+    this.district = '',
     this.state = '',
     this.country = '',
     this.pincode = '',
+    this.shippingConfig = const {},
+    this.deliveryAreas = const [],
+    this.createdAt = '',
   });
 
   factory StoreModel.fromJson(Map<String, dynamic> json, String documentId) {
@@ -80,11 +107,26 @@ class StoreModel {
       isVerified: json['verified'] ?? json['isVerified'] ?? false,
       isFeatured: json['isFeatured'] ?? false,
       isActive: json['isActive'] ?? true,
-      dispatchTime: json['dispatchTime'] ?? '24 hours',
+      canSellPanIndia: json['canSellPanIndia'] ?? false,
+      dispatchTime: json['dispatchTime'] ?? '1-2 Days',
+      taxRegistrationType: json['taxRegistrationType'] ?? '',
+      taxNumber: json['taxNumber'] ?? '',
+      businessAddress: json['businessAddress'] ?? '',
+      village: json['village'] ?? '',
       city: json['city'] ?? '',
+      district: json['district'] ?? '',
       state: json['state'] ?? '',
       country: json['country'] ?? '',
       pincode: json['pincode'] ?? '',
+      shippingConfig: json['shippingConfig'] ?? {},
+      deliveryAreas: json['deliveryAreas'] != null && (json['deliveryAreas'] as List).isNotEmpty
+          ? (json['deliveryAreas'] as List).map((e) => DeliveryAreaModel.fromJson(e)).toList() 
+          : DeliveryAreaModel.createDefaultAreas(json['state'] ?? '', json['canSellPanIndia'] ?? false),
+      createdAt: json['createdAt'] != null 
+          ? (json['createdAt'] is Timestamp 
+              ? (json['createdAt'] as Timestamp).toDate().toIso8601String() 
+              : json['createdAt'].toString()) 
+          : '',
     );
   }
 
@@ -110,11 +152,20 @@ class StoreModel {
       'verified': isVerified,
       'isFeatured': isFeatured,
       'isActive': isActive,
+      'canSellPanIndia': canSellPanIndia,
       'dispatchTime': dispatchTime,
+      'taxRegistrationType': taxRegistrationType,
+      'taxNumber': taxNumber,
+      'businessAddress': businessAddress,
+      'village': village,
       'city': city,
+      'district': district,
       'state': state,
       'country': country,
       'pincode': pincode,
+      'shippingConfig': shippingConfig,
+      'deliveryAreas': deliveryAreas.map((e) => e.toJson()).toList(),
+      'createdAt': createdAt,
     };
   }
 }

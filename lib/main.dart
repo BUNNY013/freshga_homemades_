@@ -26,16 +26,22 @@ void main() async {
     MultiProvider(
       providers: [
         Provider<AuthService>(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => BannerProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
-        ChangeNotifierProvider(create: (_) => StoreProvider()),
-        ChangeNotifierProvider(create: (_) => ProductProvider()),
+        ChangeNotifierProxyProvider<CustomerProvider, StoreProvider>(
+          create: (_) => StoreProvider(),
+          update: (_, customer, store) => store!..updateCustomerState(customer.currentCustomer?.state),
+        ),
+        ChangeNotifierProxyProvider<CustomerProvider, ProductProvider>(
+          create: (_) => ProductProvider(),
+          update: (_, customer, product) => product!..updateCustomerState(customer.currentCustomer?.state),
+        ),
         ChangeNotifierProvider(create: (_) => CollectionProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => FollowingProvider()),
-        ChangeNotifierProvider(create: (_) => CustomerProvider()),
       ],
       child: const MyApp(),
     ),

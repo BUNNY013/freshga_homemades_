@@ -2,37 +2,39 @@ class CategoryModel {
   final String categoryId;
   final String name;
   final String slug;
-  final String imageUrl;
   final Map<String, dynamic>? image;
   final Map<String, dynamic>? banner;
-  final String? themeColor;
-  final int itemCount;
-  final bool isActive;
+  final int itemCount; // Legacy
+  final String status;
   final bool isFeatured;
-  final int sortOrder;
+  final int displayIndex;
   final String description;
   final List<String>? searchKeywords;
   final bool createdBySeeder;
+  final Map<String, dynamic>? analytics;
+  final Map<String, dynamic>? metadata;
 
-  // Backwards compatibility getters
+  // Backwards compatibility getters for smooth transition in places that haven't updated yet
   String get id => categoryId;
-  int get order => sortOrder;
+  String get imageUrl => image?['url'] ?? '';
+  bool get isActive => status == 'active';
+  int get sortOrder => displayIndex;
 
   CategoryModel({
     required this.categoryId,
     required this.name,
     required this.slug,
-    required this.imageUrl,
     this.image,
     this.banner,
-    this.themeColor,
     required this.itemCount,
-    required this.isActive,
+    required this.status,
     this.isFeatured = false,
-    required this.sortOrder,
+    required this.displayIndex,
     this.description = '',
     this.searchKeywords,
     this.createdBySeeder = false,
+    this.analytics,
+    this.metadata,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json, [String? docId]) {
@@ -40,17 +42,17 @@ class CategoryModel {
       categoryId: json['categoryId'] ?? docId ?? '',
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      image: json['image'],
-      banner: json['banner'],
-      themeColor: json['themeColor'],
-      itemCount: json['itemCount'] ?? 0,
-      isActive: json['isActive'] ?? true,
-      isFeatured: json['isFeatured'] ?? false,
-      sortOrder: json['sortOrder'] ?? json['order'] ?? 0,
-      description: json['description'] ?? json['tagline'] ?? '',
-      searchKeywords: List<String>.from(json['searchKeywords'] ?? []),
-      createdBySeeder: json['createdBySeeder'] ?? false,
+      image: (json['image'] is Map) ? Map<String, dynamic>.from(json['image'] as Map) : null,
+      banner: (json['banner'] is Map) ? Map<String, dynamic>.from(json['banner'] as Map) : null,
+      itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
+      status: json['status']?.toString() ?? (json['isActive'] == false ? 'hidden' : 'active'),
+      isFeatured: json['isFeatured'] == true,
+      displayIndex: (json['displayIndex'] as num?)?.toInt() ?? (json['sortOrder'] as num?)?.toInt() ?? (json['order'] as num?)?.toInt() ?? 0,
+      description: json['description']?.toString() ?? json['tagline']?.toString() ?? '',
+      searchKeywords: json['searchKeywords'] is List ? List<String>.from(json['searchKeywords']) : [],
+      createdBySeeder: json['createdBySeeder'] == true,
+      analytics: (json['analytics'] is Map) ? Map<String, dynamic>.from(json['analytics'] as Map) : null,
+      metadata: (json['metadata'] is Map) ? Map<String, dynamic>.from(json['metadata'] as Map) : null,
     );
   }
 
@@ -59,17 +61,17 @@ class CategoryModel {
       'categoryId': categoryId,
       'name': name,
       'slug': slug,
-      'imageUrl': imageUrl,
       'image': image,
       'banner': banner,
-      'themeColor': themeColor,
       'itemCount': itemCount,
-      'isActive': isActive,
+      'status': status,
       'isFeatured': isFeatured,
-      'sortOrder': sortOrder,
+      'displayIndex': displayIndex,
       'description': description,
       'searchKeywords': searchKeywords,
       'createdBySeeder': createdBySeeder,
+      'analytics': analytics,
+      'metadata': metadata,
     };
   }
 }

@@ -4,25 +4,39 @@ import '../models/product_model.dart';
 class ProductService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<List<ProductModel>> getTrendingProducts() async {
+  Future<List<ProductModel>> getTrendingProducts({String? customerState}) async {
     try {
-      final snapshot = await _firestore.collection('products')
+      Query query = _firestore.collection('products')
           .where('isActive', isEqualTo: true)
-          .where('isTrending', isEqualTo: true)
-          .limit(10)
-          .get();
+          .where('isTrending', isEqualTo: true);
+
+      if (customerState != null && customerState.isNotEmpty) {
+        query = query.where(Filter.or(
+          Filter('canSellPanIndia', isEqualTo: true),
+          Filter('state', isEqualTo: customerState)
+        ));
+      }
+
+      final snapshot = await query.limit(10).get();
       return snapshot.docs.map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
     } catch (e) {
       throw Exception('Failed to load trending products: $e');
     }
   }
 
-  Future<List<ProductModel>> getRandomDiscoveryProducts({int limit = 50}) async {
+  Future<List<ProductModel>> getRandomDiscoveryProducts({int limit = 50, String? customerState}) async {
     try {
-      final snapshot = await _firestore.collection('products')
-          .where('isActive', isEqualTo: true)
-          .limit(limit)
-          .get();
+      Query query = _firestore.collection('products')
+          .where('isActive', isEqualTo: true);
+          
+      if (customerState != null && customerState.isNotEmpty) {
+        query = query.where(Filter.or(
+          Filter('canSellPanIndia', isEqualTo: true),
+          Filter('state', isEqualTo: customerState)
+        ));
+      }
+
+      final snapshot = await query.limit(limit).get();
           
       final products = snapshot.docs.map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
       
@@ -36,12 +50,21 @@ class ProductService {
     }
   }
   
-  Stream<List<ProductModel>> streamProductsByCategory(String categoryId) {
-    return _firestore.collection('products')
+  Stream<List<ProductModel>> streamProductsByCategory(String categoryId, {String? customerState}) {
+    Query query = _firestore.collection('products')
         .where('categoryId', isEqualTo: categoryId)
-        .where('isActive', isEqualTo: true)
+        .where('isActive', isEqualTo: true);
+
+    if (customerState != null && customerState.isNotEmpty) {
+      query = query.where(Filter.or(
+        Filter('canSellPanIndia', isEqualTo: true),
+        Filter('state', isEqualTo: customerState)
+      ));
+    }
+
+    return query
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => ProductModel.fromJson(doc.data(), doc.id)).toList());
+        .map((snapshot) => snapshot.docs.map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList());
   }
 
   Future<ProductModel?> getProduct(String id) async {
@@ -56,21 +79,24 @@ class ProductService {
     }
   }
 
-  Future<List<ProductModel>> getSimilarProducts(ProductModel product) async {
+  Future<List<ProductModel>> getSimilarProducts(ProductModel product, {String? customerState}) async {
     try {
-      // 1. Same category
-      // 2. Overlapping subCategoryIds
-      // We will query by categoryId and then sort/filter in memory for overlapping subcategories,
-      // as Firestore cannot efficiently do "where in array" and "sort by overlap".
-      final snapshot = await _firestore.collection('products')
+      Query query = _firestore.collection('products')
           .where('categoryId', isEqualTo: product.categoryId)
           .where('isActive', isEqualTo: true)
-          .where(FieldPath.documentId, isNotEqualTo: product.id)
-          .limit(20) // Fetch some to sort in memory
-          .get();
+          .where(FieldPath.documentId, isNotEqualTo: product.id);
+
+      if (customerState != null && customerState.isNotEmpty) {
+        query = query.where(Filter.or(
+          Filter('canSellPanIndia', isEqualTo: true),
+          Filter('state', isEqualTo: customerState)
+        ));
+      }
+
+      final snapshot = await query.limit(20).get();
 
       List<ProductModel> products = snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data(), doc.id))
+          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id))
           .toList();
 
       // Sort by overlapping subcategories, then by rating/bestselling
@@ -97,19 +123,24 @@ class ProductService {
     }
   }
 
-  Future<List<ProductModel>> getSuggestedProducts(ProductModel product) async {
+  Future<List<ProductModel>> getSuggestedProducts(ProductModel product, {String? customerState}) async {
     try {
-      // Suggested products: high ratings, best selling, or related tags.
-      // We will query for high rating products, then rank them by tag similarity.
-      final snapshot = await _firestore.collection('products')
+      Query query = _firestore.collection('products')
           .where('isActive', isEqualTo: true)
           .where('rating', isGreaterThanOrEqualTo: 4.5)
-          .where(FieldPath.documentId, isNotEqualTo: product.id)
-          .limit(20)
-          .get();
+          .where(FieldPath.documentId, isNotEqualTo: product.id);
+
+      if (customerState != null && customerState.isNotEmpty) {
+        query = query.where(Filter.or(
+          Filter('canSellPanIndia', isEqualTo: true),
+          Filter('state', isEqualTo: customerState)
+        ));
+      }
+
+      final snapshot = await query.limit(20).get();
 
       List<ProductModel> products = snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data(), doc.id))
+          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id))
           .toList();
 
       // Sort by tag overlap
@@ -138,7 +169,7 @@ class ProductService {
           .get();
 
       List<ProductModel> products = snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data(), doc.id))
+          .map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id))
           .toList();
 
       if (excludeProductId != null) {

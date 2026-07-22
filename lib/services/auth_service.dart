@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:freshga_homemades/services/notification_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -43,6 +44,7 @@ class AuthService {
 
   // Logout
   Future<void> logout() async {
+    await NotificationService.clearToken();
     await _auth.signOut();
   }
 

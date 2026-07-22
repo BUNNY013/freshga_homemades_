@@ -7,6 +7,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/store_update_model.dart';
 import '../../screens/product/product_details_screen.dart';
 import '../../screens/store/store_screen.dart';
+import 'package:provider/provider.dart';
+import '../../../providers/following_provider.dart';
 
 class FeedCard extends StatelessWidget {
   final StoreUpdateModel update;
@@ -48,7 +50,6 @@ class FeedCard extends StatelessWidget {
       if (match != null) {
         return match.group(1)?.toUpperCase();
       }
-      return 'FRESH10'; // Fallback for UI demonstration
     }
     return null;
   }
@@ -75,6 +76,19 @@ class FeedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final badgeColor = _getBadgeColor();
     final isProductPost = update.type != 'community_update'; // new_launch, restock, offer
+    
+    // Look up the latest store logo from the provider just in case the stored one is stale
+    final followingStores = context.read<FollowingProvider>().followingStoresData;
+    String displayLogo = update.storeLogo;
+    if (displayLogo.isEmpty) {
+      try {
+        final storeMatch = followingStores.firstWhere((s) => s['storeId'] == update.storeId);
+        displayLogo = storeMatch['storeLogo'] ?? '';
+      } catch (e) {
+        // Store not found in the list, use default
+      }
+    }
+
     final discountCode = _extractDiscountCode();
 
     return Container(
@@ -119,8 +133,8 @@ class FeedCard extends StatelessWidget {
                           ),
                           clipBehavior: Clip.antiAlias,
                           child: CachedNetworkImage(
-                            imageUrl: update.storeLogo.isNotEmpty 
-                                ? update.storeLogo 
+                            imageUrl: displayLogo.isNotEmpty 
+                                ? displayLogo 
                                 : 'https://images.unsplash.com/photo-1556910103-1c02745a872f?w=100&h=100&fit=crop',
                             fit: BoxFit.cover,
                             errorWidget: (context, url, error) => const Icon(Icons.storefront_rounded, color: Colors.grey, size: 20),
@@ -231,18 +245,60 @@ class FeedCard extends StatelessWidget {
                                 ),
                               ),
 
-                            // Price
-                            if (update.price > 0 && update.type != 'offer')
+                            // Price and Discount
+                            if (update.price > 0 || update.discountPrice > 0)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: Text(
-                                  '₹${(update.discountPrice > 0 ? update.discountPrice : update.price).toStringAsFixed(0)}',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.primaryGreen,
-                                    fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    if (update.type == 'offer' && update.discountPrice > 0 && update.price > update.discountPrice) ...[
+                                      Text(
+                                        '₹${update.discountPrice.toStringAsFixed(0)}',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.primaryGreen,
+                                          fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '₹${update.price.toStringAsFixed(0)}',
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.textSecondary,
+                                          decoration: TextDecoration.lineThrough,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryGreen.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          '${(((update.price - update.discountPrice) / update.price) * 100).round()}% OFF',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.primaryGreen,
+                                          ),
+                                        ),
+                                      ),
+                                    ] else ...[
+                                      Text(
+                                        '₹${(update.discountPrice > 0 ? update.discountPrice : update.price).toStringAsFixed(0)}',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.primaryGreen,
+                                          fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
                             
@@ -270,20 +326,22 @@ class FeedCard extends StatelessWidget {
                       // Right Column: Product Image
                       Expanded(
                         flex: 4,
-                        child: Container(
-                          height: 150,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: Colors.grey.shade50,
-                            border: Border.all(color: Colors.grey.shade100),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: CachedNetworkImage(
-                            imageUrl: update.imageUrl,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                            errorWidget: (context, url, error) => const Icon(Icons.fastfood_rounded, color: Colors.grey, size: 40),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: Colors.grey.shade50,
+                              border: Border.all(color: Colors.grey.shade100),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: CachedNetworkImage(
+                              imageUrl: update.imageUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                              errorWidget: (context, url, error) => const Icon(Icons.fastfood_rounded, color: Colors.grey, size: 40),
+                            ),
                           ),
                         ),
                       ),

@@ -14,9 +14,14 @@ class MockDataGenerator {
 
   static const List<String> tags = ['spicy', 'traditional', 'homemade', 'organic', 'fresh', 'healthy', 'sweet', 'savory', 'authentic', 'premium'];
 
-  // --- STORE HELPERS ---
   static String generateStoreName() {
     return '${storePrefixes[_random.nextInt(storePrefixes.length)]} ${storeSuffixes[_random.nextInt(storeSuffixes.length)]}';
+  }
+
+  static String generateStoreHandle(String name) {
+    String formatted = name.toLowerCase().replaceAll(' ', '_');
+    formatted = formatted.replaceAll(RegExp(r'[^a-z0-9_\.]'), '');
+    return formatted;
   }
 
   static String generateSlug(String name) {
@@ -25,25 +30,31 @@ class MockDataGenerator {
 
   // Mock Locations
   static const List<Map<String, String>> mockLocations = [
-    {'city': 'Hyderabad', 'state': 'Telangana', 'country': 'India', 'pincode': '500081'},
-    {'city': 'Gudlavalleru', 'state': 'Andhra Pradesh', 'country': 'India', 'pincode': '521356'},
-    {'city': 'Vijayawada', 'state': 'Andhra Pradesh', 'country': 'India', 'pincode': '520001'},
-    {'city': 'Bangalore', 'state': 'Karnataka', 'country': 'India', 'pincode': '560001'},
-    {'city': 'Chennai', 'state': 'Tamil Nadu', 'country': 'India', 'pincode': '600001'},
+    {'businessAddress': 'Plot No 12, Jubilee Hills', 'village': 'Madhapur', 'district': 'Hyderabad', 'city': 'Hyderabad', 'state': 'Telangana', 'country': 'India', 'pincode': '500081'},
+    {'businessAddress': 'D.No 4-5-6, Main Road', 'village': 'Gudlavalleru', 'district': 'Krishna', 'city': 'Gudlavalleru', 'state': 'Andhra Pradesh', 'country': 'India', 'pincode': '521356'},
+    {'businessAddress': 'Beside RTC Bus Stand', 'village': 'Patamata', 'district': 'NTR', 'city': 'Vijayawada', 'state': 'Andhra Pradesh', 'country': 'India', 'pincode': '520001'},
+    {'businessAddress': '1st Cross, Indiranagar', 'village': 'Indiranagar', 'district': 'Bengaluru Urban', 'city': 'Bangalore', 'state': 'Karnataka', 'country': 'India', 'pincode': '560001'},
+    {'businessAddress': 'No 5, Anna Salai', 'village': 'T Nagar', 'district': 'Chennai', 'city': 'Chennai', 'state': 'Tamil Nadu', 'country': 'India', 'pincode': '600001'},
   ];
 
   static Map<String, dynamic> generateStoreData(String storeId, String ownerId) {
     final name = generateStoreName();
     final categories = ['Pickles', 'Snacks'];
-    final searchableText = "$name ${categories.join(' ')}";
+    final storeSlug = generateStoreHandle(name);
+    final searchableText = "$name $storeSlug ${categories.join(' ')}";
     final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
     final loc = mockLocations[_random.nextInt(mockLocations.length)];
+    
+    // Simulate GST vs Enrolment ID
+    final bool isPanIndia = _random.nextDouble() > 0.5;
+    final String taxRegType = isPanIndia ? 'GSTIN' : 'EnrolmentNumber';
+    final String taxNumber = isPanIndia ? '27AAPFU0939F1Z5' : 'ENR1234567890';
     
     return {
       'storeId': storeId,
       'ownerId': ownerId,
       'storeName': name,
-      'storeSlug': generateSlug(name),
+      'storeSlug': storeSlug,
       'description': 'Handcrafted with love. Traditional recipes passed down through generations.',
       'logo': ImageConstants.storeLogos[_random.nextInt(ImageConstants.storeLogos.length)],
       'banner': ImageConstants.storeBanners[_random.nextInt(ImageConstants.storeBanners.length)],
@@ -62,7 +73,13 @@ class MockDataGenerator {
       'isActive': true,
       'dispatchTime': '${_random.nextInt(2) + 1}-${_random.nextInt(3) + 3} Days',
       'searchKeywords': searchKeywords,
+      'canSellPanIndia': isPanIndia,
+      'taxRegistrationType': taxRegType,
+      'taxNumber': taxNumber,
+      'businessAddress': loc['businessAddress'],
+      'village': loc['village'],
       'city': loc['city'],
+      'district': loc['district'],
       'state': loc['state'],
       'country': loc['country'],
       'pincode': loc['pincode'],
@@ -80,12 +97,16 @@ class MockDataGenerator {
     required String categoryId,
     required String categoryName,
     required List<String> subCategoryIds,
+    bool canSellPanIndia = false,
+    String state = '',
   }) {
     final name = '${productPrefixes[_random.nextInt(productPrefixes.length)]} ${productBases[_random.nextInt(productBases.length)]}';
     final basePrice = 150 + _random.nextInt(400);
     
+    final storeSlug = generateStoreHandle(storeName);
+    
     final selectedTags = [tags[_random.nextInt(tags.length)], tags[_random.nextInt(tags.length)]];
-    final searchableText = "$name $storeName $categoryName $categoryId ${subCategoryIds.join(' ')} ${selectedTags.join(' ')}";
+    final searchableText = "$name $storeName $storeSlug $categoryName $categoryId ${subCategoryIds.join(' ')} ${selectedTags.join(' ')}";
     final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
 
     final totalReviews = _random.nextInt(200) + 10;
@@ -176,8 +197,11 @@ class MockDataGenerator {
       'isFeatured': _random.nextDouble() > 0.8,
       'isTrending': _random.nextDouble() > 0.7,
       'isActive': true,
+      'status': 'Live',
       'shelfLife': '${_random.nextInt(4) + 2} Months',
       'dispatchTime': '${_random.nextInt(3) + 1} Days',
+      'canSellPanIndia': canSellPanIndia,
+      'state': state,
       'searchKeywords': searchKeywords,
       'createdBySeeder': true,
       'createdAt': FieldValue.serverTimestamp(),

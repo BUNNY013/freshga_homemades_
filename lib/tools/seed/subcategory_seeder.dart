@@ -56,21 +56,22 @@ class SubCategorySeeder {
           name: rawName,
           slug: slug,
           description: 'Authentic homemade $rawName',
-          imageUrl: 'https://placehold.co/400x400/81C784/FFFFFF/png?text=${Uri.encodeComponent(rawName)}', // Fallback
           image: {
-            'thumb': 'https://placehold.co/150x150/81C784/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
-            'medium': 'https://placehold.co/400x400/81C784/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
-            'large': 'https://placehold.co/800x800/81C784/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
+            'url': 'https://placehold.co/400x400/81C784/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
+            'storagePath': '',
           },
-          productsCount: 0,
-          storesCount: 0,
-          tagsCount: tags.length,
           isPopular: sortOrder <= 3, // mark first 3 as popular
-          isActive: true,
-          sortOrder: sortOrder,
+          status: 'active',
+          displayIndex: sortOrder,
           aliases: aliases,
           searchKeywords: keywords,
           createdBySeeder: true,
+          analytics: {
+            'productsCount': 0,
+            'storesCount': 0,
+            'tagsCount': tags.length,
+          },
+          metadata: {'createdBy': 'seeder', 'updatedBy': 'seeder'},
         );
 
         batch.set(docRef, subCatModel.toJson(), SetOptions(merge: true));

@@ -7,7 +7,7 @@ class SearchService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Fetch live suggestions from both Products and Stores (max 10 combined)
-  Future<Map<String, List<dynamic>>> getLiveSuggestions(String query) async {
+  Future<Map<String, List<dynamic>>> getLiveSuggestions(String query, {bool isStoreSearch = false}) async {
     final Map<String, List<dynamic>> results = {
       'products': [],
       'stores': [],
@@ -18,26 +18,48 @@ class SearchService {
     final String lowercaseQuery = query.toLowerCase().trim();
 
     try {
-      // Run both queries concurrently
-      final futures = await Future.wait([
-        _firestore
-            .collection('products')
-            .where('isActive', isEqualTo: true)
-            .where('searchKeywords', arrayContains: lowercaseQuery)
-            .limit(5)
-            .get(),
-        _firestore
+      List<Future<QuerySnapshot>> tasks = [];
+      
+      if (!isStoreSearch) {
+        tasks.add(
+          _firestore
+              .collection('products')
+              .where('isActive', isEqualTo: true)
+              .where('searchKeywords', arrayContains: lowercaseQuery)
+              .limit(5)
+              .get()
+        );
+      }
+      
+      // For store search, if it's explicitly a store search (@handle), 
+      // we check storeSlug prefix directly to ensure instant matches even without keywords.
+      Query storeQuery;
+      if (isStoreSearch) {
+        storeQuery = _firestore
+            .collection('stores')
+            .where('storeSlug', isGreaterThanOrEqualTo: lowercaseQuery)
+            .where('storeSlug', isLessThanOrEqualTo: '$lowercaseQuery\uf8ff')
+            .limit(10);
+      } else {
+        storeQuery = _firestore
             .collection('stores')
             .where('searchKeywords', arrayContains: lowercaseQuery)
-            .limit(5)
-            .get(),
-      ]);
+            .limit(5);
+      }
+      
+      tasks.add(storeQuery.get());
 
-      final productDocs = futures[0].docs;
-      final storeDocs = futures[1].docs;
+      final futures = await Future.wait(tasks);
 
-      results['products'] = productDocs.map((doc) => ProductModel.fromJson(doc.data(), doc.id)).toList();
-      results['stores'] = storeDocs.map((doc) => StoreModel.fromJson(doc.data(), doc.id)).toList();
+      if (isStoreSearch) {
+        final storeDocs = futures[0].docs;
+        results['stores'] = storeDocs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      } else {
+        final productDocs = futures[0].docs;
+        final storeDocs = futures[1].docs;
+        results['products'] = productDocs.map((doc) => ProductModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+        results['stores'] = storeDocs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      }
 
       return results;
     } catch (e) {
@@ -72,16 +94,25 @@ class SearchService {
   }
 
   /// Search Stores with pagination (limit 20)
-  Future<List<StoreModel>> searchStores(String query, {DocumentSnapshot? lastDocument}) async {
+  Future<List<StoreModel>> searchStores(String query, {DocumentSnapshot? lastDocument, bool isStoreSearch = false}) async {
     if (query.trim().isEmpty) return [];
     
     final String lowercaseQuery = query.toLowerCase().trim();
 
     try {
-      Query q = _firestore
-          .collection('stores')
-          .where('searchKeywords', arrayContains: lowercaseQuery)
-          .limit(20);
+      Query q;
+      if (isStoreSearch) {
+        q = _firestore
+            .collection('stores')
+            .where('storeSlug', isGreaterThanOrEqualTo: lowercaseQuery)
+            .where('storeSlug', isLessThanOrEqualTo: '$lowercaseQuery\uf8ff')
+            .limit(20);
+      } else {
+        q = _firestore
+            .collection('stores')
+            .where('searchKeywords', arrayContains: lowercaseQuery)
+            .limit(20);
+      }
 
       if (lastDocument != null) {
         q = q.startAfterDocument(lastDocument);
@@ -125,10 +156,11 @@ class SearchService {
       for (var doc in snapshot.docs) {
         final storeData = doc.data();
         final storeName = storeData['storeName'] ?? storeData['name'] ?? '';
+        final storeSlug = storeData['storeSlug'] ?? '';
         final tags = List<String>.from(storeData['categories'] ?? storeData['tags'] ?? []);
         
-        // Combine name and tags for better searchability
-        final String searchableText = "$storeName ${tags.join(' ')}";
+        // Combine name, slug, and tags for better searchability
+        final String searchableText = "$storeName $storeSlug ${tags.join(' ')}";
         final List<String> searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
         
         batch.update(doc.reference, {'searchKeywords': searchKeywords});

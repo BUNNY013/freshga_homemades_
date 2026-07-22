@@ -101,19 +101,38 @@ class SearchProvider with ChangeNotifier {
 
   Future<void> _fetchSuggestions(String query) async {
     try {
-      final results = await _searchService.getLiveSuggestions(query);
-      final rawProducts = (results['products'] as List<dynamic>).cast<ProductModel>();
-      final rawStores = (results['stores'] as List<dynamic>).cast<StoreModel>();
+      final bool isStoreSearch = query.trim().startsWith('@');
+      final String cleanQuery = isStoreSearch ? query.trim().substring(1) : query;
+      
+      // If user typed "@" but nothing else, just return empty
+      if (cleanQuery.trim().isEmpty) {
+        _productSuggestions = [];
+        _storeSuggestions = [];
+        return;
+      }
+
+      final results = await _searchService.getLiveSuggestions(cleanQuery, isStoreSearch: isStoreSearch);
+      
+      List<StoreModel> rawStores = [];
+      if (results['stores'] != null) {
+        rawStores = (results['stores'] as List<dynamic>).cast<StoreModel>();
+      }
       
       // Filter out paused stores
       _storeSuggestions = rawStores.where((s) => s.isActive).toList();
       
-      // For products, we don't have their stores fetched in suggestions perfectly without an extra call,
-      // but we can filter out any products whose store is in rawStores and is paused.
-      // A better approach for suggestions is to just accept they might show up, or filter if we know.
-      // Let's filter out products if their store is in the fetched stores and is paused.
-      final pausedStoreIdsInSuggestions = rawStores.where((s) => !s.isActive).map((s) => s.id).toSet();
-      _productSuggestions = rawProducts.where((p) => !pausedStoreIdsInSuggestions.contains(p.storeId)).toList();
+      if (isStoreSearch) {
+        // If explicitly looking for accounts, don't show products
+        _productSuggestions = [];
+      } else {
+        // Let's filter out products if their store is in the fetched stores and is paused.
+        List<ProductModel> rawProducts = [];
+        if (results['products'] != null) {
+          rawProducts = (results['products'] as List<dynamic>).cast<ProductModel>();
+        }
+        final pausedStoreIdsInSuggestions = rawStores.where((s) => !s.isActive).map((s) => s.id).toSet();
+        _productSuggestions = rawProducts.where((p) => !pausedStoreIdsInSuggestions.contains(p.storeId)).toList();
+      }
     } catch (e) {
       print("Error fetching suggestions in provider: $e");
       _productSuggestions = [];
@@ -134,13 +153,18 @@ class SearchProvider with ChangeNotifier {
     await saveRecentSearch(query);
 
     try {
+      final bool isStoreSearch = query.trim().startsWith('@');
+      final String cleanQuery = isStoreSearch ? query.trim().substring(1) : query;
+      
+      // For full search, if they used @ we should ideally still search products, but maybe weight stores more.
+      // We'll keep it simple: just use cleanQuery for both so results aren't completely empty if it was a mistake.
       final futures = await Future.wait([
-        _searchService.searchProducts(query),
-        _searchService.searchStores(query),
+        if (!isStoreSearch) _searchService.searchProducts(cleanQuery),
+        _searchService.searchStores(cleanQuery, isStoreSearch: isStoreSearch),
       ]);
       
-      List<ProductModel> products = futures[0] as List<ProductModel>;
-      List<StoreModel> baselineStores = futures[1] as List<StoreModel>;
+      List<ProductModel> products = isStoreSearch ? [] : futures[0] as List<ProductModel>;
+      List<StoreModel> baselineStores = isStoreSearch ? futures[0] as List<StoreModel> : futures[1] as List<StoreModel>;
 
       // If we found products, make sure their parent stores are also displayed
       // in the "Stores" tab, even if the store name didn't explicitly match the query.

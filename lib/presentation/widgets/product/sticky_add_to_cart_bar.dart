@@ -4,6 +4,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../providers/product_provider.dart';
 import '../../../providers/cart_provider.dart';
 
+import '../../../providers/customer_provider.dart';
+
 class StickyAddToCartBar extends StatelessWidget {
   const StickyAddToCartBar({super.key});
 
@@ -26,8 +28,18 @@ class StickyAddToCartBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Consumer<ProductProvider>(
-        builder: (context, provider, child) {
+      child: Consumer2<ProductProvider, CustomerProvider>(
+        builder: (context, provider, customerProvider, child) {
+          final product = provider.currentProduct;
+          final customerState = customerProvider.currentCustomer?.state;
+          
+          final bool isStateRestricted = product != null &&
+              !product.canSellPanIndia && 
+              product.state.isNotEmpty && 
+              customerState != null && 
+              customerState.isNotEmpty && 
+              product.state.toLowerCase() != customerState.toLowerCase();
+
           final isAdding = provider.isAddingToCart;
           return Row(
             children: [
@@ -66,7 +78,7 @@ class StickyAddToCartBar extends StatelessWidget {
                 child: SizedBox(
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: isAdding || !provider.isStoreActive || provider.currentProduct?.status == 'Unavailable' ? null : () {
+                    onPressed: isAdding || !provider.isStoreActive || provider.currentProduct?.status == 'Unavailable' || isStateRestricted ? null : () {
                       final product = provider.currentProduct;
                       if (product == null || provider.variants.isEmpty) return;
                       
@@ -99,9 +111,11 @@ class StickyAddToCartBar extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: provider.currentProduct?.status == 'Unavailable' 
-                          ? Colors.red.shade400 
-                          : (!provider.isStoreActive ? Colors.grey.shade400 : AppColors.primaryGreen),
+                      backgroundColor: isStateRestricted 
+                          ? Colors.grey.shade400 
+                          : (provider.currentProduct?.status == 'Unavailable' 
+                              ? Colors.red.shade400 
+                              : (!provider.isStoreActive ? Colors.grey.shade400 : AppColors.primaryGreen)),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -120,9 +134,11 @@ class StickyAddToCartBar extends StatelessWidget {
                               const Icon(Icons.shopping_cart_outlined, size: 20),
                               const SizedBox(width: 8),
                               Text(
-                                !provider.isStoreActive 
-                                    ? "Store Paused" 
-                                    : (provider.currentProduct?.status == 'Unavailable' ? "Unavailable" : "Add to Cart"),
+                                isStateRestricted
+                                    ? "Not Deliverable"
+                                    : (!provider.isStoreActive 
+                                        ? "Store Paused" 
+                                        : (provider.currentProduct?.status == 'Unavailable' ? "Unavailable" : "Add to Cart")),
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                               const Spacer(),

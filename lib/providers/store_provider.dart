@@ -10,6 +10,11 @@ enum StoreSortType { bestSelling, newest, priceLowHigh, priceHighLow }
 class StoreProvider with ChangeNotifier {
   final StoreService _service = StoreService();
   
+  String? _customerState;
+  void updateCustomerState(String? state) {
+    _customerState = state;
+  }
+  
   // Individual Store State
   StoreModel? _currentStore;
   bool _isLoadingStore = false;
@@ -185,10 +190,19 @@ class StoreProvider with ChangeNotifier {
 
     try {
       // Setup realtime listener for featured stores
-      _featuredStoresSubscription?.cancel();
-      _featuredStoresSubscription = FirebaseFirestore.instance.collection('stores')
+      Query query = FirebaseFirestore.instance.collection('stores')
           .where('isActive', isEqualTo: true)
-          .where('isFeatured', isEqualTo: true)
+          .where('isFeatured', isEqualTo: true);
+          
+      if (_customerState != null && _customerState!.isNotEmpty) {
+        query = query.where(Filter.or(
+          Filter('canSellPanIndia', isEqualTo: true),
+          Filter('state', isEqualTo: _customerState)
+        ));
+      }
+
+      _featuredStoresSubscription?.cancel();
+      _featuredStoresSubscription = query
           .limit(10)
           .snapshots().listen((snapshot) {
         final list = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();

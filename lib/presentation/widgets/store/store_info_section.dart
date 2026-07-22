@@ -59,6 +59,18 @@ class StoreInfoSection extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 4),
+          
+          // Store Handle (Slug)
+          Text(
+            "@${store.storeSlug}",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryGreen,
+              letterSpacing: 0.5,
+            ),
+          ),
           const SizedBox(height: 12),
           
           // Store Subtitle (Location & Category)
@@ -67,12 +79,16 @@ class StoreInfoSection extends StatelessWidget {
             children: [
               Icon(Icons.location_on_outlined, size: 14, color: Colors.grey.shade600),
               const SizedBox(width: 4),
-              Text(
-                store.city.isNotEmpty ? "${store.city}, ${store.state}" : "Local Homemade",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
+              Flexible(
+                child: Text(
+                  _getStoreLocationString(store),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(width: 8),
@@ -88,6 +104,39 @@ class StoreInfoSection extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+
+          // Tax/Registration Info
+          if (store.taxNumber.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    store.taxRegistrationType == 'GSTIN' ? Icons.receipt_long : Icons.verified_user_outlined, 
+                    size: 14, 
+                    color: Colors.grey.shade700
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    "${store.taxRegistrationType == 'GSTIN' ? 'GST' : 'Enrolled ID'}: ${store.taxNumber}",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          
           const SizedBox(height: 16),
 
           // Follow Button
@@ -97,5 +146,15 @@ class StoreInfoSection extends StatelessWidget {
       ),
       ),
     );
+  }
+
+  String _getStoreLocationString(StoreModel store) {
+    if (store.village.isNotEmpty && store.district.isNotEmpty && store.state.isNotEmpty) {
+      return "${store.village}, ${store.district}, ${store.state}";
+    }
+    if (store.city.isNotEmpty && store.state.isNotEmpty) {
+      return "${store.city}, ${store.state}";
+    }
+    return "Local Homemade";
   }
 }

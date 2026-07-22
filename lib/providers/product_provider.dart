@@ -6,6 +6,11 @@ import '../services/product_service.dart';
 class ProductProvider with ChangeNotifier {
   final ProductService _service = ProductService();
   
+  String? _customerState;
+  void updateCustomerState(String? state) {
+    _customerState = state;
+  }
+  
   List<ProductModel> _trendingProducts = [];
   bool _isLoadingTrending = false;
 
@@ -92,7 +97,7 @@ class ProductProvider with ChangeNotifier {
     try {
       if (_allDiscoveryProducts.isEmpty) {
         // Fetch a large pool of products and shuffle them
-        _allDiscoveryProducts = await _service.getRandomDiscoveryProducts(limit: 50);
+        _allDiscoveryProducts = await _service.getRandomDiscoveryProducts(limit: 50, customerState: _customerState);
       }
       
       _loadNextDiscoveryChunk();
@@ -146,7 +151,7 @@ class ProductProvider with ChangeNotifier {
     _isLoadingTrending = true;
     notifyListeners();
     try {
-      _trendingProducts = await _service.getTrendingProducts();
+      _trendingProducts = await _service.getTrendingProducts(customerState: _customerState);
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -190,8 +195,8 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final similarFuture = _service.getSimilarProducts(product);
-      final suggestedFuture = _service.getSuggestedProducts(product);
+      final similarFuture = _service.getSimilarProducts(product, customerState: _customerState);
+      final suggestedFuture = _service.getSuggestedProducts(product, customerState: _customerState);
       final storeProductsFuture = _service.getStoreProducts(product.storeId, excludeProductId: product.id);
 
       final results = await Future.wait([similarFuture, suggestedFuture, storeProductsFuture]);

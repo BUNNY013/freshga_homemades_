@@ -67,10 +67,10 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
           categoryId: widget.categoryId,
           name: widget.categoryName,
           slug: '',
-          imageUrl: '',
+          image: const {'url': '', 'storagePath': ''},
           itemCount: 0,
-          isActive: true,
-          sortOrder: 0,
+          status: 'active',
+          displayIndex: 0,
           description: '',
         );
       });

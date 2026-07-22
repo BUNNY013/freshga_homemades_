@@ -4,19 +4,24 @@ class SubCategoryModel {
   final String name;
   final String slug;
   final String description;
-  final String imageUrl;
   final Map<String, dynamic>? image;
-  final int productsCount;
-  final int storesCount;
-  final int tagsCount;
+  final int productsCount; // legacy
+  final int storesCount; // legacy
+  final int tagsCount; // legacy
   final bool isPopular;
-  final bool isActive;
-  final int sortOrder;
+  final String status;
+  final int displayIndex;
   final List<String>? aliases;
   final List<String>? searchKeywords;
   final bool createdBySeeder;
+  final Map<String, dynamic>? analytics;
+  final Map<String, dynamic>? metadata;
 
+  // Backwards compatibility getters
   String get id => subCategoryId;
+  String get imageUrl => image?['url'] ?? '';
+  bool get isActive => status == 'active';
+  int get sortOrder => displayIndex;
 
   SubCategoryModel({
     required this.subCategoryId,
@@ -24,17 +29,18 @@ class SubCategoryModel {
     required this.name,
     required this.slug,
     this.description = '',
-    required this.imageUrl,
     this.image,
     this.productsCount = 0,
     this.storesCount = 0,
     this.tagsCount = 0,
     this.isPopular = false,
-    this.isActive = true,
-    this.sortOrder = 0,
+    required this.status,
+    required this.displayIndex,
     this.aliases,
     this.searchKeywords,
     this.createdBySeeder = false,
+    this.analytics,
+    this.metadata,
   });
 
   factory SubCategoryModel.fromJson(Map<String, dynamic> json, [String? docId]) {
@@ -44,17 +50,18 @@ class SubCategoryModel {
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
       description: json['description'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      image: json['image'],
-      productsCount: json['productsCount'] ?? 0,
-      storesCount: json['storesCount'] ?? 0,
-      tagsCount: json['tagsCount'] ?? 0,
-      isPopular: json['isPopular'] ?? false,
-      isActive: json['isActive'] ?? true,
-      sortOrder: json['sortOrder'] ?? json['order'] ?? 0,
-      aliases: json['aliases'] != null ? List<String>.from(json['aliases']) : null,
-      searchKeywords: json['searchKeywords'] != null ? List<String>.from(json['searchKeywords']) : null,
-      createdBySeeder: json['createdBySeeder'] ?? false,
+      image: (json['image'] is Map) ? Map<String, dynamic>.from(json['image'] as Map) : null,
+      productsCount: (json['productsCount'] as num?)?.toInt() ?? 0,
+      storesCount: (json['storesCount'] as num?)?.toInt() ?? 0,
+      tagsCount: (json['tagsCount'] as num?)?.toInt() ?? 0,
+      isPopular: json['isPopular'] == true,
+      status: json['status']?.toString() ?? (json['isActive'] == false ? 'hidden' : 'active'),
+      displayIndex: (json['displayIndex'] as num?)?.toInt() ?? (json['sortOrder'] as num?)?.toInt() ?? (json['order'] as num?)?.toInt() ?? 0,
+      aliases: json['aliases'] is List ? List<String>.from(json['aliases']) : [],
+      searchKeywords: json['searchKeywords'] is List ? List<String>.from(json['searchKeywords']) : [],
+      createdBySeeder: json['createdBySeeder'] == true,
+      analytics: (json['analytics'] is Map) ? Map<String, dynamic>.from(json['analytics'] as Map) : null,
+      metadata: (json['metadata'] is Map) ? Map<String, dynamic>.from(json['metadata'] as Map) : null,
     );
   }
 
@@ -65,17 +72,18 @@ class SubCategoryModel {
       'name': name,
       'slug': slug,
       'description': description,
-      'imageUrl': imageUrl,
       'image': image,
       'productsCount': productsCount,
       'storesCount': storesCount,
       'tagsCount': tagsCount,
       'isPopular': isPopular,
-      'isActive': isActive,
-      'sortOrder': sortOrder,
+      'status': status,
+      'displayIndex': displayIndex,
       'aliases': aliases,
       'searchKeywords': searchKeywords,
       'createdBySeeder': createdBySeeder,
+      'analytics': analytics,
+      'metadata': metadata,
     };
   }
 }

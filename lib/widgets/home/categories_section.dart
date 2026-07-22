@@ -28,7 +28,7 @@ class CategoriesSection extends StatelessWidget {
         SectionTitle(title: title, onSeeAll: onViewAll),
         const SizedBox(height: 12),
         SizedBox(
-          height: 110,
+          height: 130,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -48,6 +48,7 @@ class CategoriesSection extends StatelessWidget {
                     child: Column(
                       children: [
                         Container(
+                      key: ValueKey(cat.imageUrl), // Forces rebuild when URL changes
                       width: 70,
                       height: 70,
                       decoration: BoxDecoration(
@@ -55,7 +56,7 @@ class CategoriesSection extends StatelessWidget {
                         color: Colors.grey.shade200,
                         image: cat.imageUrl.isNotEmpty
                             ? DecorationImage(
-                                image: CachedNetworkImageProvider(cat.imageUrl),
+                                image: CachedNetworkImageProvider(cat.imageUrl, maxWidth: 150, maxHeight: 150),
                                 fit: BoxFit.cover,
                               )
                             : null,

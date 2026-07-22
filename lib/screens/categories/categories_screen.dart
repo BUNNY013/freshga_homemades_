@@ -171,8 +171,10 @@ class CategoriesScreen extends StatelessWidget {
                                         ? Transform.scale(
                                             scale: 1.15, // Zoom in perfectly without spilling
                                             child: CachedNetworkImage(
+                                              key: ValueKey(category.imageUrl),
                                               imageUrl: category.imageUrl,
                                               fit: BoxFit.contain,
+                                              memCacheWidth: 300,
                                               placeholder: (context, url) => const Center(
                                                 child: SizedBox(
                                                   width: 24, height: 24,
