@@ -136,6 +136,10 @@ service cloud.firestore {
       allow read, write: if true; // Temporarily relaxed for testing
     }
 
+    match /reviews/{reviewId} {
+      allow read, write: if true;
+    }
+
     // =========================
     // COUNTERS
     // =========================
@@ -162,6 +166,14 @@ service cloud.firestore {
 
     match /payouts/{payoutId} {
       allow read, write: if isAuthenticated();
+    }
+
+    // =========================
+    // REFUND REQUESTS
+    // =========================
+
+    match /refund_requests/{requestId} {
+      allow read, write: if true; // Temporarily relaxed for Admin app access
     }
   }
 }

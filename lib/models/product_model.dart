@@ -124,7 +124,7 @@ class ProductModel {
       images: images,
       isTrending: json['isTrending'] ?? false,
       rating: (json['rating'] ?? 0.0).toDouble(),
-      reviewsCount: json['totalReviews'] ?? json['reviewsCount'] ?? 0,
+      reviewsCount: _parseReviewsCount(json),
       weight: variantWeight,
       categoryId: json['categoryId'] ?? '',
       categoryName: json['categoryName'] ?? '',
@@ -172,5 +172,11 @@ class ProductModel {
       'state': state,
       'canSellPanIndia': canSellPanIndia,
     };
+  }
+
+  static int _parseReviewsCount(Map<String, dynamic> json) {
+    int total = json['totalReviews'] ?? 0;
+    int reviews = json['reviewsCount'] ?? 0;
+    return total > reviews ? total : reviews;
   }
 }

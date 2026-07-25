@@ -4,6 +4,7 @@ import '../core/theme/app_colors.dart';
 import 'home/home_feed_view.dart';
 import 'categories/categories_screen.dart';
 import '../presentation/screens/following/following_screen.dart';
+import '../presentation/screens/orders/orders_list_screen.dart';
 import 'dev/seeder_screen.dart';
 import '../presentation/widgets/cart/floating_cart_bar.dart';
 
@@ -29,7 +30,7 @@ class CustomerHomeScreenState extends State<CustomerHomeScreen> {
     const HomeFeedView(),
     const CategoriesScreen(),
     const FollowingScreen(),
-    const Center(child: Text("Orders")),
+    const OrdersListScreen(),
     const SeederScreen(), // Temp replacement for Profile to allow testing
   ];
 

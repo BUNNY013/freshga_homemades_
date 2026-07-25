@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class OrderModel {
   final String orderId;
   final String storeId;
@@ -20,6 +22,10 @@ class OrderModel {
   final String trackingLink;
   final String rejectionReason;
   final List<Map<String, dynamic>> timeline;
+  final bool isRated;
+  final bool isIssueReported;
+  final String issueStatus;
+  final String issueId;
   
   // SLAs
   final DateTime expiresAt; // Time vendor MUST accept by (24h)
@@ -48,6 +54,10 @@ class OrderModel {
     this.trackingLink = '',
     this.rejectionReason = '',
     this.timeline = const [],
+    this.isRated = false,
+    this.isIssueReported = false,
+    this.issueStatus = '',
+    this.issueId = '',
     required this.expiresAt,
     required this.maxDispatchDate,
     required this.createdAt,
@@ -80,10 +90,14 @@ class OrderModel {
       timeline: json['timeline'] != null 
           ? List<Map<String, dynamic>>.from(json['timeline']) 
           : [],
-      expiresAt: json['expiresAt'] != null ? DateTime.parse(json['expiresAt']) : DateTime.now().add(const Duration(hours: 24)),
-      maxDispatchDate: json['maxDispatchDate'] != null ? DateTime.parse(json['maxDispatchDate']) : DateTime.now().add(const Duration(days: 2)),
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : DateTime.now(),
+      isRated: json['isRated'] ?? false,
+      isIssueReported: json['isIssueReported'] ?? false,
+      issueStatus: json['issueStatus'] ?? '',
+      issueId: json['issueId'] ?? '',
+      expiresAt: json['expiresAt'] != null ? (json['expiresAt'] is Timestamp ? (json['expiresAt'] as Timestamp).toDate() : DateTime.parse(json['expiresAt'].toString())) : DateTime.now().add(const Duration(hours: 24)),
+      maxDispatchDate: json['maxDispatchDate'] != null ? (json['maxDispatchDate'] is Timestamp ? (json['maxDispatchDate'] as Timestamp).toDate() : DateTime.parse(json['maxDispatchDate'].toString())) : DateTime.now().add(const Duration(days: 2)),
+      createdAt: json['createdAt'] != null ? (json['createdAt'] is Timestamp ? (json['createdAt'] as Timestamp).toDate() : DateTime.parse(json['createdAt'].toString())) : DateTime.now(),
+      updatedAt: json['updatedAt'] != null ? (json['updatedAt'] is Timestamp ? (json['updatedAt'] as Timestamp).toDate() : DateTime.parse(json['updatedAt'].toString())) : DateTime.now(),
     );
   }
 
@@ -108,6 +122,10 @@ class OrderModel {
       'trackingLink': trackingLink,
       'rejectionReason': rejectionReason,
       'timeline': timeline,
+      'isRated': isRated,
+      'isIssueReported': isIssueReported,
+      'issueStatus': issueStatus,
+      'issueId': issueId,
       'expiresAt': expiresAt.toIso8601String(),
       'maxDispatchDate': maxDispatchDate.toIso8601String(),
       'createdAt': createdAt.toIso8601String(),
