@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/store_model.dart';
+import '../modals/report_modal.dart';
 
 class StoreHeader extends StatelessWidget {
   final StoreModel store;
@@ -57,14 +58,13 @@ class StoreHeader extends StatelessWidget {
               elevation: 4,
               color: Colors.white,
               onSelected: (value) {
-                // Handle menu actions here
                 if (value == 'report') {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Report submitted. Our team will review this store.'),
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
+                  ReportModal.show(
+                    context,
+                    type: 'store',
+                    targetId: store.storeId,
+                    targetName: store.name,
+                    storeId: store.storeId,
                   );
                 }
               },

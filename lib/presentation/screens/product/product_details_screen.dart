@@ -18,6 +18,7 @@ import '../../widgets/product/product_loading_shimmer.dart';
 import '../../widgets/cart/floating_cart_bar.dart';
 import 'product_ratings_screen.dart';
 import '../store/store_screen.dart';
+import '../../widgets/modals/report_modal.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final String productId;
@@ -383,6 +384,27 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           
                           // Shelf Life and Dispatch Time
                           ProductInfoCards(product: product),
+                          const SizedBox(height: 16),
+
+                          // Report Item Button
+                          Center(
+                            child: TextButton.icon(
+                              onPressed: () {
+                                ReportModal.show(
+                                  context,
+                                  type: 'product_before_order',
+                                  targetId: product.id,
+                                  targetName: product.name,
+                                  storeId: product.storeId,
+                                );
+                              },
+                              icon: const Icon(Icons.flag_outlined, color: Colors.red, size: 18),
+                              label: const Text(
+                                "Report incorrect product info or image",
+                                style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 32),
                         ],
                       ),
@@ -479,6 +501,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               ),
                               Row(
                                 children: [
+                                  _buildGlassButton(
+                                    icon: Icons.flag_outlined,
+                                    iconColor: Colors.redAccent,
+                                    onTap: () {
+                                      ReportModal.show(
+                                        context,
+                                        type: 'product_before_order',
+                                        targetId: product.id,
+                                        targetName: product.name,
+                                        storeId: product.storeId,
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(width: 12),
                                   _buildGlassButton(
                                     icon: provider.isWishlisted ? Icons.favorite : Icons.favorite_border,
                                     iconColor: provider.isWishlisted ? Colors.red : Colors.black87,

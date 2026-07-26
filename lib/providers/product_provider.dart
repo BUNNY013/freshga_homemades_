@@ -172,7 +172,9 @@ class ProductProvider with ChangeNotifier {
       if (_currentProduct != null) {
         try {
           final storeDoc = await FirebaseFirestore.instance.collection('stores').doc(_currentProduct!.storeId).get();
-          _isStoreActive = storeDoc.data()?['isActive'] ?? true;
+          final data = storeDoc.data();
+          _isStoreActive = (data?['isActive'] ?? true) &&
+              ((data?['status'] ?? '').toString().toLowerCase() != 'suspended');
         } catch (e) {
           _isStoreActive = true;
         }

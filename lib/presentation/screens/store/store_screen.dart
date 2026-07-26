@@ -167,7 +167,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           ),
                         ),
                       ),
-                    if (!store.isActive)
+                    if (!store.isActive || store.isSuspended)
                       SliverToBoxAdapter(
                         child: Container(
                           width: double.infinity,
@@ -179,7 +179,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  "${store.name} is currently on a break and not accepting orders. Please check back later.",
+                                  store.isSuspended
+                                      ? "${store.name} is temporarily offline and not accepting orders at this time."
+                                      : "${store.name} is currently on a break and not accepting orders. Please check back later.",
                                   style: const TextStyle(
                                     color: Color(0xFF991B1B), // Dark red text
                                     fontSize: 13,

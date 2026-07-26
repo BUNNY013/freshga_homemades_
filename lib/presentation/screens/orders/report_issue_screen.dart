@@ -6,6 +6,9 @@ import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/order_model.dart';
 import '../../../services/order_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../models/report_model.dart';
 
 class ReportIssueScreen extends StatefulWidget {
   final OrderModel order;
@@ -92,6 +95,30 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
         description: _descriptionController.text.trim(),
         images: _selectedImages,
       );
+
+      // Also log to centralized reports collection for Admin Moderation
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        final docRef = FirebaseFirestore.instance.collection('reports').doc();
+        final targetNames = itemsWithIssues.map((e) => e.name).join(', ');
+        final report = ReportModel(
+          reportId: docRef.id,
+          type: 'product_after_order',
+          targetId: widget.order.orderId,
+          targetName: targetNames.isNotEmpty ? targetNames : 'Order #${widget.order.orderId}',
+          storeId: widget.order.storeId,
+          reporterUserId: user?.uid ?? 'anonymous',
+          reporterName: user?.displayName ?? user?.phoneNumber ?? 'Customer',
+          reason: _selectedReason!,
+          comments: _descriptionController.text.trim(),
+          orderId: widget.order.orderId,
+          status: 'open',
+          createdAt: DateTime.now(),
+        );
+        await docRef.set(report.toMap());
+      } catch (e) {
+        debugPrint('Error logging report to moderation queue: $e');
+      }
 
       if (mounted) {
         Navigator.pop(context, true); // Return true to refresh order details

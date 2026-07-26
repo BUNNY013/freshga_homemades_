@@ -23,7 +23,11 @@ class StoreModel {
   final bool isVerified; // maps to verified
   final bool isFeatured;
   final bool isActive;
+  final String status; // 'Active', 'Pending', 'Suspended'
   final bool canSellPanIndia;
+
+  bool get isSuspended => status.toLowerCase() == 'suspended' || (!isActive && status.toLowerCase() == 'suspended');
+
   final String dispatchTime;
   
   // Tax Info
@@ -68,8 +72,9 @@ class StoreModel {
     required this.isVerified,
     required this.isFeatured,
     required this.isActive,
-    this.canSellPanIndia = false,
-    this.dispatchTime = '1-2 Days',
+    this.status = 'Active',
+    required this.canSellPanIndia,
+    required this.dispatchTime,
     this.taxRegistrationType = '',
     this.taxNumber = '',
     this.businessAddress = '',
@@ -107,6 +112,7 @@ class StoreModel {
       isVerified: json['verified'] ?? json['isVerified'] ?? false,
       isFeatured: json['isFeatured'] ?? false,
       isActive: json['isActive'] ?? true,
+      status: json['status'] ?? 'Active',
       canSellPanIndia: json['canSellPanIndia'] ?? false,
       dispatchTime: json['dispatchTime'] ?? '1-2 Days',
       taxRegistrationType: json['taxRegistrationType'] ?? '',

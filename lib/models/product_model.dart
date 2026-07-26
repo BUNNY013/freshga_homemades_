@@ -6,6 +6,11 @@ class ProductVariantModel {
   final int stock;
   final bool inStock;
   final bool isArchived;
+  final bool manageStock;
+  final int weightGrams;
+  final double lengthCm;
+  final double widthCm;
+  final double heightCm;
 
   ProductVariantModel({
     required this.id,
@@ -15,6 +20,11 @@ class ProductVariantModel {
     required this.stock,
     required this.inStock,
     this.isArchived = false,
+    this.manageStock = false,
+    this.weightGrams = 0,
+    this.lengthCm = 0.0,
+    this.widthCm = 0.0,
+    this.heightCm = 0.0,
   });
 
   factory ProductVariantModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +38,11 @@ class ProductVariantModel {
       stock: json['stock'] ?? 0,
       inStock: json['inStock'] ?? true,
       isArchived: json['isArchived'] ?? false,
+      manageStock: json['manageStock'] ?? false,
+      weightGrams: json['weightGrams'] ?? 0,
+      lengthCm: (json['lengthCm'] ?? 0.0).toDouble(),
+      widthCm: (json['widthCm'] ?? 0.0).toDouble(),
+      heightCm: (json['heightCm'] ?? 0.0).toDouble(),
     );
   }
 
@@ -40,6 +55,11 @@ class ProductVariantModel {
       'stock': stock,
       'inStock': inStock,
       'isArchived': isArchived,
+      'manageStock': manageStock,
+      'weightGrams': weightGrams,
+      'lengthCm': lengthCm,
+      'widthCm': widthCm,
+      'heightCm': heightCm,
     };
   }
 }
