@@ -386,6 +386,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final customer = context.watch<CustomerProvider>().currentCustomer;
+    if (_selectedAddress == null &&
+        customer != null &&
+        customer.savedAddresses != null &&
+        customer.savedAddresses!.isNotEmpty) {
+      try {
+        _selectedAddress = customer.savedAddresses!.firstWhere((addr) => addr.isDefault);
+      } catch (_) {
+        _selectedAddress = customer.savedAddresses!.first;
+      }
+    }
+
     return Consumer<CartProvider>(
       builder: (context, cartProvider, child) {
         final groupedItems = cartProvider.getStoreGroupedItems();

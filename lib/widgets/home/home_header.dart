@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 
-import 'package:provider/provider.dart';
 import '../../../providers/customer_provider.dart';
+import '../../../providers/wishlist_provider.dart';
 import '../../../screens/location_search_screen.dart';
+import '../../../presentation/screens/wishlist/liked_products_screen.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -69,15 +70,49 @@ class HomeHeader extends StatelessWidget {
         ),
         Row(
           children: [
+            Consumer<WishlistProvider>(
+              builder: (context, wishlistProvider, _) {
+                final count = wishlistProvider.likedProducts.length;
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                        );
+                      },
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                          child: Text(
+                            '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
             IconButton(
               icon: const Icon(Icons.notifications_none_rounded),
               onPressed: () {},
-            ),
-            const CircleAvatar(
-              radius: 18,
-              backgroundImage: CachedNetworkImageProvider(
-                'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-              ),
             ),
           ],
         ),

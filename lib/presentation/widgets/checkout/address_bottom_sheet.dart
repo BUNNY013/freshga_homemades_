@@ -8,12 +8,16 @@ import '../../../providers/customer_provider.dart';
 
 class AddressBottomSheet extends StatefulWidget {
   final AddressModel? selectedAddress;
-  final Function(AddressModel) onAddressSelected;
+  final Function(AddressModel)? onAddressSelected;
+  final bool startInAddMode;
+  final AddressModel? addressToEdit;
 
   const AddressBottomSheet({
     super.key,
     this.selectedAddress,
-    required this.onAddressSelected,
+    this.onAddressSelected,
+    this.startInAddMode = false,
+    this.addressToEdit,
   });
 
   @override
@@ -23,7 +27,7 @@ class AddressBottomSheet extends StatefulWidget {
 class _AddressBottomSheetState extends State<AddressBottomSheet> {
   bool _isAddingNew = false;
   AddressModel? _addressToEdit;
-  
+  bool _isDefault = true;
   
   // Form controllers
   final _formKey = GlobalKey<FormState>();
@@ -43,6 +47,17 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
   bool _isApiFallback = false; // True when API fails
   List<String> _villages = [];
   String? _selectedVillage;
+  
+  @override
+  void initState() {
+    super.initState();
+    if (widget.addressToEdit != null) {
+      _editAddress(widget.addressToEdit!);
+    } else if (widget.startInAddMode) {
+      _isAddingNew = true;
+      _isDefault = true;
+    }
+  }
   
   final List<String> _indianStates = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -158,7 +173,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
       if (cityParts.length >= 3) {
         villageToPreserve = cityParts[0];
         _selectedVillage = villageToPreserve;
-        _villages = [villageToPreserve!];
+        _villages = [villageToPreserve];
         _cityCtrl.text = cityParts[1];
         _districtCtrl.text = cityParts[2];
       } else if (cityParts.isNotEmpty) {
@@ -170,6 +185,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
       
       _stateCtrl.text = address.state;
       _addressType = address.addressType;
+      _isDefault = address.isDefault;
       
       if (_pincodeCtrl.text.length == 6) {
         _fetchPincodeDetails(_pincodeCtrl.text, preserveVillage: villageToPreserve);
@@ -199,7 +215,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
         state: _stateCtrl.text,
         pincode: _pincodeCtrl.text,
         addressType: _addressType,
-        isDefault: _addressToEdit?.isDefault ?? true,
+        isDefault: _isDefault,
       );
 
       final customerProvider = context.read<CustomerProvider>();
@@ -208,7 +224,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
       } else {
         await customerProvider.addAddress(newAddress);
       }
-      widget.onAddressSelected(newAddress);
+      widget.onAddressSelected?.call(newAddress);
       if (mounted) Navigator.pop(context);
     }
   }
@@ -240,30 +256,39 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _isAddingNew ? "Add New Address" : "Select Delivery Address",
+                  _isAddingNew
+                      ? (_addressToEdit != null ? "Edit Address" : "Add New Address")
+                      : "Select Delivery Address",
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 if (_isAddingNew)
                   InkWell(
-                    onTap: () => setState(() {
-                      _isAddingNew = false;
-                      _addressToEdit = null;
-                      _formKey.currentState?.reset();
-                      _nameCtrl.clear();
-                      _phoneCtrl.clear();
-                      _houseCtrl.clear();
-                      _streetCtrl.clear();
-                      _landmarkCtrl.clear();
-                      _cityCtrl.clear();
-                      _districtCtrl.clear();
-                      _stateCtrl.clear();
-                      _pincodeCtrl.clear();
-                      _villages.clear();
-                      _selectedVillage = null;
-                      _villageFallbackCtrl.clear();
-                      _isApiFallback = false;
-                      _addressType = 'Home';
-                    }),
+                    onTap: () {
+                      if (widget.startInAddMode || widget.addressToEdit != null) {
+                        Navigator.pop(context);
+                      } else {
+                        setState(() {
+                          _isAddingNew = false;
+                          _addressToEdit = null;
+                          _formKey.currentState?.reset();
+                          _nameCtrl.clear();
+                          _phoneCtrl.clear();
+                          _houseCtrl.clear();
+                          _streetCtrl.clear();
+                          _landmarkCtrl.clear();
+                          _cityCtrl.clear();
+                          _districtCtrl.clear();
+                          _stateCtrl.clear();
+                          _pincodeCtrl.clear();
+                          _villages.clear();
+                          _selectedVillage = null;
+                          _villageFallbackCtrl.clear();
+                          _isApiFallback = false;
+                          _addressType = 'Home';
+                          _isDefault = true;
+                        });
+                      }
+                    },
                     child: const Text("Cancel", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold)),
                   )
                 else
@@ -325,7 +350,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
                     
                     return InkWell(
                       onTap: () {
-                        widget.onAddressSelected(address);
+                        widget.onAddressSelected?.call(address);
                         Navigator.pop(context);
                       },
                       child: Container(
@@ -546,7 +571,18 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
                 ],
               )
             : _buildTextField(_stateCtrl, "State", readOnly: true),
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
+          CheckboxListTile(
+            title: const Text("Make this my default address", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            value: _isDefault,
+            activeColor: AppColors.primaryGreen,
+            contentPadding: EdgeInsets.zero,
+            controlAffinity: ListTileControlAffinity.leading,
+            onChanged: (val) {
+              setState(() => _isDefault = val ?? true);
+            },
+          ),
+          const SizedBox(height: 24),
           SizedBox(
             height: 50,
             child: ElevatedButton(

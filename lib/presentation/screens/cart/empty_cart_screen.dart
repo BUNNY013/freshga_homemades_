@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
-
+import '../../../providers/wishlist_provider.dart';
+import '../wishlist/liked_products_screen.dart';
 
 class EmptyCartScreen extends StatelessWidget {
   const EmptyCartScreen({super.key});
@@ -25,10 +27,47 @@ class EmptyCartScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border, color: AppColors.textPrimary),
-            onPressed: () {},
+          Consumer<WishlistProvider>(
+            builder: (context, wishlistProvider, _) {
+              final count = wishlistProvider.likedProducts.length;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.favorite_border, color: AppColors.textPrimary),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                      );
+                    },
+                  ),
+                  if (count > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        child: Text(
+                          '$count',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
+          const SizedBox(width: 4),
         ],
       ),
       body: Center(

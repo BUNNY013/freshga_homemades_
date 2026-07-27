@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/product_model.dart';
 import '../../../providers/cart_provider.dart';
-import '../../../providers/product_provider.dart';
+import '../../../providers/wishlist_provider.dart';
 import '../../screens/product/product_details_screen.dart';
 import '../store/variant_selection_bottom_sheet.dart';
 
@@ -23,14 +23,10 @@ class FreshgaProductCard extends StatefulWidget {
 }
 
 class _FreshgaProductCardState extends State<FreshgaProductCard> {
-  bool _isWishlisted = false;
   bool _isAdding = false;
 
   void _toggleWishlist() {
-    setState(() {
-      _isWishlisted = !_isWishlisted;
-    });
-    // context.read<ProductProvider>().toggleWishlist(widget.product.id);
+    context.read<WishlistProvider>().toggleLike(widget.product);
   }
 
   void _addToCart() async {
@@ -147,37 +143,42 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
                   Positioned(
                     top: 10,
                     right: 10,
-                    child: GestureDetector(
-                      onTap: _toggleWishlist,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          shape: BoxShape.circle,
-                        ),
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          transitionBuilder: (child, animation) =>
-                              ScaleTransition(scale: animation, child: child),
-                          child: Icon(
-                            _isWishlisted
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            key: ValueKey<bool>(_isWishlisted),
-                            size: 22,
-                            color: _isWishlisted
-                                ? Colors.red
-                                : Colors.white,
-                            shadows: const [
-                              Shadow(
-                                color: Colors.black45,
-                                blurRadius: 6,
-                                offset: Offset(0, 1),
+                    child: Consumer<WishlistProvider>(
+                      builder: (context, wishlistProvider, _) {
+                        final isWishlisted = wishlistProvider.isLiked(widget.product.id);
+                        return GestureDetector(
+                          onTap: _toggleWishlist,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Colors.transparent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              transitionBuilder: (child, animation) =>
+                                  ScaleTransition(scale: animation, child: child),
+                              child: Icon(
+                                isWishlisted
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                key: ValueKey<bool>(isWishlisted),
+                                size: 22,
+                                color: isWishlisted
+                                    ? Colors.red
+                                    : Colors.white,
+                                shadows: const [
+                                  Shadow(
+                                    color: Colors.black45,
+                                    blurRadius: 6,
+                                    offset: Offset(0, 1),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
 

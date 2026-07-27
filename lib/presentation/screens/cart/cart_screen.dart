@@ -11,6 +11,8 @@ import '../../widgets/cart/multi_store_banner.dart';
 import 'empty_cart_screen.dart';
 import '../store/store_screen.dart';
 import '../checkout/checkout_screen.dart';
+import '../../../providers/wishlist_provider.dart';
+import '../wishlist/liked_products_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -76,10 +78,47 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.favorite_border, color: AppColors.textPrimary),
-                onPressed: () {},
+              Consumer<WishlistProvider>(
+                builder: (context, wishlistProvider, _) {
+                  final count = wishlistProvider.likedProducts.length;
+                  return Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.favorite_border, color: AppColors.textPrimary),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                          );
+                        },
+                      ),
+                      if (count > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                            child: Text(
+                              '$count',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
+              const SizedBox(width: 4),
             ],
           ),
           body: SingleChildScrollView(

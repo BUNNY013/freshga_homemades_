@@ -5,7 +5,7 @@ import 'home/home_feed_view.dart';
 import 'categories/categories_screen.dart';
 import '../presentation/screens/following/following_screen.dart';
 import '../presentation/screens/orders/orders_list_screen.dart';
-import 'dev/seeder_screen.dart';
+import '../presentation/screens/profile/profile_screen.dart';
 import '../presentation/widgets/cart/floating_cart_bar.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
@@ -31,7 +31,7 @@ class CustomerHomeScreenState extends State<CustomerHomeScreen> {
     const CategoriesScreen(),
     const FollowingScreen(),
     const OrdersListScreen(),
-    const SeederScreen(), // Temp replacement for Profile to allow testing
+    const ProfileScreen(),
   ];
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/product_provider.dart';
+import '../../../providers/wishlist_provider.dart';
 import '../../../providers/customer_provider.dart';
 import '../../widgets/product/product_image_section.dart';
 import '../../widgets/product/variant_selector.dart';
@@ -515,10 +516,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     },
                                   ),
                                   const SizedBox(width: 12),
-                                  _buildGlassButton(
-                                    icon: provider.isWishlisted ? Icons.favorite : Icons.favorite_border,
-                                    iconColor: provider.isWishlisted ? Colors.red : Colors.black87,
-                                    onTap: () => provider.toggleWishlist(),
+                                  Consumer<WishlistProvider>(
+                                    builder: (context, wishlistProvider, _) {
+                                      final isWishlisted = wishlistProvider.isLiked(product.id);
+                                      return _buildGlassButton(
+                                        icon: isWishlisted ? Icons.favorite : Icons.favorite_border,
+                                        iconColor: isWishlisted ? Colors.red : Colors.black87,
+                                        onTap: () => wishlistProvider.toggleLike(product),
+                                      );
+                                    },
                                   ),
                                   const SizedBox(width: 12),
                                   _buildGlassButton(

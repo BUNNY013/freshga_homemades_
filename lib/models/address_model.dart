@@ -59,6 +59,34 @@ class AddressModel {
     };
   }
   
+  AddressModel copyWith({
+    String? id,
+    String? name,
+    String? phoneNumber,
+    String? houseNumber,
+    String? street,
+    String? landmark,
+    String? city,
+    String? state,
+    String? pincode,
+    String? addressType,
+    bool? isDefault,
+  }) {
+    return AddressModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      houseNumber: houseNumber ?? this.houseNumber,
+      street: street ?? this.street,
+      landmark: landmark ?? this.landmark,
+      city: city ?? this.city,
+      state: state ?? this.state,
+      pincode: pincode ?? this.pincode,
+      addressType: addressType ?? this.addressType,
+      isDefault: isDefault ?? this.isDefault,
+    );
+  }
+
   String get formattedAddress {
     List<String> parts = [houseNumber, street];
     if (landmark.isNotEmpty) parts.add(landmark);

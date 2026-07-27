@@ -128,6 +128,39 @@ class CustomerProvider with ChangeNotifier {
     }
   }
 
+  Future<void> setDefaultAddress(String addressId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _customerService.setDefaultAddress(user.uid, addressId);
+    }
+  }
+
+  Future<void> updateProfile({
+    String? fullName,
+    String? email,
+    String? profileImageUrl,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _customerService.updateProfile(
+        uid: user.uid,
+        fullName: fullName,
+        email: email,
+        profileImageUrl: profileImageUrl,
+      );
+    }
+  }
+
+  Future<void> updateNotificationPreferences(Map<String, bool> preferences) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await _customerService.updateNotificationPreferences(
+        uid: user.uid,
+        preferences: preferences,
+      );
+    }
+  }
+
   @override
   void dispose() {
     _customerSubscription?.cancel();

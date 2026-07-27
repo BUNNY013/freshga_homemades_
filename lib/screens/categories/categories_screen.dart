@@ -6,8 +6,11 @@ import 'dart:ui';
 import '../../core/theme/app_colors.dart';
 import '../../providers/category_provider.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/wishlist_provider.dart';
 import '../search/search_screen.dart';
 import 'category_discovery_screen.dart';
+import '../../presentation/screens/cart/cart_screen.dart';
+import '../../presentation/screens/wishlist/liked_products_screen.dart';
 
 class CategoriesScreen extends StatelessWidget {
   const CategoriesScreen({super.key});
@@ -57,13 +60,58 @@ class CategoriesScreen extends StatelessWidget {
                       );
                     },
                   ),
+                  Consumer<WishlistProvider>(
+                    builder: (context, wishlistProvider, _) {
+                      final count = wishlistProvider.likedProducts.length;
+                      return Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                              );
+                            },
+                          ),
+                          if (count > 0)
+                            Positioned(
+                              right: 8,
+                              top: 8,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                                child: Text(
+                                  '$count',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
                   Consumer<CartProvider>(
                     builder: (context, cart, child) {
                       return Stack(
                         children: [
                           IconButton(
                             icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const CartScreen()),
+                              );
+                            },
                           ),
                           if (cart.itemCount > 0)
                             Positioned(
