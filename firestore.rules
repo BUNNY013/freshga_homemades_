@@ -89,7 +89,7 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
-    match /products/{productId} {
+    match /products/{document=**} {
       allow read, write: if true;
     }
 
@@ -140,11 +140,11 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
-    match /orders/{orderId} {
+    match /orders/{document=**} {
       allow read, write: if true; // Temporarily relaxed for testing
     }
 
-    match /reviews/{reviewId} {
+    match /reviews/{document=**} {
       allow read, write: if true;
     }
 
