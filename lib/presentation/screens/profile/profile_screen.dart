@@ -159,20 +159,10 @@ class ProfileScreen extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // 5. Developer & Account Actions
+                // 5. Account Actions
                 _buildSectionTitle('Account Actions'),
                 const SizedBox(height: 10),
                 _buildSectionCard([
-                  _buildMenuTile(
-                    icon: Icons.developer_mode_rounded,
-                    title: 'Developer / Seeder Tools',
-                    subtitle: 'Access test data generator & seeding utilities',
-                    iconColor: Colors.purple,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SeederScreen()));
-                    },
-                  ),
-                  const Divider(height: 1),
                   _buildMenuTile(
                     icon: Icons.logout_rounded,
                     title: 'Log Out',
