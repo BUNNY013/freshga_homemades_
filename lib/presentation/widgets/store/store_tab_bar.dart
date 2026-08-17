@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 
 class StoreTabBarDelegate extends SliverPersistentHeaderDelegate {
@@ -20,9 +21,9 @@ class StoreTabBarDelegate extends SliverPersistentHeaderDelegate {
             indicatorWeight: 2,
             labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
-            tabs: const [
-              Tab(text: "Shop"),
-              Tab(text: "About"),
+            tabs: [
+              Tab(text: "store.shop".tr()),
+              Tab(text: "store.about".tr()),
             ],
           ),
           Divider(height: 1, color: Colors.grey.shade200),

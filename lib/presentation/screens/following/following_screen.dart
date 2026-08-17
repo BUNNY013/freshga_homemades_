@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/following_provider.dart';
@@ -53,19 +54,15 @@ class _FollowingScreenState extends State<FollowingScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: const Text(
-          'Following',
-          style: TextStyle(
+        title: Text(
+          'following.title'.tr(),
+          style: const TextStyle(
             color: AppColors.textPrimary,
             fontSize: 22,
             fontWeight: FontWeight.w700,
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary),
-            onPressed: () {},
-          ),
           IconButton(
             icon: const Icon(Icons.search_rounded, color: AppColors.textPrimary),
             onPressed: () {},
@@ -74,54 +71,62 @@ class _FollowingScreenState extends State<FollowingScreen> {
       ),
       body: Consumer<FollowingProvider>(
         builder: (context, provider, child) {
-          if (provider.isLoadingIds) {
-            return const FeedShimmer();
-          }
-
-          if (provider.followingStoreIds.isEmpty) {
+          if (!provider.isLoadingIds && provider.followingStoreIds.isEmpty) {
             return const FollowingEmptyState();
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const FollowingStoreList(),
-              const FollowingFilterChips(),
-              Expanded(
-                child: provider.isLoading
-                    ? const FeedShimmer()
-                    : provider.feed.isEmpty
-                        ? _buildEmptyFeedFilter(provider.selectedFilter)
-                        : RefreshIndicator(
-                            onRefresh: _onRefresh,
-                            color: AppColors.primaryGreen,
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100), // Bottom padding for cart
-                              itemCount: provider.feed.length + (provider.isPaginating ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (index == provider.feed.length) {
-                                  return const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 20),
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        color: AppColors.primaryGreen,
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  );
-                                }
+          return RefreshIndicator(
+            onRefresh: _onRefresh,
+            color: AppColors.primaryGreen,
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                const SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FollowingStoreList(),
+                      FollowingFilterChips(),
+                    ],
+                  ),
+                ),
+                if (provider.isLoading || provider.isLoadingIds)
+                  const SliverToBoxAdapter(child: FeedShimmer())
+                else if (provider.feed.isEmpty)
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: _buildEmptyFeedFilter(provider.selectedFilter),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100), // Bottom padding for cart
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          if (index == provider.feed.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.primaryGreen,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          }
 
-                                final update = provider.feed[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: FeedCard(update: update),
-                                );
-                              },
-                            ),
-                          ),
-              ),
-            ],
+                          final update = provider.feed[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: FeedCard(update: update),
+                          );
+                        },
+                        childCount: provider.feed.length + (provider.isPaginating ? 1 : 0),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           );
         },
       ),

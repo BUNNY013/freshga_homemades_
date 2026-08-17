@@ -6,8 +6,9 @@ import '../modals/report_modal.dart';
 
 class StoreHeader extends StatelessWidget {
   final StoreModel store;
+  final String? heroTag;
 
-  const StoreHeader({super.key, required this.store});
+  const StoreHeader({super.key, required this.store, this.heroTag});
 
   @override
   Widget build(BuildContext context) {
@@ -146,31 +147,34 @@ class StoreHeader extends StatelessWidget {
               right: 0,
               bottom: 0, // Logo rests exactly at the boundary of StoreInfoSection
               child: Center(
-                child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                child: Hero(
+                  tag: heroTag ?? 'store_logo_${store.id}',
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 4),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: store.logoUrl,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(color: Colors.grey.shade100),
-                    errorWidget: (context, url, error) => const Icon(Icons.store, color: Colors.grey, size: 36),
+                    child: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: store.logoUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(color: Colors.grey.shade100),
+                        errorWidget: (context, url, error) => const Icon(Icons.store, color: Colors.grey, size: 36),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
             ),
           ],
         ),

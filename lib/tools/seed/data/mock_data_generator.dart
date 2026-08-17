@@ -224,4 +224,45 @@ class MockDataGenerator {
       'createdAt': FieldValue.serverTimestamp(),
     };
   }
+
+  // --- SUBSCRIPTION HELPERS ---
+  static Map<String, dynamic> generateVendorSubscriptionData(String storeId) {
+    final scenarios = ['trialing', 'active', 'grace_period', 'expired'];
+    final status = scenarios[_random.nextInt(scenarios.length)];
+    
+    DateTime now = DateTime.now();
+    DateTime trialEndsAt;
+    DateTime? currentPeriodEnd;
+
+    switch (status) {
+      case 'trialing':
+        trialEndsAt = now.add(Duration(days: _random.nextInt(14) + 1));
+        break;
+      case 'active':
+        trialEndsAt = now.subtract(Duration(days: _random.nextInt(30) + 10));
+        currentPeriodEnd = now.add(Duration(days: _random.nextInt(30) + 1));
+        break;
+      case 'grace_period':
+        trialEndsAt = now.subtract(Duration(days: _random.nextInt(60) + 30));
+        // Grace period is within 3 days after currentPeriodEnd
+        currentPeriodEnd = now.subtract(Duration(days: _random.nextInt(3)));
+        break;
+      case 'expired':
+        trialEndsAt = now.subtract(Duration(days: _random.nextInt(90) + 60));
+        currentPeriodEnd = now.subtract(Duration(days: _random.nextInt(30) + 4));
+        break;
+      default:
+        trialEndsAt = now.add(const Duration(days: 90));
+    }
+
+    return {
+      'storeId': storeId,
+      'status': status,
+      'trialEndsAt': trialEndsAt.toIso8601String(),
+      'currentPeriodEnd': currentPeriodEnd?.toIso8601String(),
+      'createdBySeeder': true,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+  }
 }

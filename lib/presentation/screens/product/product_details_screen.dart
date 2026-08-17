@@ -386,27 +386,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           // Shelf Life and Dispatch Time
                           ProductInfoCards(product: product),
                           const SizedBox(height: 16),
-
-                          // Report Item Button
-                          Center(
-                            child: TextButton.icon(
-                              onPressed: () {
-                                ReportModal.show(
-                                  context,
-                                  type: 'product_before_order',
-                                  targetId: product.id,
-                                  targetName: product.name,
-                                  storeId: product.storeId,
-                                );
-                              },
-                              icon: const Icon(Icons.flag_outlined, color: Colors.red, size: 18),
-                              label: const Text(
-                                "Report incorrect product info or image",
-                                style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 32),
                         ],
                       ),
                     ),
@@ -502,20 +481,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               ),
                               Row(
                                 children: [
-                                  _buildGlassButton(
-                                    icon: Icons.flag_outlined,
-                                    iconColor: Colors.redAccent,
-                                    onTap: () {
-                                      ReportModal.show(
-                                        context,
-                                        type: 'product_before_order',
-                                        targetId: product.id,
-                                        targetName: product.name,
-                                        storeId: product.storeId,
-                                      );
-                                    },
-                                  ),
-                                  const SizedBox(width: 12),
                                   Consumer<WishlistProvider>(
                                     builder: (context, wishlistProvider, _) {
                                       final isWishlisted = wishlistProvider.isLiked(product.id);
@@ -528,14 +493,53 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   _buildGlassButton(
-                                    icon: Icons.share_outlined,
+                                    icon: Icons.shopping_cart_outlined,
+                                    hasBadge: true,
                                     onTap: () {},
                                   ),
                                   const SizedBox(width: 12),
                                   _buildGlassButton(
-                                    icon: Icons.shopping_cart_outlined,
-                                    hasBadge: true,
+                                    icon: Icons.share_outlined,
                                     onTap: () {},
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.8),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+                                    ),
+                                    child: PopupMenuButton<String>(
+                                      icon: const Icon(Icons.more_vert, color: Colors.black87, size: 22),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                      position: PopupMenuPosition.under,
+                                      elevation: 4,
+                                      color: Colors.white,
+                                      onSelected: (value) {
+                                        if (value == 'report') {
+                                          ReportModal.show(
+                                            context,
+                                            type: 'product_before_order',
+                                            targetId: product.id,
+                                            targetName: product.name,
+                                            storeId: product.storeId,
+                                          );
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        PopupMenuItem(
+                                          value: 'report',
+                                          child: Row(
+                                            children: const [
+                                              Icon(Icons.flag_outlined, color: Colors.redAccent, size: 20),
+                                              SizedBox(width: 12),
+                                              Text('Report Issue', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w500)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),

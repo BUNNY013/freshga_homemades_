@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../screens/search/search_screen.dart';
 
@@ -11,20 +12,10 @@ class SearchBarWidget extends StatefulWidget {
 }
 
 class _SearchBarWidgetState extends State<SearchBarWidget> {
-  final List<String> _searchHints = [
-    "mango pickles...",
-    "pure organic honey...",
-    "fresh ground podis...",
-    "authentic ghee sweets...",
-    "healthy millet snacks...",
-    "traditional savories...",
-    "organic cold-pressed oils...",
-    "natural health mixes...",
-    "hand-ground spices...",
-    "homemade papads...",
-    "freshly baked cookies...",
-    "premium dry fruits...",
-    "homemade batter mixes..."
+  List<String> get _searchHints => [
+    'home.search_hint_1'.tr(),
+    'home.search_hint_2'.tr(),
+    'home.search_hint_3'.tr(),
   ];
   
   int _currentIndex = 0;
@@ -103,10 +94,22 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                 const Icon(Icons.search_rounded, color: AppColors.textSecondary),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(
-                    "$_currentText|",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary.withOpacity(0.7),
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "home.search_prefix".tr(),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary.withOpacity(0.7),
+                          ),
+                        ),
+                        TextSpan(
+                          text: "$_currentText|",
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary.withOpacity(0.7),
+                          ),
+                        ),
+                      ],
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

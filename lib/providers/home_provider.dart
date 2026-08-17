@@ -35,11 +35,11 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _service.getActiveSections(limit: 4); // Load first 4 sections
+      final result = await _service.getActiveSections(limit: 10); // Load first 10 sections
       _sections = List<HomeSectionModel>.from(result['sections']);
       _lastDoc = result['lastDoc'];
       
-      if (_sections.length < 4) {
+      if (_sections.length < 10) {
         _hasMore = false;
       }
     } catch (e) {

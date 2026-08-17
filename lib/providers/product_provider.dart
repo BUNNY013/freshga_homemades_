@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product_model.dart';
 import '../services/product_service.dart';
+import '../services/store_service.dart';
 
 class ProductProvider with ChangeNotifier {
   final ProductService _service = ProductService();
@@ -173,8 +174,14 @@ class ProductProvider with ChangeNotifier {
         try {
           final storeDoc = await FirebaseFirestore.instance.collection('stores').doc(_currentProduct!.storeId).get();
           final data = storeDoc.data();
-          _isStoreActive = (data?['isActive'] ?? true) &&
-              ((data?['status'] ?? '').toString().toLowerCase() != 'suspended');
+          final bool isStoreSuspendedOrInactive = !(data?['isActive'] ?? true) ||
+              ((data?['status'] ?? '').toString().toLowerCase() == 'suspended');
+          
+          if (isStoreSuspendedOrInactive) {
+            _isStoreActive = false;
+          } else {
+            _isStoreActive = await StoreService().isStoreActive(_currentProduct!.storeId);
+          }
         } catch (e) {
           _isStoreActive = true;
         }

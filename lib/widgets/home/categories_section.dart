@@ -28,7 +28,7 @@ class CategoriesSection extends StatelessWidget {
         SectionTitle(title: title, onSeeAll: onViewAll),
         const SizedBox(height: 12),
         SizedBox(
-          height: 130,
+          height: 135,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -53,20 +53,17 @@ class CategoriesSection extends StatelessWidget {
                       height: 70,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.grey.shade200,
+                        color: Colors.transparent,
                         image: cat.imageUrl.isNotEmpty
                             ? DecorationImage(
                                 image: CachedNetworkImageProvider(cat.imageUrl, maxWidth: 150, maxHeight: 150),
                                 fit: BoxFit.cover,
+                                colorFilter: const ColorFilter.mode(
+                                  AppColors.background,
+                                  BlendMode.multiply,
+                                ),
                               )
                             : null,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.textSecondary.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
                       ),
                     ),
                     const SizedBox(height: 8),

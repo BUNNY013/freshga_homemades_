@@ -11,8 +11,10 @@ import '../../../services/store_service.dart';
 import '../../widgets/checkout/address_bottom_sheet.dart';
 import '../store/store_screen.dart';
 import '../product/product_details_screen.dart';
-import 'payment_screen.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'order_success_screen.dart';
 import '../../../models/order_model.dart';
+import '../../../services/order_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final String storeId;
@@ -28,14 +30,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   StoreModel? _store;
   bool _isLoading = false;
   String _deliveryInstructions = '';
+  late Razorpay _razorpay;
 
   @override
   void initState() {
     super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchStoreDetails();
       _autoSelectDefaultAddress();
     });
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
   }
 
   void _autoSelectDefaultAddress() {
@@ -207,32 +221,141 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final storeName = items.first.storeName;
     final itemTotal = cartProvider.getStoreTotal(widget.storeId);
     final deliveryFee = _calculateDeliveryFee(itemTotal);
-    final toPay = itemTotal + deliveryFee;
+    final platformFee = 9.0;
+    final toPay = itemTotal + deliveryFee + platformFee;
 
-    final orderItems = items.map((cartItem) => OrderItem(
-      productId: cartItem.productId,
-      productName: cartItem.productName,
-      imageUrl: cartItem.imageUrl,
-      variantLabel: cartItem.variantLabel,
-      quantity: cartItem.quantity,
-      price: cartItem.price,
-    )).toList();
+    var options = {
+      'key': 'rzp_test_TOo0mUDrME9tJp', // TODO: Replace with real key
+      'amount': (toPay * 100).toInt(), // Amount in paise
+      'name': 'FreshGa Homemades',
+      'description': 'Payment for Order from $storeName',
+      'timeout': 120,
+      'retry': {
+        'enabled': true,
+        'max_count': 3
+      },
+      'prefill': {
+        'contact': _selectedAddress!.phoneNumber,
+        'email': context.read<CustomerProvider>().currentCustomer?.email ?? 'test@example.com'
+      },
+      'theme': {
+        'color': '#4CAF50'
+      }
+    };
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => PaymentScreen(
-          storeId: widget.storeId,
-          storeName: storeName,
-          items: orderItems,
-          deliveryAddress: _selectedAddress!,
-          subtotal: itemTotal,
-          deliveryFee: deliveryFee,
-          totalToPay: toPay,
-          instructions: _deliveryInstructions,
-        ),
-      ),
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Could not open Razorpay: $e"), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (mounted) setState(() => _isLoading = false);
+    
+    String errorMessage = "Payment Failed: ${response.message ?? 'Unknown error'}";
+    if (response.code == Razorpay.NETWORK_ERROR) {
+      errorMessage = "Network issue detected. Please check your internet connection.";
+    } else if (response.code == Razorpay.PAYMENT_CANCELLED) {
+      errorMessage = "Payment was cancelled. You can try again.";
+    } else if (response.code == Razorpay.INVALID_OPTIONS) {
+      errorMessage = "Configuration error. Please contact support.";
+    }
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(errorMessage), behavior: SnackBarBehavior.floating, backgroundColor: Colors.red.shade800),
     );
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    if (mounted) setState(() => _isLoading = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("External Wallet Selected: ${response.walletName}"), backgroundColor: Colors.orange),
+    );
+  }
+
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    // Payment succeeded! Save the order to Firestore.
+    try {
+      final cartProvider = context.read<CartProvider>();
+      final groupedItems = cartProvider.getStoreGroupedItems();
+      final items = groupedItems[widget.storeId] ?? [];
+      if (items.isEmpty) return;
+
+      final storeName = items.first.storeName;
+      final itemTotal = cartProvider.getStoreTotal(widget.storeId);
+      final deliveryFee = _calculateDeliveryFee(itemTotal);
+      final platformFee = 9.0;
+      final toPay = itemTotal + deliveryFee + platformFee;
+
+      final orderItems = items.map((cartItem) => OrderItem(
+        productId: cartItem.productId,
+        productName: cartItem.productName,
+        imageUrl: cartItem.imageUrl,
+        variantLabel: cartItem.variantLabel,
+        quantity: cartItem.quantity,
+        price: cartItem.price,
+      )).toList();
+
+      final orderService = OrderService();
+      int maxDispatchDays = 1;
+      final maxDispatchDate = DateTime.now().add(const Duration(days: 2));
+      final expiresAt = DateTime.now().add(const Duration(hours: 24));
+      
+      final customerProvider = context.read<CustomerProvider>();
+      final customerId = customerProvider.currentCustomer?.uid ?? 'unknown_customer';
+
+      final order = OrderModel(
+        orderId: '',
+        storeId: widget.storeId,
+        storeName: storeName,
+        customerId: customerId,
+        customerName: _selectedAddress!.name,
+        items: orderItems,
+        totalAmount: toPay,
+        subTotal: itemTotal,
+        deliveryFee: deliveryFee,
+        taxes: 0.0,
+        platformFee: platformFee,
+        paymentMethod: 'Online',
+        paymentStatus: 'Completed',
+        payoutStatus: 'pending',
+        deliveryAddress: _selectedAddress!.formattedAddress,
+        customerPhone: _selectedAddress!.phoneNumber,
+        orderStatus: 'New',
+        expiresAt: expiresAt,
+        maxDispatchDate: maxDispatchDate,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final generatedOrderId = await orderService.createOrder(order);
+
+      if (mounted) {
+        cartProvider.clearStoreCart(widget.storeId);
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => OrderSuccessScreen(
+            orderId: generatedOrderId,
+            amountPaid: toPay,
+            paymentMethod: 'Online',
+            date: DateTime.now(),
+          )),
+          (route) => route.isFirst,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to save order: $e"), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   String _calculateDeliveryDate(List<dynamic> items) {
@@ -420,7 +543,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         
         final applicableArea = _getApplicableDeliveryArea();
         final double deliveryFee = _calculateDeliveryFee(itemTotal);
-        final double toPay = itemTotal + deliveryFee;
+        final double platformFee = 9.0;
+        final double toPay = itemTotal + deliveryFee + platformFee;
 
         final bool isStateRestricted = _store != null &&
             !_store!.canSellPanIndia &&
@@ -779,6 +903,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               deliveryFee == 0 ? "FREE" : "₹${deliveryFee.toInt()}", 
                               valueColor: deliveryFee == 0 ? AppColors.primaryGreen : Colors.black87
                             ),
+                            const SizedBox(height: 12),
+                            _buildBillRow("Platform Fee", "₹${platformFee.toInt()}"),
                             const Padding(
                               padding: EdgeInsets.symmetric(vertical: 16),
                               child: Divider(height: 1),

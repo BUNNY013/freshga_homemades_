@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:ui';
 
 import '../../core/theme/app_colors.dart';
@@ -42,9 +43,9 @@ class CategoriesScreen extends StatelessWidget {
                     child: Container(color: Colors.transparent),
                   ),
                 ),
-                title: const Text(
-                  'Categories',
-                  style: TextStyle(
+                title: Text(
+                  'categories.title'.tr(),
+                  style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
@@ -60,43 +61,12 @@ class CategoriesScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  Consumer<WishlistProvider>(
-                    builder: (context, wishlistProvider, _) {
-                      final count = wishlistProvider.likedProducts.length;
-                      return Stack(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
-                              );
-                            },
-                          ),
-                          if (count > 0)
-                            Positioned(
-                              right: 8,
-                              top: 8,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                                child: Text(
-                                  '$count',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                        ],
+                  IconButton(
+                    icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
                       );
                     },
                   ),
@@ -187,82 +157,36 @@ class CategoriesScreen extends StatelessWidget {
                       crossAxisCount: 3,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
-                      childAspectRatio: 0.75, // Optimized for 3-column
+                      childAspectRatio: 0.68, // Fixed RenderFlex overflow
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final category = categories[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CategoryDiscoveryScreen(
-                                  category: category,
-                                ),
+                        return TweenAnimationBuilder<double>(
+                          tween: Tween(begin: 0.0, end: 1.0),
+                          duration: Duration(milliseconds: 400 + (index * 50).clamp(0, 500)),
+                          curve: Curves.easeOutCubic,
+                          builder: (context, value, child) {
+                            return Transform.translate(
+                              offset: Offset(0, 20 * (1 - value)),
+                              child: Opacity(
+                                opacity: value,
+                                child: child,
                               ),
                             );
                           },
-                          child: Container(
-                              clipBehavior: Clip.antiAlias, // Prevents images from spilling out
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFF4EA), // Soft yellowish cream
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(top: 16.0),
-                                    child: category.imageUrl.isNotEmpty
-                                        ? Transform.scale(
-                                            scale: 1.15, // Zoom in perfectly without spilling
-                                            child: CachedNetworkImage(
-                                              key: ValueKey(category.imageUrl),
-                                              imageUrl: category.imageUrl,
-                                              fit: BoxFit.contain,
-                                              memCacheWidth: 300,
-                                              placeholder: (context, url) => const Center(
-                                                child: SizedBox(
-                                                  width: 24, height: 24,
-                                                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen)
-                                                )
-                                              ),
-                                              errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: Colors.grey),
-                                            ),
-                                        )
-                                      : const Icon(Icons.category, color: Colors.grey, size: 40),
+                          child: _AnimatedCategoryCard(
+                            category: category,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CategoryDiscoveryScreen(
+                                    category: category,
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                  child: Text(
-                                    category.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                      color: AppColors.textPrimary,
-                                      letterSpacing: -0.1,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  '${category.itemCount > 0 ? category.itemCount : (category.name.length * 7 + 12)}+ items',
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w400,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                              ],
-                            ),
+                              );
+                            },
                           ),
                         );
                       },
@@ -351,6 +275,121 @@ class CategoriesScreen extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _AnimatedCategoryCard extends StatefulWidget {
+  final dynamic category;
+  final VoidCallback onTap;
+
+  const _AnimatedCategoryCard({required this.category, required this.onTap});
+
+  @override
+  State<_AnimatedCategoryCard> createState() => _AnimatedCategoryCardState();
+}
+
+class _AnimatedCategoryCardState extends State<_AnimatedCategoryCard> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          );
+        },
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF4EA),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 12,
+                spreadRadius: 0,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: widget.category.imageUrl.isNotEmpty
+                      ? ColorFiltered(
+                          colorFilter: const ColorFilter.mode(
+                            Color(0xFFFFF4EA),
+                            BlendMode.multiply,
+                          ),
+                          child: CachedNetworkImage(
+                            key: ValueKey(widget.category.imageUrl),
+                            imageUrl: widget.category.imageUrl,
+                            fit: BoxFit.contain,
+                            memCacheWidth: 300,
+                            placeholder: (context, url) => const Center(
+                              child: SizedBox(
+                                width: 24, height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: Colors.grey),
+                          ),
+                        )
+                      : const Icon(Icons.category, color: Colors.grey, size: 40),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Text(
+                  widget.category.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.1,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
       ),
     );
   }

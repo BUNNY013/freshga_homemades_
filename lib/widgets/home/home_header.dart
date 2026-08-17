@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 
 import '../../../providers/customer_provider.dart';
 import '../../../providers/wishlist_provider.dart';
 import '../../../screens/location_search_screen.dart';
 import '../../../presentation/screens/wishlist/liked_products_screen.dart';
+import '../../../presentation/screens/notifications/notification_screen.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -31,7 +33,7 @@ class HomeHeader extends StatelessWidget {
                   child: Consumer<CustomerProvider>(
                     builder: (context, customerProvider, child) {
                       final customer = customerProvider.currentCustomer;
-                      final city = customer?.city ?? 'Select Location';
+                      final city = customer?.city ?? 'home.select_location'.tr();
                       final state = customer?.state ?? '';
                       final displayText = state.isNotEmpty ? '$city, $state' : city;
 
@@ -39,7 +41,7 @@ class HomeHeader extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Delivery to",
+                            "home.delivery_to".tr(),
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -70,49 +72,23 @@ class HomeHeader extends StatelessWidget {
         ),
         Row(
           children: [
-            Consumer<WishlistProvider>(
-              builder: (context, wishlistProvider, _) {
-                final count = wishlistProvider.likedProducts.length;
-                return Stack(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
-                        );
-                      },
-                    ),
-                    if (count > 0)
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                          child: Text(
-                            '$count',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
-                  ],
+            IconButton(
+              icon: const Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
                 );
               },
             ),
             IconButton(
-              icon: const Icon(Icons.notifications_none_rounded),
-              onPressed: () {},
+              icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                );
+              },
             ),
           ],
         ),

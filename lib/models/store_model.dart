@@ -33,6 +33,7 @@ class StoreModel {
   // Tax Info
   final String taxRegistrationType; // 'GSTIN' or 'EnrolmentNumber'
   final String taxNumber;
+  final String fssaiNumber;
   
   // Location
   final String businessAddress;
@@ -77,6 +78,7 @@ class StoreModel {
     required this.dispatchTime,
     this.taxRegistrationType = '',
     this.taxNumber = '',
+    this.fssaiNumber = '',
     this.businessAddress = '',
     this.village = '',
     this.city = '',
@@ -117,6 +119,7 @@ class StoreModel {
       dispatchTime: json['dispatchTime'] ?? '1-2 Days',
       taxRegistrationType: json['taxRegistrationType'] ?? '',
       taxNumber: json['taxNumber'] ?? '',
+      fssaiNumber: json['fssaiNumber'] ?? '',
       businessAddress: json['businessAddress'] ?? '',
       village: json['village'] ?? '',
       city: json['city'] ?? '',
@@ -162,6 +165,7 @@ class StoreModel {
       'dispatchTime': dispatchTime,
       'taxRegistrationType': taxRegistrationType,
       'taxNumber': taxNumber,
+      'fssaiNumber': fssaiNumber,
       'businessAddress': businessAddress,
       'village': village,
       'city': city,

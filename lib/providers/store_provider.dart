@@ -19,11 +19,13 @@ class StoreProvider with ChangeNotifier {
   StoreModel? _currentStore;
   bool _isLoadingStore = false;
   String? _storeError;
+  bool _isStoreActive = true;
   StreamSubscription<DocumentSnapshot>? _storeSubscription;
 
   StoreModel? get currentStore => _currentStore;
   bool get isLoadingStore => _isLoadingStore;
   String? get storeError => _storeError;
+  bool get isStoreActive => _isStoreActive;
 
   // Store Products
   List<ProductModel> _allStoreProducts = [];
@@ -141,6 +143,7 @@ class StoreProvider with ChangeNotifier {
     _selectedCategory = "All";
     _selectedSubcategory = "All";
     _sortType = StoreSortType.bestSelling;
+    _isStoreActive = true;
     notifyListeners();
 
     try {
@@ -148,6 +151,7 @@ class StoreProvider with ChangeNotifier {
       if (_currentStore == null) {
         _storeError = "Store not found";
       } else {
+        _isStoreActive = await _service.isStoreActive(storeId);
         await loadAllStoreProducts(storeId);
         
         // Listen for realtime updates (like followers count)

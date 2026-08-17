@@ -15,6 +15,11 @@ class FollowingStoreList extends StatelessWidget {
     return Consumer<FollowingProvider>(
       builder: (context, provider, child) {
         final stores = provider.followingStoresData;
+        
+        if (provider.isLoadingIds) {
+          return _buildSkeleton();
+        }
+        
         if (stores.isEmpty) return const SizedBox.shrink();
 
         return Column(
@@ -77,22 +82,15 @@ class FollowingStoreList extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(2), // border width
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.primaryGreen, width: 2),
-                            ),
-                            child: CircleAvatar(
-                              radius: 28,
-                              backgroundColor: Colors.grey[200],
-                              backgroundImage: (store['storeLogo'] != null && store['storeLogo'].toString().isNotEmpty)
-                                  ? CachedNetworkImageProvider(store['storeLogo'])
-                                  : null,
-                              child: (store['storeLogo'] == null || store['storeLogo'].toString().isEmpty)
-                                  ? const Icon(Icons.store, color: Colors.grey)
-                                  : null,
-                            ),
+                          CircleAvatar(
+                            radius: 30,
+                            backgroundColor: Colors.grey.shade100,
+                            backgroundImage: (store['storeLogo'] != null && store['storeLogo'].toString().isNotEmpty)
+                                ? CachedNetworkImageProvider(store['storeLogo'])
+                                : null,
+                            child: (store['storeLogo'] == null || store['storeLogo'].toString().isEmpty)
+                                ? Icon(Icons.storefront_rounded, color: AppColors.textSecondary, size: 24)
+                                : null,
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -117,6 +115,53 @@ class FollowingStoreList extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(width: 140, height: 20, color: Colors.grey.shade200),
+              Container(width: 60, height: 16, color: Colors.grey.shade200),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            itemCount: 5,
+            itemBuilder: (context, index) {
+              return Container(
+                width: 72,
+                margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade200,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Container(width: 40, height: 10, color: Colors.grey.shade200),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

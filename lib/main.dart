@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui' as ui;
 
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
@@ -17,17 +19,36 @@ import 'providers/cart_provider.dart';
 import 'providers/following_provider.dart';
 import 'providers/wishlist_provider.dart';
 import 'providers/customer_provider.dart';
+import 'providers/network_provider.dart';
+import 'providers/maintenance_provider.dart';
+import 'screens/no_internet_screen.dart';
+import 'screens/maintenance_mode_screen.dart';
+import 'providers/update_provider.dart';
+import 'screens/force_update_screen.dart';
+import 'screens/soft_update_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(
-    MultiProvider(
-      providers: [
-        Provider<AuthService>(create: (_) => AuthService()),
-        ChangeNotifierProvider(create: (_) => CustomerProvider()),
+    runApp(
+      EasyLocalization(
+        supportedLocales: const [
+          Locale('en'),
+          Locale('hi'),
+          Locale('te')
+        ],
+        path: 'assets/translations',
+        fallbackLocale: const Locale('en'),
+        child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => NetworkProvider()),
+          ChangeNotifierProvider(create: (_) => MaintenanceProvider()),
+          ChangeNotifierProvider(create: (_) => UpdateProvider()),
+          Provider<AuthService>(create: (_) => AuthService()),
+          ChangeNotifierProvider(create: (_) => CustomerProvider()),
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => BannerProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
@@ -47,6 +68,7 @@ void main() async {
       ],
       child: const MyApp(),
     ),
+      ),
   );
 }
 
@@ -59,6 +81,81 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'FreshGa HomeMades',
       theme: AppTheme.lightTheme,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            Consumer3<NetworkProvider, MaintenanceProvider, UpdateProvider>(
+              builder: (context, network, maintenance, update, _) {
+                if (!network.isOnline) {
+                  return Positioned.fill(
+                    child: Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: MediaQuery(
+                        data: MediaQueryData.fromView(View.of(context)),
+                        child: Theme(
+                          data: AppTheme.lightTheme,
+                          child: const NoInternetScreen(),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                
+                if (update.isForceUpdate) {
+                  return Positioned.fill(
+                    child: Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: MediaQuery(
+                        data: MediaQueryData.fromView(View.of(context)),
+                        child: Theme(
+                          data: AppTheme.lightTheme,
+                          child: const ForceUpdateScreen(),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                
+                if (maintenance.isMaintenanceMode) {
+                  return Positioned.fill(
+                    child: Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: MediaQuery(
+                        data: MediaQueryData.fromView(View.of(context)),
+                        child: Theme(
+                          data: AppTheme.lightTheme,
+                          child: const MaintenanceModeScreen(),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                if (update.isSoftUpdate) {
+                  return Positioned.fill(
+                    child: Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: MediaQuery(
+                        data: MediaQueryData.fromView(View.of(context)),
+                        child: Theme(
+                          data: AppTheme.lightTheme,
+                          child: const SoftUpdateOverlay(),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        );
+      },
       home: const SplashScreen(),
     );
   }

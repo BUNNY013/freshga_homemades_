@@ -66,7 +66,10 @@ class FeedCard extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => StoreScreen(storeId: update.storeId),
+          builder: (context) => StoreScreen(
+            storeId: update.storeId,
+            heroTag: 'store_logo_feed_${update.updateId}',
+          ),
         ),
       );
     }
@@ -95,8 +98,7 @@ class FeedCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade100),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -107,10 +109,10 @@ class FeedCard extends StatelessWidget {
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () => _onCardTap(context),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -123,21 +125,24 @@ class FeedCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade200, width: 1),
-                            color: Colors.white,
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: CachedNetworkImage(
-                            imageUrl: displayLogo.isNotEmpty 
-                                ? displayLogo 
-                                : 'https://images.unsplash.com/photo-1556910103-1c02745a872f?w=100&h=100&fit=crop',
-                            fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => const Icon(Icons.storefront_rounded, color: Colors.grey, size: 20),
+                        Hero(
+                          tag: 'store_logo_feed_${update.updateId}',
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.shade200, width: 1),
+                              color: Colors.white,
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: CachedNetworkImage(
+                              imageUrl: displayLogo.isNotEmpty 
+                                  ? displayLogo 
+                                  : 'https://images.unsplash.com/photo-1556910103-1c02745a872f?w=100&h=100&fit=crop',
+                              fit: BoxFit.cover,
+                              errorWidget: (context, url, error) => const Icon(Icons.storefront_rounded, color: Colors.grey, size: 20),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -332,7 +337,6 @@ class FeedCard extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
                               color: Colors.grey.shade50,
-                              border: Border.all(color: Colors.grey.shade100),
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: CachedNetworkImage(

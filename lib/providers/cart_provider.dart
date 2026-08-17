@@ -210,6 +210,19 @@ class CartProvider with ChangeNotifier {
 
     List<String> messages = [];
     final productService = ProductService();
+    final storeService = StoreService();
+
+    // Check store subscription/active status
+    final isStoreActive = await storeService.isStoreActive(storeId);
+    if (!isStoreActive) {
+      messages.add('This store is currently offline. Orders cannot be placed at this time.');
+      for (var item in storeItems) {
+        _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
+      }
+      _saveCart();
+      notifyListeners();
+      return messages;
+    }
 
     await Future.wait(storeItems.map((item) async {
       try {

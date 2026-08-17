@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/constants/lottie_constants.dart';
 import '../../../providers/wishlist_provider.dart';
 import '../../../providers/cart_provider.dart';
 import '../../../models/product_model.dart';
@@ -99,17 +101,22 @@ class LikedProductsScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.favorite_rounded,
-                color: Colors.red,
-                size: 42,
+            Lottie.network(
+              LottieConstants.emptyWishlist,
+              height: 140,
+              repeat: true,
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.favorite_rounded,
+                  color: Colors.red,
+                  size: 42,
+                ),
               ),
             ),
             const SizedBox(height: 20),

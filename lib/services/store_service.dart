@@ -10,9 +10,10 @@ class StoreService {
       final snapshot = await _firestore.collection('stores')
           .where('verified', isEqualTo: true)
           .orderBy('rating', descending: true)
-          .limit(10)
+          .limit(20) // Fetch more to account for filtered ones
           .get();
-      return snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      final stores = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      return await _filterActiveStores(stores, limit: 10);
     } catch (e) {
       throw Exception('Failed to load featured stores: $e');
     }
@@ -25,7 +26,7 @@ class StoreService {
           .where('isActive', isEqualTo: true)
           .where('city', isEqualTo: city);
           
-      final snapshot = await query.limit(10).get();
+      final snapshot = await query.limit(20).get();
       
       List<StoreModel> stores = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
       
@@ -46,7 +47,7 @@ class StoreService {
           }
         }
       }
-      return stores;
+      return await _filterActiveStores(stores, limit: 10);
     } catch (e) {
       print('Error loading local stores: $e');
       return [];
@@ -58,9 +59,10 @@ class StoreService {
       final snapshot = await _firestore.collection('stores')
           .where('isActive', isEqualTo: true)
           .orderBy('createdAt', descending: true)
-          .limit(10)
+          .limit(20)
           .get();
-      return snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      final stores = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      return await _filterActiveStores(stores, limit: 10);
     } catch (e) {
       print('Error loading new stores: $e');
       return [];
@@ -84,10 +86,14 @@ class StoreService {
     try {
       final snapshot = await _firestore.collection('products')
           .where('storeId', isEqualTo: storeId)
-          .where('status', whereIn: ['Live', 'Live + Draft Changes', 'Live + Update Pending', 'Unavailable'])
           .limit(500) // Safe limit for homemade stores
           .get();
-      return snapshot.docs.map((doc) => ProductModel.fromJson(doc.data(), doc.id)).toList();
+          
+      final allProducts = snapshot.docs.map((doc) => ProductModel.fromJson(doc.data(), doc.id)).toList();
+      
+      // Filter locally to avoid requiring composite indexes
+      final allowedStatuses = ['Live', 'Live + Draft Changes', 'Live + Update Pending', 'Unavailable'];
+      return allProducts.where((p) => allowedStatuses.contains(p.status)).toList();
     } catch (e) {
       print('Error getting all store products: $e');
       return [];
@@ -192,5 +198,75 @@ class StoreService {
     } catch (e) {
       print('Error unfollowing store: $e');
     }
+  }
+
+  // --- Subscription Helper ---
+  Future<bool> isStoreActive(String storeId) async {
+    try {
+      final subDoc = await _firestore.collection('store_subscriptions').doc(storeId).get();
+      if (!subDoc.exists) return false;
+      
+      final data = subDoc.data()!;
+      final status = data['status'] ?? 'expired';
+      final trialEndsAtStr = data['trialEndsAt'];
+      final currentPeriodEndStr = data['currentPeriodEnd'];
+      
+      final trialEndsAt = trialEndsAtStr != null ? (trialEndsAtStr is Timestamp ? trialEndsAtStr.toDate() : DateTime.parse(trialEndsAtStr.toString())) : DateTime.now().subtract(const Duration(days: 1));
+      final currentPeriodEnd = currentPeriodEndStr != null ? (currentPeriodEndStr is Timestamp ? currentPeriodEndStr.toDate() : DateTime.parse(currentPeriodEndStr.toString())) : null;
+
+      final isTrialActive = status == 'trialing' && DateTime.now().isBefore(trialEndsAt);
+      final isPaidActive = status == 'active' && currentPeriodEnd != null && DateTime.now().isBefore(currentPeriodEnd);
+      
+      bool isInGracePeriod = false;
+      if (currentPeriodEnd != null) {
+        final graceEndsAt = currentPeriodEnd.add(const Duration(days: 3));
+        isInGracePeriod = DateTime.now().isAfter(currentPeriodEnd) && DateTime.now().isBefore(graceEndsAt);
+      }
+
+      return isTrialActive || isPaidActive || isInGracePeriod;
+    } catch (e) {
+      print("Error checking store active status: $e");
+      return false; // Fallback to offline on error for safety
+    }
+  }
+
+  Future<List<StoreModel>> _filterActiveStores(List<StoreModel> stores, {int limit = 10}) async {
+    if (stores.isEmpty) return [];
+    List<StoreModel> activeStores = [];
+    
+    // We check each store's subscription document. 
+    // If it's expired/missing (and no trial), we filter it out.
+    for (var store in stores) {
+      try {
+        final subDoc = await _firestore.collection('store_subscriptions').doc(store.id).get();
+        if (!subDoc.exists) continue; // No subscription doc -> offline
+        
+        final data = subDoc.data()!;
+        final status = data['status'] ?? 'expired';
+        final trialEndsAtStr = data['trialEndsAt'];
+        final currentPeriodEndStr = data['currentPeriodEnd'];
+        
+        final trialEndsAt = trialEndsAtStr != null ? (trialEndsAtStr is Timestamp ? trialEndsAtStr.toDate() : DateTime.parse(trialEndsAtStr.toString())) : DateTime.now().subtract(const Duration(days: 1));
+        final currentPeriodEnd = currentPeriodEndStr != null ? (currentPeriodEndStr is Timestamp ? currentPeriodEndStr.toDate() : DateTime.parse(currentPeriodEndStr.toString())) : null;
+
+        final isTrialActive = status == 'trialing' && DateTime.now().isBefore(trialEndsAt);
+        final isPaidActive = status == 'active' && currentPeriodEnd != null && DateTime.now().isBefore(currentPeriodEnd);
+        
+        bool isInGracePeriod = false;
+        if (currentPeriodEnd != null) {
+          final graceEndsAt = currentPeriodEnd.add(const Duration(days: 3));
+          isInGracePeriod = DateTime.now().isAfter(currentPeriodEnd) && DateTime.now().isBefore(graceEndsAt);
+        }
+
+        if (isTrialActive || isPaidActive || isInGracePeriod) {
+          activeStores.add(store);
+          if (activeStores.length >= limit) break; // Reached desired limit
+        }
+      } catch (e) {
+        print("Error checking subscription for ${store.id}: $e");
+      }
+    }
+    
+    return activeStores;
   }
 }

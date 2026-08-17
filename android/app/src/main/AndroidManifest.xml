@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     
     <application
-        android:label="freshga_homemades"
+        android:label="FreshGa Homemades"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

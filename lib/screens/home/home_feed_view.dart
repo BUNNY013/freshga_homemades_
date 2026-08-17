@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui';
 
 import '../../core/theme/app_colors.dart';
 import '../../providers/home_provider.dart';
@@ -12,6 +14,8 @@ import 'dynamic_section_renderer.dart';
 import '../../widgets/home/home_header.dart';
 import '../../widgets/home/search_bar_widget.dart';
 import '../../presentation/widgets/product/freshga_product_card.dart';
+import '../../widgets/skeletons.dart';
+import '../../widgets/animations/fade_slide_animation.dart';
 
 class HomeFeedView extends StatefulWidget {
   const HomeFeedView({super.key});
@@ -86,8 +90,49 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                 Consumer<HomeProvider>(
                   builder: (context, homeProvider, child) {
                     if (homeProvider.isLoading) {
-                      return const SliverFillRemaining(
-                        child: Center(child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+                      return SliverList(
+                        delegate: SliverChildListDelegate([
+                          const SizedBox(height: 16),
+                          const BannerSkeleton(),
+                          const SizedBox(height: 32),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: List.generate(4, (index) => const CategorySkeleton()),
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          const SectionTitleSkeleton(),
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              children: [
+                                Expanded(child: SizedBox(height: 220, child: const ProductSkeleton())),
+                                const SizedBox(width: 16),
+                                Expanded(child: SizedBox(height: 220, child: const ProductSkeleton())),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                          const SectionTitleSkeleton(),
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              child: Row(
+                                children: List.generate(
+                                  3,
+                                  (index) => const StoreSkeleton(),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 100), // padding for bottom bar
+                        ]),
                       );
                     }
 
@@ -99,10 +144,10 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                             children: [
                               const Icon(Icons.error_outline, size: 48, color: AppColors.terracotta),
                               const SizedBox(height: 16),
-                              Text("Failed to load home sections", style: Theme.of(context).textTheme.titleMedium),
+                              Text("home.error_sections".tr(), style: Theme.of(context).textTheme.titleMedium),
                               TextButton(
                                 onPressed: _onRefresh,
-                                child: const Text("Retry", style: TextStyle(color: AppColors.primaryGreen)),
+                                child: Text("home.retry".tr(), style: const TextStyle(color: AppColors.primaryGreen)),
                               )
                             ],
                           ),
@@ -134,12 +179,15 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                             bottomGap = 8.0;
                           }
 
-                          return Padding(
-                            padding: EdgeInsets.only(
-                              top: index == 0 ? 16.0 : 0.0, // Add top padding below search bar
-                              bottom: bottomGap,
+                          return FadeSlideAnimation(
+                            index: index,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                top: index == 0 ? 16.0 : 0.0,
+                                bottom: bottomGap,
+                              ),
+                              child: DynamicSectionRenderer(section: section),
                             ),
-                            child: DynamicSectionRenderer(section: section),
                           );
                         },
                         childCount: homeProvider.sections.length + (homeProvider.isPaginating ? 1 : 0),
@@ -162,12 +210,12 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       sliver: SliverMainAxisGroup(
                         slivers: [
-                          const SliverToBoxAdapter(
+                          SliverToBoxAdapter(
                             child: Padding(
-                              padding: EdgeInsets.only(bottom: 16.0, top: 8.0),
+                              padding: const EdgeInsets.only(bottom: 16.0, top: 8.0),
                               child: Text(
-                                "Discover More For You",
-                                style: TextStyle(
+                                "home.discover_more".tr(),
+                                style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -179,12 +227,15 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                               crossAxisCount: 2,
                               mainAxisSpacing: 16,
                               crossAxisSpacing: 16,
-                              childAspectRatio: 0.48, // Matches category_products_screen for FreshgaProductCard
+                              childAspectRatio: 0.45, // Matches category_products_screen for FreshgaProductCard
                             ),
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
-                                return FreshgaProductCard(
-                                  product: productProvider.discoveryProducts[index],
+                                return FadeSlideAnimation(
+                                  index: index,
+                                  child: FreshgaProductCard(
+                                    product: productProvider.discoveryProducts[index],
+                                  ),
                                 );
                               },
                               childCount: productProvider.discoveryProducts.length,
@@ -228,13 +279,17 @@ class _HomeFeedViewState extends State<HomeFeedView> {
 
   Widget _buildStickyHeader(BuildContext context) {
     return SliverAppBar(
-      pinned: false,
-      floating: true,
-      snap: true,
-      backgroundColor: AppColors.background,
+      pinned: true,
+      floating: false,
+      backgroundColor: AppColors.background.withOpacity(0.85),
       elevation: 0,
-      scrolledUnderElevation: 4,
-      shadowColor: AppColors.textSecondary.withOpacity(0.2),
+      scrolledUnderElevation: 0,
+      flexibleSpace: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(color: Colors.transparent),
+        ),
+      ),
       titleSpacing: 16,
       toolbarHeight: 110,
       title: const Column(

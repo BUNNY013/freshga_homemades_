@@ -8,6 +8,7 @@ import 'cancel_order_screen.dart';
 import 'order_tracking_screen.dart';
 import 'rate_product_screen.dart';
 import 'report_issue_screen.dart';
+import 'order_help_screen.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final String orderId;
@@ -41,82 +42,115 @@ class OrderDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          "Order Details",
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Help Support action
-            },
-            child: const Text("Help", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold)),
-          )
-        ],
-      ),
-      body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance.collection('orders').doc(orderId).snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('orders').doc(orderId).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: Colors.grey.shade50,
+            appBar: AppBar(
+              backgroundColor: Colors.grey.shade50,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: const Text("Order Details", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 18)),
+            ),
+            body: const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+          );
+        }
 
-          if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text("Order not found."));
-          }
+        if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
+          return Scaffold(
+            backgroundColor: Colors.grey.shade50,
+            appBar: AppBar(
+              backgroundColor: Colors.grey.shade50,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: const Text("Order Details", style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 18)),
+            ),
+            body: const Center(child: Text("Order not found.")),
+          );
+        }
 
-          final order = OrderModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
-          final displayStatus = _getDisplayStatus(order.orderStatus);
-          final statusColor = _getStatusColor(order.orderStatus);
-          final dateFormat = DateFormat('dd MMM, yyyy • hh:mm a');
+        final order = OrderModel.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+        final displayStatus = _getDisplayStatus(order.orderStatus);
+        final statusColor = _getStatusColor(order.orderStatus);
+        final dateFormat = DateFormat('dd MMM, yyyy • hh:mm a');
 
-          return SingleChildScrollView(
+        return Scaffold(
+          backgroundColor: Colors.grey.shade50,
+          appBar: AppBar(
+            backgroundColor: Colors.grey.shade50,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: const Text(
+              "Order Details",
+              style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 18),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => OrderHelpScreen(order: order)));
+                },
+                child: const Text("Help", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold)),
+              )
+            ],
+          ),
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header Info
+                // Header Info & Tracking
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 8))],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Order ID: ${order.orderId}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                            const SizedBox(height: 4),
-                            Text("Placed on ${dateFormat.format(order.createdAt)}", style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                          ],
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Order ID: ${order.orderId}", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.textPrimary)),
+                                const SizedBox(height: 4),
+                                Text("Placed on ${dateFormat.format(order.createdAt)}", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w500)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: statusColor.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              displayStatus,
+                              style: TextStyle(color: statusColor, fontWeight: FontWeight.w800, fontSize: 11, letterSpacing: 0.3),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          displayStatus,
-                          style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12),
-                        ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Divider(height: 1, color: Color(0xFFF5F5F5)),
                       ),
+                      _AnimatedTrackingTimeline(order: order),
                     ],
                   ),
                 ),
@@ -128,57 +162,84 @@ class OrderDetailsScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 8))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Delivery Address", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      const SizedBox(height: 12),
-                      Text(order.customerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                      const SizedBox(height: 4),
-                      Text(
-                        order.deliveryAddress,
-                        style: TextStyle(color: Colors.grey.shade700, fontSize: 13, height: 1.4),
-                      ),
-                      if (order.customerPhone.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(order.customerPhone, style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
-                      ]
+                      const Text("Delivery Address", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary)),
+                      const SizedBox(height: 16),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryGreen.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.location_on_rounded, color: AppColors.primaryGreen, size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(order.customerName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textPrimary)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  order.deliveryAddress,
+                                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13, height: 1.4),
+                                ),
+                                if (order.customerPhone.isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(order.customerPhone, style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                                ]
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),
 
                 const SizedBox(height: 16),
 
-                // Items
+                // Items & Bill
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 8))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Items (${order.items.length})", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                      const SizedBox(height: 12),
+                      Text("Items (${order.items.length})", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary)),
+                      const SizedBox(height: 16),
                       ...order.items.map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.only(bottom: 16),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: CachedNetworkImage(
-                                imageUrl: item.imageUrl,
-                                width: 56,
-                                height: 56,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) => Container(color: Colors.grey.shade100, width: 56, height: 56),
-                                errorWidget: (context, url, error) => Container(color: Colors.grey.shade100, width: 56, height: 56, child: const Icon(Icons.image, color: Colors.grey)),
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 4))],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: CachedNetworkImage(
+                                  imageUrl: item.imageUrl,
+                                  width: 64,
+                                  height: 64,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Container(color: Colors.grey.shade100, width: 64, height: 64),
+                                  errorWidget: (context, url, error) => Container(color: Colors.grey.shade100, width: 64, height: 64, child: const Icon(Icons.image, color: Colors.grey)),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -186,15 +247,24 @@ class OrderDetailsScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(item.productName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                                  const SizedBox(height: 4),
-                                  Text(item.variantLabel, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                                  Text(item.productName, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textPrimary)),
+                                  if (item.variantLabel.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(item.variantLabel, style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500)),
+                                  ],
                                   const SizedBox(height: 8),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text("₹${item.price.toInt()}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                                      Text("Qty: ${item.quantity}", style: TextStyle(color: Colors.grey.shade800, fontSize: 13, fontWeight: FontWeight.w500)),
+                                      Text("₹${item.price.toInt()}", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textPrimary)),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        child: Text("Qty: ${item.quantity}", style: const TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w700)),
+                                      ),
                                     ],
                                   )
                                 ],
@@ -203,31 +273,35 @@ class OrderDetailsScreen extends StatelessWidget {
                           ],
                         ),
                       )),
-                      const Divider(height: 24),
-                      _buildBillRow("Item Total", "₹${order.subTotal.toInt()}"),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Divider(height: 1, color: Color(0xFFF5F5F5)),
+                      ),
                       const SizedBox(height: 8),
+                      _buildBillRow("Item Total", "₹${order.subTotal.toInt()}"),
+                      const SizedBox(height: 12),
                       _buildBillRow(
                         "Delivery Fee",
                         order.deliveryFee == 0 ? "FREE" : "₹${order.deliveryFee.toInt()}",
                         valueColor: order.deliveryFee == 0 ? AppColors.primaryGreen : Colors.black87,
                       ),
                       if (order.platformFee > 0) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         _buildBillRow("Platform Fee", "₹${order.platformFee.toInt()}"),
                       ],
                       if (order.taxes > 0) ...[
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         _buildBillRow("Taxes", "₹${order.taxes.toInt()}"),
                       ],
                       const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Divider(height: 1),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Divider(height: 1, color: Color(0xFFF5F5F5)),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text("Total", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text("₹${order.totalAmount.toInt()}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                          const Text("Total", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary)),
+                          Text("₹${order.totalAmount.toInt()}", style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 20, color: AppColors.primaryGreen)),
                         ],
                       ),
                     ],
@@ -241,11 +315,11 @@ class OrderDetailsScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.info_outline, size: 16, color: Colors.grey.shade500),
+                      Icon(Icons.info_outline, size: 16, color: Colors.grey.shade400),
                       const SizedBox(width: 8),
                       Text(
                         _getFooterStatusMessage(order.orderStatus),
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -263,8 +337,8 @@ class OrderDetailsScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.blue.shade200),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.blue.shade100),
                           ),
                           child: Row(
                             children: [
@@ -310,7 +384,7 @@ class OrderDetailsScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: Colors.orange.shade50,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: Colors.orange.shade200),
                           ),
                           child: Row(
@@ -333,10 +407,6 @@ class OrderDetailsScreen extends StatelessWidget {
                                     context,
                                     MaterialPageRoute(builder: (_) => ReportIssueScreen(order: order)),
                                   );
-                                  if (result == true) {
-                                    // In a real app, this page would rebuild automatically 
-                                    // if it's using a StreamBuilder for the order.
-                                  }
                                 },
                                 child: const Text("Report", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
                               )
@@ -364,11 +434,11 @@ class OrderDetailsScreen extends StatelessWidget {
                             );
                           },
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             side: const BorderSide(color: Colors.red),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           ),
-                          child: const Text("Cancel Order", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 15)),
+                          child: const Text("Cancel Order", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -385,12 +455,12 @@ class OrderDetailsScreen extends StatelessWidget {
                               );
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               backgroundColor: AppColors.primaryGreen,
                               elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             ),
-                            child: const Text("Rate Products", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                            child: const Text("Rate Products", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -406,44 +476,24 @@ class OrderDetailsScreen extends StatelessWidget {
                               );
                             },
                             style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               side: const BorderSide(color: Colors.red),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             ),
-                            child: const Text("Report Issue / Refund", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 15)),
+                            child: const Text("Report Issue / Refund", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16)),
                           ),
                         ),
                         const SizedBox(height: 12),
                       ],
-                    ],
-                    if (['New', 'Accepted', 'Packed', 'Shipped'].contains(order.orderStatus)) ...[
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => OrderTrackingScreen(order: order)),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            backgroundColor: AppColors.primaryGreen,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: const Text("Track Order", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                        ),
-                      ),
                     ],
                   ],
                 ),
                 const SizedBox(height: 32),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -479,5 +529,139 @@ class OrderDetailsScreen extends StatelessWidget {
     );
     final deliveredDate = DateTime.parse(deliveredEvent['timestamp'] ?? order.updatedAt.toIso8601String());
     return DateTime.now().difference(deliveredDate).inHours <= 24;
+  }
+}
+
+class _AnimatedTrackingTimeline extends StatelessWidget {
+  final OrderModel order;
+  
+  const _AnimatedTrackingTimeline({required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    final status = order.orderStatus;
+    // Determine current step index
+    final steps = ['New', 'Accepted', 'Packed', 'Shipped', 'Delivered'];
+    int currentIndex = steps.indexOf(status);
+    
+    // Handle cancelled cases
+    if (['Declined', 'Cancelled', 'Auto-Cancelled'].contains(status)) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.red.shade50,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.cancel_outlined, color: Colors.red),
+            const SizedBox(width: 12),
+            Text("Order Cancelled", style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      );
+    }
+    
+    if (currentIndex == -1) currentIndex = 0; // Fallback
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+      child: Column(
+        children: List.generate(steps.length, (index) {
+          final stepName = steps[index];
+          final isCompleted = index <= currentIndex;
+          final isCurrent = index == currentIndex;
+          final isLast = index == steps.length - 1;
+
+          // Find timestamp for this step
+          String? timeString;
+          try {
+            final event = order.timeline.lastWhere((e) => e['status'] == stepName);
+            final rawTime = event['timestamp'] ?? event['time'];
+            if (rawTime != null) {
+              timeString = DateFormat('dd MMM, hh:mm a').format(DateTime.parse(rawTime.toString()));
+            }
+          } catch (e) {
+            // No event found for this step yet
+            if (stepName == 'New') {
+               timeString = DateFormat('dd MMM, hh:mm a').format(order.createdAt);
+            }
+          }
+
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: Duration(milliseconds: 400 + (index * 200)),
+                    curve: Curves.easeOutBack,
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: isCompleted ? value : 1.0,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isCompleted ? AppColors.primaryGreen : Colors.grey.shade200,
+                            boxShadow: isCurrent ? [
+                              BoxShadow(color: AppColors.primaryGreen.withOpacity(0.4), blurRadius: 12, spreadRadius: 2)
+                            ] : [],
+                          ),
+                          child: isCompleted 
+                              ? const Icon(Icons.check, color: Colors.white, size: 14)
+                              : null,
+                        ),
+                      );
+                    },
+                  ),
+                  if (!isLast)
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      width: 2,
+                      height: 36,
+                      color: index < currentIndex ? AppColors.primaryGreen : Colors.grey.shade200,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                    ),
+                ],
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 2.0, bottom: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        stepName,
+                        style: TextStyle(
+                          fontWeight: isCurrent ? FontWeight.w800 : (isCompleted ? FontWeight.w700 : FontWeight.w500),
+                          color: isCompleted ? AppColors.textPrimary : Colors.grey.shade400,
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (timeString != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          timeString,
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
   }
 }

@@ -6,6 +6,7 @@ import '../providers/customer_provider.dart';
 import 'customer_home_screen.dart';
 import 'login_screen.dart';
 import 'location_setup_screen.dart'; // Will create this next
+import 'static_splash_screen.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -16,9 +17,7 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const StaticSplashScreen();
         }
 
         if (snapshot.hasData) {
@@ -26,9 +25,7 @@ class AuthWrapper extends StatelessWidget {
           return Consumer<CustomerProvider>(
             builder: (context, customerProvider, child) {
               if (customerProvider.isLoading) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
+                return const StaticSplashScreen();
               }
 
               final customer = customerProvider.currentCustomer;

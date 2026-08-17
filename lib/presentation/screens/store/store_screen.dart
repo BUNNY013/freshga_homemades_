@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/store_provider.dart';
 import '../../../providers/customer_provider.dart';
@@ -17,8 +18,9 @@ import '../../widgets/cart/floating_cart_bar.dart';
 
 class StoreScreen extends StatefulWidget {
   final String storeId;
+  final String? heroTag;
 
-  const StoreScreen({super.key, required this.storeId});
+  const StoreScreen({super.key, required this.storeId, this.heroTag});
 
   @override
   State<StoreScreen> createState() => _StoreScreenState();
@@ -125,7 +127,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               }
 
               if (provider.currentStore == null) {
-                return _buildErrorState("Store not found");
+                return _buildErrorState('store.not_found'.tr());
               }
 
               final store = provider.currentStore!;
@@ -142,7 +144,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               return NestedScrollView(
                 headerSliverBuilder: (context, innerBoxIsScrolled) {
                   return [
-                    StoreHeader(store: store),
+                    StoreHeader(store: store, heroTag: widget.heroTag),
                     if (isStateRestricted)
                       SliverToBoxAdapter(
                         child: Container(
@@ -155,7 +157,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  "Not Available in Your State. This store only delivers within ${store.state}.",
+                                  'store.not_available_state'.tr() + store.state + '.',
                                   style: TextStyle(
                                     color: Colors.orange.shade900,
                                     fontSize: 13,
@@ -167,7 +169,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           ),
                         ),
                       ),
-                    if (!store.isActive || store.isSuspended)
+                    if (!store.isActive || store.isSuspended || !provider.isStoreActive)
                       SliverToBoxAdapter(
                         child: Container(
                           width: double.infinity,
@@ -179,9 +181,11 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  store.isSuspended
-                                      ? "${store.name} is temporarily offline and not accepting orders at this time."
-                                      : "${store.name} is currently on a break and not accepting orders. Please check back later.",
+                                  !provider.isStoreActive 
+                                    ? 'store.unavailable'.tr()
+                                    : store.isSuspended
+                                      ? "${store.name} " + 'store.offline'.tr()
+                                      : "${store.name} " + 'store.break'.tr(),
                                   style: const TextStyle(
                                     color: Color(0xFF991B1B), // Dark red text
                                     fontSize: 13,
@@ -202,25 +206,29 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                     ),
                   ];
                 },
-                body: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    // 1. Shop Tab
-                    Builder(
-                      builder: (innerContext) => _buildShopTab(innerContext, provider),
-                    ),
-                    
-                    // 2. About Tab
-                    Builder(
-                      builder: (innerContext) => CustomScrollView(
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: AboutStoreSection(store: store),
-                          ),
-                        ],
+                body: SafeArea(
+                  top: true,
+                  bottom: false,
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // 1. Shop Tab
+                      Builder(
+                        builder: (innerContext) => _buildShopTab(innerContext, provider),
                       ),
-                    ),
-                  ],
+                      
+                      // 2. About Tab
+                      Builder(
+                        builder: (innerContext) => CustomScrollView(
+                          slivers: [
+                            SliverToBoxAdapter(
+                              child: AboutStoreSection(store: store),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -250,7 +258,14 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               );
             },
           ),
-          const FloatingCartBar(),
+          Consumer<StoreProvider>(
+            builder: (context, provider, child) {
+              if (!provider.isStoreActive || provider.currentStore?.isSuspended == true || provider.currentStore?.isActive == false) {
+                return const SizedBox.shrink(); // Hide cart bar if store offline
+              }
+              return const FloatingCartBar();
+            },
+          ),
         ],
       ),
     );
@@ -364,9 +379,12 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
       return a.compareTo(b);
     });
 
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-      slivers: [
+    return RefreshIndicator(
+      color: AppColors.primaryGreen,
+      onRefresh: () => provider.loadStoreData(widget.storeId),
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        slivers: [
         SliverPersistentHeader(
           pinned: true,
           delegate: _StickyCategoryDelegate(
@@ -485,8 +503,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           ),
         )
       ],
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildErrorState(String message) {
     return Center(

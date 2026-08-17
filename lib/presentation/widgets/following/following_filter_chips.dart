@@ -41,12 +41,8 @@ class FollowingFilterChips extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryGreen : Colors.grey[200],
+                    color: isSelected ? AppColors.primaryGreen : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isSelected ? AppColors.primaryGreen : Colors.transparent,
-                      width: 1,
-                    ),
                   ),
                   child: Center(
                     child: Text(

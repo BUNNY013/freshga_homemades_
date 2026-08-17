@@ -139,6 +139,10 @@ service cloud.firestore {
     match /admin_settings/{document} {
       allow read, write: if true;
     }
+    
+    match /global_settings/{document} {
+      allow read, write: if true;
+    }
 
     match /orders/{document=**} {
       allow read, write: if true; // Temporarily relaxed for testing
@@ -190,6 +194,13 @@ service cloud.firestore {
 
     match /reports/{reportId} {
       allow read, write: if true; // Allows customers to submit store/product reports & Admin to moderate
+    }
+
+    // =========================
+    // SUPPORT TICKETS
+    // =========================
+    match /support_tickets/{document=**} {
+      allow read, write: if true; // Temporarily relaxed so users can submit queries and replies
     }
   }
 }

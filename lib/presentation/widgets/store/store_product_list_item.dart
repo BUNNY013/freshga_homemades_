@@ -66,7 +66,7 @@ class _StoreProductListItemState extends State<StoreProductListItem> {
     final customerProvider = context.watch<CustomerProvider>();
     
     final bool isStoreActive = (storeProvider.currentStore?.isActive ?? true) &&
-        !(storeProvider.currentStore?.isSuspended ?? false);
+        !(storeProvider.currentStore?.isSuspended ?? false) && storeProvider.isStoreActive;
     final store = storeProvider.currentStore;
     final customerState = customerProvider.currentCustomer?.state;
     

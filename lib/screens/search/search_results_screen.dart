@@ -449,7 +449,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
       sliver: SliverGrid(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.48,
+          childAspectRatio: 0.45,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),

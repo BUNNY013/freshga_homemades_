@@ -24,6 +24,7 @@ class FreshgaProductCard extends StatefulWidget {
 
 class _FreshgaProductCardState extends State<FreshgaProductCard> {
   bool _isAdding = false;
+  bool _isPressed = false;
 
   void _toggleWishlist() {
     context.read<WishlistProvider>().toggleLike(widget.product);
@@ -82,36 +83,43 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
             .round()
         : 0;
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                ProductDetailsScreen(productId: widget.product.id),
-          ),
-        );
-      },
-      child: Container(
-        width: widget.width,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+    return AnimatedScale(
+      scale: _isPressed ? 0.96 : 1.0,
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOutCubic,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isPressed = true),
+        onTapUp: (_) {
+          setState(() => _isPressed = false);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailsScreen(productId: widget.product.id),
             ),
-          ],
-          border: Border.all(color: Colors.grey.shade100),
-        ),
-        child: Column(
+          );
+        },
+        onTapCancel: () => setState(() => _isPressed = false),
+        child: Container(
+          width: widget.width,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 24,
+                spreadRadius: 0,
+                offset: const Offset(0, 8),
+              ),
+            ],
+            border: Border.all(color: Colors.grey.shade50, width: 1.5),
+          ),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ─── IMAGE SECTION (fixed height — never grows) ───────────────
-            SizedBox(
-              height: 170,
+            // ─── IMAGE SECTION (flexible to prevent overflow) ───────────────
+            Expanded(
+              flex: 5,
               child: Stack(
                 children: [
                   // Product image
@@ -189,6 +197,7 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
 
             // ─── CONTENT SECTION (Expanded — fills remaining card space) ──
             Expanded(
+              flex: 7,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
                 child: Column(
@@ -295,13 +304,17 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                          "₹${widget.product.price.toStringAsFixed(0)}",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primaryGreen,
-                            height: 1.1,
+                        Flexible(
+                          child: Text(
+                            "₹${widget.product.price.toStringAsFixed(0)}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primaryGreen,
+                              height: 1.1,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         if (hasDiscount) ...[
@@ -347,28 +360,34 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
                       children: [
                         // Variants chip
                         if (hasMultipleVariants)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 7, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryGreen.withOpacity(0.08),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.inventory_2_outlined,
-                                    size: 11, color: AppColors.primaryGreen),
-                                const SizedBox(width: 4),
-                                Text(
-                                  "${widget.product.variants.length} sizes",
-                                  style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primaryGreen,
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryGreen.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.inventory_2_outlined,
+                                      size: 11, color: AppColors.primaryGreen),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      "${widget.product.variants.length} sizes",
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primaryGreen,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           )
                         else
@@ -424,6 +443,6 @@ class _FreshgaProductCardState extends State<FreshgaProductCard> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

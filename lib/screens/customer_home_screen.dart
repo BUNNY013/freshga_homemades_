@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../core/theme/app_colors.dart';
 import 'home/home_feed_view.dart';
@@ -7,6 +9,7 @@ import '../presentation/screens/following/following_screen.dart';
 import '../presentation/screens/orders/orders_list_screen.dart';
 import '../presentation/screens/profile/profile_screen.dart';
 import '../presentation/widgets/cart/floating_cart_bar.dart';
+import 'dev/seeder_screen.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   const CustomerHomeScreen({super.key});
@@ -36,15 +39,23 @@ class CustomerHomeScreenState extends State<CustomerHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Stack(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.background,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: Stack(
         children: [
           IndexedStack(
             index: _currentIndex,
             children: _pages,
           ),
-          const FloatingCartBar(),
+          if (_currentIndex == 0 || _currentIndex == 1 || _currentIndex == 2)
+            const FloatingCartBar(),
         ],
       ),
       bottomNavigationBar: Container(
@@ -72,35 +83,37 @@ class CustomerHomeScreenState extends State<CustomerHomeScreen> {
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home_rounded),
-              label: 'Home',
+              icon: const Icon(Icons.home_outlined),
+              activeIcon: const Icon(Icons.home_rounded),
+              label: 'bottom_nav.home'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view_outlined),
-              activeIcon: Icon(Icons.grid_view_rounded),
-              label: 'Categories',
+              icon: const Icon(Icons.grid_view_outlined),
+              activeIcon: const Icon(Icons.grid_view_rounded),
+              label: 'bottom_nav.categories'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_border_rounded),
-              activeIcon: Icon(Icons.favorite_rounded),
-              label: 'Following',
+              icon: const Icon(Icons.favorite_border_rounded),
+              activeIcon: const Icon(Icons.favorite_rounded),
+              label: 'bottom_nav.following'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_bag_outlined),
-              activeIcon: Icon(Icons.shopping_bag_rounded),
-              label: 'Orders',
+              icon: const Icon(Icons.receipt_long_outlined),
+              activeIcon: const Icon(Icons.receipt_long_rounded),
+              label: 'bottom_nav.orders'.tr(),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
-              label: 'Profile',
+              icon: const Icon(Icons.person_outline_rounded),
+              activeIcon: const Icon(Icons.person_rounded),
+              label: 'bottom_nav.profile'.tr(),
             ),
           ],
         ),
       ),
+    ),
     );
   }
 }
+

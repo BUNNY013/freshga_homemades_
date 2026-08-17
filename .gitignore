@@ -53,3 +53,7 @@ yarn-error.log*
 firebase-debug.log
 firebase-debug.*.log
 
+
+# Keystore files
+key.properties
+*.jks

@@ -21,7 +21,7 @@ void main() async {
 Future<void> clearOldData() async {
   print('🧹 Clearing old generated data (categories, tags, stores, products)...');
   final db = FirebaseFirestore.instance;
-  final collections = ['categories', 'sub_categories', 'subcategories', 'tags', 'stores', 'products'];
+  final collections = ['categories', 'sub_categories', 'subcategories', 'tags', 'stores', 'products', 'store_subscriptions'];
   
   for (String col in collections) {
     final snapshot = await db.collection(col).where('createdBySeeder', isEqualTo: true).get();

@@ -6,6 +6,7 @@ import '../../../providers/following_provider.dart';
 import '../../presentation/screens/store/store_screen.dart';
 import '../../presentation/screens/following/all_followed_stores_screen.dart';
 import 'section_title.dart';
+import '../skeletons.dart';
 
 class FollowingStoresSection extends StatelessWidget {
   final String title;
@@ -17,7 +18,27 @@ class FollowingStoresSection extends StatelessWidget {
     return Consumer<FollowingProvider>(
       builder: (context, provider, child) {
         if (provider.isLoadingIds) {
-          return const SizedBox(); // Could show shimmer here
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SectionTitle(title: title, onSeeAll: () {}),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 110,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  itemCount: 4,
+                  itemBuilder: (context, index) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: CategorySkeleton(), // Similar circular skeleton
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
         }
 
         if (provider.followingStoresData.isEmpty) {
@@ -80,26 +101,19 @@ class FollowingStoresSection extends StatelessWidget {
             Container(
               width: 70,
               height: 70,
-              padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(color: AppColors.primaryGreen, width: 2), // Ring like Instagram stories
+                color: Colors.grey.shade100,
               ),
-              child: Container(
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: ClipOval(
-                  child: storeLogo.isNotEmpty
-                      ? CachedNetworkImage(
-                          imageUrl: storeLogo,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(color: Colors.grey.shade200),
-                          errorWidget: (context, url, error) => const Icon(Icons.store, color: Colors.grey),
-                        )
-                      : const Icon(Icons.store, size: 30, color: Colors.grey),
-                ),
+              child: ClipOval(
+                child: storeLogo.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: storeLogo,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(color: Colors.grey.shade200),
+                        errorWidget: (context, url, error) => const Icon(Icons.store, color: Colors.grey),
+                      )
+                    : const Icon(Icons.store, size: 30, color: Colors.grey),
               ),
             ),
             const SizedBox(height: 8),

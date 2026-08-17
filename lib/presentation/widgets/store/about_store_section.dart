@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../models/store_model.dart';
 
 class AboutStoreSection extends StatelessWidget {
@@ -367,13 +368,17 @@ class AboutStoreSection extends StatelessWidget {
                     child: Image.asset('assets/fssai.png', width: 32, height: 32, fit: BoxFit.contain),
                   ),
                   const SizedBox(width: 16),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("FSSAI Verified", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: primaryText)),
-                        SizedBox(height: 4),
-                        Text("Food safety and quality standards verified.", style: TextStyle(fontSize: 13, color: secondaryText, height: 1.3)),
+                        const Text("FSSAI Verified", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: primaryText)),
+                        const SizedBox(height: 4),
+                        const Text("Food safety and quality standards verified.", style: TextStyle(fontSize: 13, color: secondaryText, height: 1.3)),
+                        if (store.fssaiNumber.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text("Registration No: ${store.fssaiNumber}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32))),
+                        ],
                       ],
                     ),
                   ),
@@ -409,9 +414,12 @@ class AboutStoreSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              if (store.instagramLink.isNotEmpty) _buildSocialImageIcon('assets/instagram.png', "Instagram"),
-              if (store.facebookLink.isNotEmpty) _buildSocialIcon(Icons.facebook_outlined, "Facebook"),
-              if (store.youtubeLink.isNotEmpty) _buildSocialIcon(Icons.play_circle_outline_rounded, "YouTube"),
+              if (store.instagramLink.isNotEmpty) 
+                _buildSocialImageIcon('assets/instagram.png', "Instagram", store.instagramLink),
+              if (store.facebookLink.isNotEmpty) 
+                _buildSocialIcon(Icons.facebook_outlined, "Facebook", store.facebookLink),
+              if (store.youtubeLink.isNotEmpty) 
+                _buildSocialIcon(Icons.play_circle_outline_rounded, "YouTube", store.youtubeLink),
             ],
           ),
         ],
@@ -419,57 +427,77 @@ class AboutStoreSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialIcon(IconData icon, String label) {
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      debugPrint('Could not launch $urlString');
+    }
+  }
+
+  Widget _buildSocialIcon(IconData icon, String label, String url) {
     return Padding(
-      padding: const EdgeInsets.only(right: 24),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(
-              color: iconBgColor,
-              shape: BoxShape.circle,
+      padding: const EdgeInsets.only(right: 28),
+      child: GestureDetector(
+        onTap: () => _launchUrl(url),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: const BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 32),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: secondaryText,
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: secondaryText,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSocialImageIcon(String assetPath, String label) {
+  Widget _buildSocialImageIcon(String assetPath, String label, String url) {
     return Padding(
-      padding: const EdgeInsets.only(right: 24),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade200),
+      padding: const EdgeInsets.only(right: 28),
+      child: GestureDetector(
+        onTap: () => _launchUrl(url),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.grey.shade200, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Image.asset(assetPath, width: 36, height: 36, fit: BoxFit.contain),
             ),
-            child: Image.asset(assetPath, width: 28, height: 28, fit: BoxFit.contain),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: secondaryText,
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: secondaryText,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,77 @@
+{
+  "profile": {
+    "title": "Profile",
+    "edit_profile": "Edit Profile",
+    "app_language": "App Language",
+    "my_orders": "My Orders",
+    "wishlist": "Wishlist",
+    "support": "Support Tickets",
+    "about": "About App",
+    "logout": "Log Out"
+  },
+  "bottom_nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "following": "Following",
+    "orders": "Orders",
+    "profile": "Profile"
+  },
+  "home": {
+    "select_location": "Select Location",
+    "delivery_to": "Delivery to",
+    "error_sections": "Failed to load home sections",
+    "retry": "Retry",
+    "discover_more": "Discover More For You",
+    "search_prefix": "Search for ",
+    "search_hint_1": "mango pickles...",
+    "search_hint_2": "pure organic honey...",
+    "search_hint_3": "fresh ground podis...",
+    "view_all": "View all"
+  },
+  "categories": {
+    "title": "All Categories"
+  },
+  "following": {
+    "title": "Following Kitchens",
+    "empty_title": "No updates yet",
+    "empty_subtitle": "Follow your favorite homemade kitchens to see their latest products, offers, and stories here.",
+    "explore_kitchens": "Explore Kitchens"
+  },
+  "store": {
+    "shop": "Shop",
+    "about": "About",
+    "menu": "MENU",
+    "other_delights": "Other Delights",
+    "bestsellers": "Bestsellers",
+    "discounts": "Discounts",
+    "all": "All",
+    "not_found": "Store not found",
+    "unavailable": "This store is currently unavailable and cannot accept new orders.",
+    "offline": "is temporarily offline and not accepting orders at this time.",
+    "break": "is currently on a break and not accepting orders. Please check back later.",
+    "not_available_state": "Not Available in Your State. This store only delivers within "
+  },
+  "product": {
+    "add": "ADD",
+    "out_of_stock": "Out of Stock",
+    "bestseller": "Bestseller",
+    "details": "Product Details",
+    "ingredients": "Ingredients",
+    "nutritional_info": "Nutritional Info",
+    "shelf_life": "Shelf Life",
+    "reviews": "Reviews"
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty_title": "Your cart is empty",
+    "empty_subtitle": "Looks like you haven't added anything to your cart yet",
+    "checkout": "Proceed to Checkout",
+    "subtotal": "Subtotal"
+  },
+  "orders": {
+    "title": "My Orders",
+    "active": "Active",
+    "past": "Past",
+    "track": "Track Order"
+  }
+}

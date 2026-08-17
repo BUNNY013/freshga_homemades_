@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/store_provider.dart';
 
@@ -299,9 +300,9 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
                         children: [
                           const Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 20),
                           const SizedBox(width: 8),
-                          const Text(
-                            "Pantry",
-                            style: TextStyle(
+                          Text(
+                            "store.menu".tr(),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w800,
                               letterSpacing: 0.8,

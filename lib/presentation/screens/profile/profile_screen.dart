@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../providers/customer_provider.dart';
 import '../../../../providers/following_provider.dart';
@@ -15,6 +16,7 @@ import 'notification_settings_screen.dart';
 import 'address_book_screen.dart';
 import 'help_support_screen.dart';
 import 'about_screen.dart';
+import 'customer_tickets_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -24,7 +26,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('My Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+        title: Text('profile.title'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
         backgroundColor: Colors.white,
         elevation: 0.5,
         automaticallyImplyLeading: false,
@@ -41,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
         builder: (context, customerProvider, followingProvider, wishlistProvider, child) {
           final customer = customerProvider.currentCustomer;
           final uid = customer?.uid ?? FirebaseAuth.instance.currentUser?.uid;
-          final name = customer?.fullName ?? 'Foodie Gourmet';
+          final name = customer?.fullName ?? 'Taste Explorer';
           final phone = customer?.phoneNumber ?? FirebaseAuth.instance.currentUser?.phoneNumber ?? '+91';
           final email = customer?.email ?? 'Not set';
           final addressesCount = customer?.savedAddresses?.length ?? 0;
@@ -72,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
                 _buildSectionCard([
                   _buildMenuTile(
                     icon: Icons.shopping_bag_outlined,
-                    title: 'My Orders',
+                    title: 'profile.my_orders'.tr(),
                     subtitle: 'Track active orders and reorder homemade favorites',
                     onTap: () {
                       CustomerHomeScreen.globalKey.currentState?.switchTab(3);
@@ -99,7 +101,7 @@ class ProfileScreen extends StatelessWidget {
                   const Divider(height: 1),
                   _buildMenuTile(
                     icon: Icons.favorite_rounded,
-                    title: 'Liked Products & Wishlist',
+                    title: 'profile.wishlist'.tr(),
                     subtitle: '$wishlistCount homemade specialty(ies) saved',
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const LikedProductsScreen()));
@@ -125,9 +127,26 @@ class ProfileScreen extends StatelessWidget {
                   _buildMenuTile(
                     icon: Icons.settings_outlined,
                     title: 'General App Settings',
-                    subtitle: 'Language, Theme & Cache management',
+                    subtitle: 'Theme & Cache management',
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                    },
+                  ),
+                  const Divider(height: 1),
+                  _buildMenuTile(
+                    icon: Icons.language_rounded,
+                    title: 'profile.app_language'.tr(),
+                    subtitle: 'Choose your preferred language',
+                    onTap: () => _showLanguageSelector(context),
+                  ),
+                  const Divider(height: 1),
+                  _buildMenuTile(
+                    icon: Icons.developer_mode,
+                    title: 'Developer Tools',
+                    subtitle: 'Database seeder and testing tools',
+                    iconColor: Colors.blue,
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SeederScreen()));
                     },
                   ),
                 ]),
@@ -139,6 +158,15 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 _buildSectionCard([
                   _buildMenuTile(
+                    icon: Icons.support_agent_rounded,
+                    title: 'profile.support'.tr(),
+                    subtitle: 'View your submitted queries and resolutions',
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const CustomerTicketsScreen()));
+                    },
+                  ),
+                  const Divider(height: 1),
+                  _buildMenuTile(
                     icon: Icons.help_outline_rounded,
                     title: 'Help & Support',
                     subtitle: 'Frequently asked questions & WhatsApp support',
@@ -149,7 +177,7 @@ class ProfileScreen extends StatelessWidget {
                   const Divider(height: 1),
                   _buildMenuTile(
                     icon: Icons.info_outline_rounded,
-                    title: 'About FreshGa Homemades',
+                    title: 'profile.about'.tr(),
                     subtitle: 'FSSAI compliance, Terms of Service & Privacy Policy',
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
@@ -165,7 +193,7 @@ class ProfileScreen extends StatelessWidget {
                 _buildSectionCard([
                   _buildMenuTile(
                     icon: Icons.logout_rounded,
-                    title: 'Log Out',
+                    title: 'profile.logout'.tr(),
                     subtitle: 'Sign out of your account safely',
                     iconColor: Colors.orange,
                     onTap: () => _showLogoutConfirm(context),
@@ -379,15 +407,16 @@ class ProfileScreen extends StatelessWidget {
   }
 
   void _showEditProfileModal(BuildContext context, String initialName, String initialEmail) {
-    final nameCtrl = TextEditingController(text: initialName == 'Foodie Gourmet' ? '' : initialName);
+    final nameCtrl = TextEditingController(text: initialName == 'Taste Explorer' ? '' : initialName);
     final emailCtrl = TextEditingController(text: initialEmail == 'Not set' ? '' : initialEmail);
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
+      builder: (_) => SingleChildScrollView(
+        child: Container(
+          decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
@@ -428,7 +457,7 @@ class ProfileScreen extends StatelessWidget {
                 onPressed: () async {
                   final provider = context.read<CustomerProvider>();
                   await provider.updateProfile(
-                    fullName: nameCtrl.text.trim().isEmpty ? 'Foodie Gourmet' : nameCtrl.text.trim(),
+                    fullName: nameCtrl.text.trim().isEmpty ? 'Taste Explorer' : nameCtrl.text.trim(),
                     email: emailCtrl.text.trim().isEmpty ? null : emailCtrl.text.trim(),
                   );
                   if (context.mounted) Navigator.pop(context);
@@ -445,18 +474,19 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
     );
+    );
   }
 
   void _showLogoutConfirm(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Log Out?', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to sign out of your FreshGa account?'),
+        title: Text('Log Out?'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('Are you sure you want to sign out of your FreshGa account?'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel'.tr()),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white),
@@ -470,7 +500,7 @@ class ProfileScreen extends StatelessWidget {
                 );
               }
             },
-            child: const Text('Log Out'),
+            child: Text('Log Out'.tr()),
           ),
         ],
       ),
@@ -504,6 +534,51 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showLanguageSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Select Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ListTile(
+                title: const Text('English'),
+                trailing: context.locale.languageCode == 'en' ? const Icon(Icons.check, color: AppColors.primaryGreen) : null,
+                onTap: () {
+                  context.setLocale(const Locale('en'));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('हिंदी (Hindi)'),
+                trailing: context.locale.languageCode == 'hi' ? const Icon(Icons.check, color: AppColors.primaryGreen) : null,
+                onTap: () {
+                  context.setLocale(const Locale('hi'));
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('తెలుగు (Telugu)'),
+                trailing: context.locale.languageCode == 'te' ? const Icon(Icons.check, color: AppColors.primaryGreen) : null,
+                onTap: () {
+                  context.setLocale(const Locale('te'));
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      }
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/constants/legal_constants.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -97,7 +98,7 @@ class AboutScreen extends StatelessWidget {
                 onTap: () => _showLegalDialog(
                   context,
                   'Terms of Service',
-                  '1. Use of the FreshGa Homemades app constitutes acceptance of our marketplace terms.\n2. Orders placed with homemade artisans are prepared freshly to order.\n3. Platform fees and delivery charges apply as shown at checkout.',
+                  LegalConstants.customerTerms,
                 ),
               ),
               const Divider(height: 1),
@@ -108,7 +109,7 @@ class AboutScreen extends StatelessWidget {
                 onTap: () => _showLegalDialog(
                   context,
                   'Privacy Policy',
-                  'We value your privacy. Your contact and delivery address information is only shared with the homemade vendor and assigned delivery partner for the purpose of completing your order.',
+                  LegalConstants.customerPrivacy,
                 ),
               ),
               const Divider(height: 1),
@@ -119,7 +120,7 @@ class AboutScreen extends StatelessWidget {
                 onTap: () => _showLegalDialog(
                   context,
                   'FSSAI Compliance Pledge',
-                  'FreshGa ensures all onboarded homemade suppliers hold valid FSSAI registration or licensing appropriate for homemade food businesses.',
+                  LegalConstants.fssaiPledge,
                 ),
               ),
             ]),
@@ -196,7 +197,12 @@ class AboutScreen extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        content: Text(content, style: const TextStyle(height: 1.4, fontSize: 13)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: Text(content, style: const TextStyle(height: 1.4, fontSize: 13)),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

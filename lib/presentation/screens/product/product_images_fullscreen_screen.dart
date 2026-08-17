@@ -16,20 +16,15 @@ class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenS
   late PageController _pageController;
   int _currentIndex = 0;
   
-  // Dummy images for demonstration (using the same image)
   late List<String> _images;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
-    _images = [
-      widget.product.imageUrl,
-      widget.product.imageUrl,
-      widget.product.imageUrl,
-      widget.product.imageUrl,
-      widget.product.imageUrl,
-    ];
+    _images = widget.product.images.isNotEmpty 
+        ? widget.product.images 
+        : [widget.product.imageUrl];
   }
 
   @override

@@ -27,6 +27,7 @@ class ProductSeeder {
 
     List<Map<String, dynamic>> stores = [];
     List<Map<String, dynamic>> products = [];
+    List<Map<String, dynamic>> subscriptions = [];
     
     // Create batches
     var batch = _db.batch();
@@ -41,6 +42,10 @@ class ProductSeeder {
       storeData['categories'] = []; // We will dynamically assign this based on products
       storeData['createdBySeeder'] = true;
       stores.add(storeData);
+
+      // Generate subscription data for this store
+      var subData = MockDataGenerator.generateVendorSubscriptionData(storeId);
+      subscriptions.add(subData);
     }
 
     int productCounter = 0;
@@ -112,10 +117,21 @@ class ProductSeeder {
       }
     }
 
+    // Add subscriptions to batch
+    for (var sub in subscriptions) {
+      batch.set(_db.collection('store_subscriptions').doc(sub['storeId']), sub);
+      count++;
+      if (count >= 100) {
+        await batch.commit();
+        batch = _db.batch();
+        count = 0;
+      }
+    }
+
     if (count > 0) {
       await batch.commit();
     }
 
-    print('✅ Successfully seeded ${stores.length} stores and ${products.length} products! Every subcategory now has at least 1 product.');
+    print('✅ Successfully seeded ${stores.length} stores, ${subscriptions.length} subscriptions, and ${products.length} products! Every subcategory now has at least 1 product.');
   }
 }

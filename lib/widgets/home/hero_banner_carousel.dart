@@ -23,7 +23,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
       children: [
         CarouselSlider(
           options: CarouselOptions(
-            height: 170.0,
+            height: 190.0,
             autoPlay: true,
             enlargeCenterPage: true,
             viewportFraction: 0.92,

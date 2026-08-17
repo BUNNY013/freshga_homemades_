@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/constants/lottie_constants.dart';
 import '../../../screens/explore/explore_screen.dart'; // Just checking if it exists
 
 class FollowingEmptyState extends StatelessWidget {
@@ -15,34 +18,40 @@ class FollowingEmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // A beautiful illustration or icon
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: AppColors.primaryGreen.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.favorite_rounded,
-                size: 60,
-                color: AppColors.primaryGreen,
-              ),
+            Lottie.network(
+              LottieConstants.emptyFollowing,
+              height: 200,
+              repeat: true,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreen.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.storefront_rounded,
+                    size: 60,
+                    color: AppColors.primaryGreen,
+                  ),
+                );
+              },
             ),
-            const SizedBox(height: 32),
-            const Text(
-              "No stores followed yet",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
+            const SizedBox(height: 24),
+            Text(
+              'following.empty_title'.tr(),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
                 color: AppColors.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            const Text(
-              "Follow homemade brands to see their latest launches, offers and updates.",
-              style: TextStyle(
+            Text(
+              'following.empty_subtitle'.tr(),
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: AppColors.textSecondary,
@@ -50,55 +59,7 @@ class FollowingEmptyState extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Ideally this switches the BottomNavigationBar to Explore index
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryGreen,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  "Explore Stores",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  // Navigate to trending/featured
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primaryGreen,
-                  side: const BorderSide(color: AppColors.primaryGreen, width: 1.5),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: const Text(
-                  "Trending Stores",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
+
           ],
         ),
       ),

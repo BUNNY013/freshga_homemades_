@@ -91,51 +91,39 @@ class StoreInfoSection extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 8),
-              Text("•", style: TextStyle(color: Colors.grey.shade400)),
-              const SizedBox(width: 8),
-              Text(
-                "${_formatNumber(store.followers)} Followers",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 12),
 
-          // Tax/Registration Info
-          if (store.taxNumber.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    store.taxRegistrationType == 'GSTIN' ? Icons.receipt_long : Icons.verified_user_outlined, 
-                    size: 14, 
-                    color: Colors.grey.shade700
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    "${store.taxRegistrationType == 'GSTIN' ? 'GST' : 'Enrolled ID'}: ${store.taxNumber}",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade800,
-                      letterSpacing: 0.5,
+          // Stats Row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.people_outline, size: 14, color: AppColors.primaryGreen),
+                    const SizedBox(width: 6),
+                    Text(
+                      "${_formatNumber(store.followers)} Followers",
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryGreen,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            ],
+          ),
           
           const SizedBox(height: 16),
 

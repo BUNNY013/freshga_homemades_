@@ -21,6 +21,7 @@ class DatabaseSeeder {
     'store_updates',
     'appConfig',
     'followers',
+    'store_subscriptions',
   ];
 
   final List<String> _mainCategories = [
@@ -263,6 +264,7 @@ class DatabaseSeeder {
   Future<void> seedStoresAndProducts() async {
     List<Map<String, dynamic>> stores = [];
     List<Map<String, dynamic>> products = [];
+    List<Map<String, dynamic>> subscriptions = [];
 
     // Fetch real categories and subcategories from the database to map products correctly
     final catsSnapshot = await _db.collection('categories').get();
@@ -292,6 +294,10 @@ class DatabaseSeeder {
       String ownerId = 'mock_owner_$s';
       var storeData = MockDataGenerator.generateStoreData(storeId, ownerId);
       stores.add(storeData);
+
+      // Generate subscription data
+      var subData = MockDataGenerator.generateVendorSubscriptionData(storeId);
+      subscriptions.add(subData);
 
       // We select 2-3 random categories for this store to specialize in
       List<Map<String, dynamic>> storeCategories = [];
@@ -352,6 +358,7 @@ class DatabaseSeeder {
 
     await _commitBatches(stores, 'stores', idGenerator: (i) => stores[i]['storeId']);
     await _commitBatches(products, 'products', idGenerator: (i) => products[i]['productId']);
+    await _commitBatches(subscriptions, 'store_subscriptions', idGenerator: (i) => subscriptions[i]['storeId']);
   }
 
   Future<void> seedStoreUpdates() async {

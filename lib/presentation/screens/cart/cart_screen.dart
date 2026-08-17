@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/cart_provider.dart';
@@ -13,6 +14,7 @@ import '../store/store_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../../../providers/wishlist_provider.dart';
 import '../wishlist/liked_products_screen.dart';
+import '../../widgets/shared/bouncing_button.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -69,9 +71,9 @@ class _CartScreenState extends State<CartScreen> {
               icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text(
-              "My Cart",
-              style: TextStyle(
+            title: Text(
+              "cart.title".tr(),
+              style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -325,8 +327,8 @@ class _CartScreenState extends State<CartScreen> {
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(
-                          onPressed: () async {
+                        child: BouncingButton(
+                          onTap: () async {
                             showDialog(
                                context: context,
                                barrierDismissible: false,
@@ -365,23 +367,27 @@ class _CartScreenState extends State<CartScreen> {
                                );
                             }
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryGreen,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Checkout $storeName",
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                          child: ElevatedButton(
+                            onPressed: () {}, // Handled by BouncingButton
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryGreen,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
-                            ],
+                              elevation: 0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const SizedBox(width: 8),
+                                Text(
+                                  "cart.checkout".tr(),
+                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                                ),
+                                const SizedBox(width: 8),
+                                const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                              ],
+                            ),
                           ),
                         ),
                       ),

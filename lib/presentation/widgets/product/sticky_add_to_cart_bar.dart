@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../providers/product_provider.dart';
 import '../../../providers/cart_provider.dart';
+import '../shared/bouncing_button.dart';
 
 import '../../../providers/customer_provider.dart';
 
@@ -77,8 +78,8 @@ class StickyAddToCartBar extends StatelessWidget {
               Expanded(
                 child: SizedBox(
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: isAdding || !provider.isStoreActive || provider.currentProduct?.status == 'Unavailable' || isStateRestricted ? null : () {
+                  child: BouncingButton(
+                    onTap: isAdding || !provider.isStoreActive || provider.currentProduct?.status == 'Unavailable' || isStateRestricted ? () {} : () {
                       final product = provider.currentProduct;
                       if (product == null || provider.variants.isEmpty) return;
                       
@@ -110,44 +111,47 @@ class StickyAddToCartBar extends StatelessWidget {
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isStateRestricted 
-                          ? Colors.grey.shade400 
-                          : (provider.currentProduct?.status == 'Unavailable' 
-                              ? Colors.red.shade400 
-                              : (!provider.isStoreActive ? Colors.grey.shade400 : AppColors.primaryGreen)),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                    child: ElevatedButton(
+                      onPressed: isAdding || !provider.isStoreActive || provider.currentProduct?.status == 'Unavailable' || isStateRestricted ? null : () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isStateRestricted 
+                            ? Colors.grey.shade400 
+                            : (provider.currentProduct?.status == 'Unavailable' 
+                                ? Colors.red.shade400 
+                                : (!provider.isStoreActive ? Colors.grey.shade400 : AppColors.primaryGreen)),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
                       ),
-                      elevation: 0,
+                      child: isAdding
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.shopping_cart_outlined, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  isStateRestricted
+                                      ? "Not Deliverable"
+                                      : (!provider.isStoreActive 
+                                          ? "Store Paused" 
+                                          : (provider.currentProduct?.status == 'Unavailable' ? "Unavailable" : "Add to Cart")),
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  "₹${(provider.currentVariantPrice * provider.quantity).toInt()}",
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
                     ),
-                    child: isAdding
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.shopping_cart_outlined, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                isStateRestricted
-                                    ? "Not Deliverable"
-                                    : (!provider.isStoreActive 
-                                        ? "Store Paused" 
-                                        : (provider.currentProduct?.status == 'Unavailable' ? "Unavailable" : "Add to Cart")),
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              const Spacer(),
-                              Text(
-                                "₹${(provider.currentVariantPrice * provider.quantity).toInt()}",
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
                   ),
                 ),
               ),

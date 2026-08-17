@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../models/home_section_model.dart';
 import '../../providers/banner_provider.dart';
 import '../../providers/category_provider.dart';
@@ -43,7 +44,7 @@ class DynamicSectionRenderer extends StatelessWidget {
             if (provider.isLoading) return const SectionShimmer();
             return CategoriesSection(
               categories: provider.categories, 
-              title: section.title,
+              title: section.title.tr(),
               onViewAll: () {
                 CustomerHomeScreen.globalKey.currentState?.switchTab(1);
               },
