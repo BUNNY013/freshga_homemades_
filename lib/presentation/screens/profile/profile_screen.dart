@@ -473,9 +473,9 @@ class ProfileScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-    );
-  }
+    ),
+  );
+}
 
   void _showLogoutConfirm(BuildContext context) {
     showDialog(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../screens/customer_home_screen.dart';
-
+import '../orders/order_details_screen.dart';
 class OrderSuccessScreen extends StatelessWidget {
   final String orderId;
   final double amountPaid;
@@ -116,11 +116,15 @@ class OrderSuccessScreen extends StatelessWidget {
                 height: 54,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate to Order Details (Placeholder for now, going to home)
+                    // Navigate to Home as root, then push Order Details
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (_) => const CustomerHomeScreen()),
                       (route) => false,
+                    );
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => OrderDetailsScreen(orderId: orderId)),
                     );
                   },
                   style: ElevatedButton.styleFrom(
