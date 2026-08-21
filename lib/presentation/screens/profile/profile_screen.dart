@@ -139,16 +139,7 @@ class ProfileScreen extends StatelessWidget {
                     subtitle: 'Choose your preferred language',
                     onTap: () => _showLanguageSelector(context),
                   ),
-                  const Divider(height: 1),
-                  _buildMenuTile(
-                    icon: Icons.developer_mode,
-                    title: 'Developer Tools',
-                    subtitle: 'Database seeder and testing tools',
-                    iconColor: Colors.blue,
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SeederScreen()));
-                    },
-                  ),
+
                 ]),
 
                 const SizedBox(height: 24),
