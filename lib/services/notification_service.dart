@@ -2,6 +2,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import '../main.dart';
+import '../presentation/screens/orders/order_details_screen.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -15,6 +18,24 @@ class NotificationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  static void _handleNotificationClick(Map<String, dynamic> data) {
+    debugPrint("Notification clicked with data: $data");
+    if (data['type'] == 'order_update' && data['orderId'] != null) {
+      final orderId = data['orderId'];
+      final context = globalNavigatorKey.currentContext;
+      if (context != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OrderDetailsScreen(orderId: orderId),
+          ),
+        );
+      } else {
+        debugPrint("Error: Navigator context is null, could not route.");
+      }
+    }
+  }
+
   /// Request permissions and initialize FCM token
   static Future<void> initialize() async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -27,6 +48,21 @@ class NotificationService {
         debugPrint('Message also contained a notification: ${message.notification}');
       }
     });
+
+    // Handle tap when app is in background
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint('A new onMessageOpenedApp event was published!');
+      _handleNotificationClick(message.data);
+    });
+
+    // Handle tap when app is fully terminated
+    RemoteMessage? initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      // Slight delay allows the MaterialApp to initialize first
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        _handleNotificationClick(initialMessage.data);
+      });
+    }
 
     try {
       // 1. Request Permission (shows native prompt on iOS/Android if needed)

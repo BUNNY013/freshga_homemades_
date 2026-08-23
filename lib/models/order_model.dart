@@ -20,9 +20,14 @@ class OrderModel {
   final String payoutStatus; // 'pending', 'paid'
   
   // Tracking & Lifecycle
+  final String shippingMethod;
   final String shippingProvider;
   final String trackingId;
   final String trackingLink;
+  final String contactNumber;
+  final String receiptNumber;
+  final String deliveryTime;
+  final String receiptImageUrl;
   final String rejectionReason;
   final List<Map<String, dynamic>> timeline;
   final bool isRated;
@@ -55,9 +60,14 @@ class OrderModel {
     required this.orderStatus,
     this.paymentMethod = 'Online',
     this.payoutStatus = 'pending',
+    this.shippingMethod = '',
     this.shippingProvider = '',
     this.trackingId = '',
     this.trackingLink = '',
+    this.contactNumber = '',
+    this.receiptNumber = '',
+    this.deliveryTime = '',
+    this.receiptImageUrl = '',
     this.rejectionReason = '',
     this.timeline = const [],
     this.isRated = false,
@@ -92,9 +102,14 @@ class OrderModel {
       orderStatus: json['orderStatus'] ?? 'New',
       paymentMethod: json['paymentMethod'] ?? 'Online',
       payoutStatus: json['payoutStatus'] ?? 'pending',
+      shippingMethod: json['shippingMethod'] ?? '',
       shippingProvider: json['shippingProvider'] ?? '',
       trackingId: json['trackingId'] ?? '',
       trackingLink: json['trackingLink'] ?? '',
+      contactNumber: json['contactNumber'] ?? '',
+      receiptNumber: json['receiptNumber'] ?? '',
+      deliveryTime: json['deliveryTime'] ?? '',
+      receiptImageUrl: json['receiptImageUrl'] ?? '',
       rejectionReason: json['rejectionReason'] ?? '',
       timeline: json['timeline'] != null 
           ? List<Map<String, dynamic>>.from(json['timeline']) 
@@ -129,9 +144,14 @@ class OrderModel {
       'orderStatus': orderStatus,
       'paymentMethod': paymentMethod,
       'payoutStatus': payoutStatus,
+      'shippingMethod': shippingMethod,
       'shippingProvider': shippingProvider,
       'trackingId': trackingId,
       'trackingLink': trackingLink,
+      'contactNumber': contactNumber,
+      'receiptNumber': receiptNumber,
+      'deliveryTime': deliveryTime,
+      'receiptImageUrl': receiptImageUrl,
       'rejectionReason': rejectionReason,
       'timeline': timeline,
       'isRated': isRated,

@@ -1,23 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/app_colors.dart';
-
-class NotificationItem {
-  final String title;
-  final String message;
-  final String time;
-  final IconData icon;
-  final Color iconColor;
-  final bool isUnread;
-
-  NotificationItem({
-    required this.title,
-    required this.message,
-    required this.time,
-    required this.icon,
-    required this.iconColor,
-    this.isUnread = false,
-  });
-}
+import '../../../models/notification_model.dart';
+import '../orders/order_details_screen.dart';
+import '../product/product_details_screen.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -27,51 +14,82 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final List<NotificationItem> _notifications = [
-    NotificationItem(
-      title: "Order Delivered!",
-      message: "Your order #8902 has been delivered successfully. Enjoy your homemade treats!",
-      time: "2 mins ago",
-      icon: Icons.local_shipping_rounded,
-      iconColor: AppColors.primaryGreen,
-      isUnread: true,
-    ),
-    NotificationItem(
-      title: "Grandma's Pickles",
-      message: "A store you follow just added a new product: Spicy Mango Pickle.",
-      time: "1 hour ago",
-      icon: Icons.storefront_rounded,
-      iconColor: AppColors.goldenYellow,
-      isUnread: true,
-    ),
-    NotificationItem(
-      title: "Items in your cart",
-      message: "You left items in your cart. Checkout now to support local makers!",
-      time: "5 hours ago",
-      icon: Icons.shopping_bag_rounded,
-      iconColor: AppColors.textSecondary,
-      isUnread: false,
-    ),
-    NotificationItem(
-      title: "Order Confirmed",
-      message: "Your order #8902 has been confirmed by the vendor.",
-      time: "Yesterday",
-      icon: Icons.check_circle_rounded,
-      iconColor: AppColors.primaryGreen,
-      isUnread: false,
-    ),
-    NotificationItem(
-      title: "System Update",
-      message: "Freshga app has been updated with new performance improvements.",
-      time: "2 days ago",
-      icon: Icons.system_update_rounded,
-      iconColor: Colors.blueAccent,
-      isUnread: false,
-    ),
-  ];
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String get _formatTime {
+    return "Just now"; // A simple helper could be added for timeago, but we'll use a basic format for now
+  }
+  
+  String _timeAgo(DateTime d) {
+    Duration diff = DateTime.now().difference(d);
+    if (diff.inDays > 365) return "${(diff.inDays / 365).floor()}y";
+    if (diff.inDays > 7) return "${(diff.inDays / 7).floor()}w";
+    if (diff.inDays > 1) return "${diff.inDays}d";
+    if (diff.inDays == 1) return "1d";
+    if (diff.inHours > 0) return "${diff.inHours}h";
+    if (diff.inMinutes > 0) return "${diff.inMinutes}m";
+    return "Now";
+  }
+
+  IconData _getIconForType(String type) {
+    switch (type) {
+      case 'order_update':
+        return Icons.local_shipping_rounded;
+      case 'promo':
+        return Icons.local_offer_rounded;
+      default:
+        return Icons.notifications_rounded;
+    }
+  }
+
+  Color _getColorForType(String type) {
+    switch (type) {
+      case 'order_update':
+        return AppColors.primaryGreen;
+      case 'promo':
+        return AppColors.goldenYellow;
+      default:
+        return Colors.blueAccent;
+    }
+  }
+
+  Future<void> _markAsRead(String notificationId) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _firestore
+          .collection('customers')
+          .doc(user.uid)
+          .collection('notifications')
+          .doc(notificationId)
+          .update({'isUnread': false});
+    }
+  }
+
+  Future<void> _markAllAsRead() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final unreadDocs = await _firestore
+          .collection('customers')
+          .doc(user.uid)
+          .collection('notifications')
+          .where('isUnread', isEqualTo: true)
+          .get();
+
+      if (unreadDocs.docs.isNotEmpty) {
+        final batch = _firestore.batch();
+        for (var doc in unreadDocs.docs) {
+          batch.update(doc.reference, {'isUnread': false});
+        }
+        await batch.commit();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final user = _auth.currentUser;
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -88,134 +106,200 @@ class _NotificationScreenState extends State<NotificationScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          StreamBuilder<QuerySnapshot>(
+            stream: user != null
+                ? _firestore
+                    .collection('customers')
+                    .doc(user.uid)
+                    .collection('notifications')
+                    .where('isUnread', isEqualTo: true)
+                    .limit(1)
+                    .snapshots()
+                : const Stream.empty(),
+            builder: (context, snapshot) {
+              final hasUnread = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+              return TextButton(
+                onPressed: hasUnread ? _markAllAsRead : null,
+                child: Text(
+                  "Mark all read",
+                  style: TextStyle(
+                    color: hasUnread ? AppColors.primaryGreen : Colors.grey.shade400, 
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 14
+                  ),
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
-      body: _notifications.isEmpty
+      body: user == null
           ? _buildEmptyState()
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: _notifications.length,
-              physics: const BouncingScrollPhysics(),
-              itemBuilder: (context, index) {
-                final notification = _notifications[index];
-                return TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0.0, end: 1.0),
-                  duration: Duration(milliseconds: 400 + (index * 100).clamp(0, 400)),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(0, 20 * (1 - value)),
-                      child: Opacity(
-                        opacity: value,
-                        child: child,
+          : StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('customers')
+                  .doc(user.uid)
+                  .collection('notifications')
+                  .orderBy('createdAt', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                final notifications = snapshot.data!.docs
+                    .map((doc) => NotificationModel.fromFirestore(doc))
+                    .toList();
+
+                return ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  itemCount: notifications.length,
+                  physics: const BouncingScrollPhysics(),
+                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () {
+                        _markAsRead(notification.id);
+                        if (notification.type == 'order_update' && notification.orderId != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OrderDetailsScreen(orderId: notification.orderId!),
+                            ),
+                          );
+                        } else if (notification.type == 'promo' && notification.productId != null) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductDetailsScreen(
+                                productId: notification.productId!,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: notification.isUnread 
+                              ? AppColors.primaryGreen.withOpacity(0.05) 
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: notification.isUnread 
+                                ? AppColors.primaryGreen.withOpacity(0.3)
+                                : Colors.grey.shade200,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Larger Icon Container or Image
+                            if (notification.imageUrl != null && notification.imageUrl!.isNotEmpty)
+                              Container(
+                                height: 52,
+                                width: 52,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                    image: NetworkImage(notification.imageUrl!),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              )
+                            else
+                              Container(
+                                height: 52,
+                                width: 52,
+                                decoration: BoxDecoration(
+                                  color: _getColorForType(notification.type).withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  _getIconForType(notification.type),
+                                  color: _getColorForType(notification.type),
+                                  size: 26,
+                                ),
+                              ),
+                            const SizedBox(width: 16),
+                            
+                            // Separated Content
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          notification.title,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: notification.isUnread ? FontWeight.bold : FontWeight.w600,
+                                            color: AppColors.textPrimary,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            _timeAgo(notification.createdAt),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: notification.isUnread ? FontWeight.w600 : FontWeight.w500,
+                                              color: notification.isUnread ? AppColors.primaryGreen : Colors.grey.shade500,
+                                            ),
+                                          ),
+                                          if (notification.isUnread) ...[
+                                            const SizedBox(width: 6),
+                                            Container(
+                                              width: 8,
+                                              height: 8,
+                                              decoration: const BoxDecoration(
+                                                color: AppColors.primaryGreen,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            ),
+                                          ]
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    notification.message,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: notification.isUnread ? AppColors.textPrimary.withOpacity(0.9) : AppColors.textSecondary,
+                                      height: 1.4,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 15,
-                            spreadRadius: 0,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(16),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () {
-                            // Handle tap
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Icon Container
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: notification.iconColor.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    notification.icon,
-                                    color: notification.iconColor,
-                                    size: 24,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                
-                                // Content
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              notification.title,
-                                              style: TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: notification.isUnread ? FontWeight.bold : FontWeight.w600,
-                                                color: AppColors.textPrimary,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            notification.time,
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              color: AppColors.textSecondary.withOpacity(0.8),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                            notification.message,
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: notification.isUnread ? AppColors.textPrimary.withOpacity(0.9) : AppColors.textSecondary,
-                                              height: 1.4,
-                                            ),
-                                          ),
-                                    ],
-                                  ),
-                                ),
-                                
-                                // Unread Dot
-                                if (notification.isUnread)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 12.0, top: 4),
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.primaryGreen,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 );
               },
             ),

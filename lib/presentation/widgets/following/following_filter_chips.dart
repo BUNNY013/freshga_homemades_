@@ -14,9 +14,8 @@ class FollowingFilterChips extends StatelessWidget {
     final filters = [
       {'id': 'all', 'label': 'All'},
       {'id': 'new_launch', 'label': 'New Launches'},
-      {'id': 'restock', 'label': 'Restocks'},
       {'id': 'offer', 'label': 'Offers'},
-      {'id': 'community_update', 'label': 'Updates'},
+      {'id': 'restock', 'label': 'Restocks'},
     ];
 
     return SizedBox(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/order_model.dart';
 import 'cancel_order_screen.dart';
@@ -154,6 +155,87 @@ class OrderDetailsScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                
+                if (order.shippingMethod.isNotEmpty || order.trackingId.isNotEmpty || order.receiptImageUrl.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 24, offset: const Offset(0, 8))],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Dispatch Details", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary)),
+                        const SizedBox(height: 16),
+                        if (order.shippingMethod.isNotEmpty)
+                          _buildDetailRow("Shipping Method", order.shippingMethod),
+                        if (order.shippingProvider.isNotEmpty)
+                          _buildDetailRow("Shipping Provider", order.shippingProvider),
+                        if (order.trackingId.isNotEmpty)
+                          _buildDetailRow("Tracking ID", order.trackingId),
+                        if (order.trackingLink.isNotEmpty)
+                          _buildDetailRow("Tracking Link", order.trackingLink, isLink: true),
+                        if (order.contactNumber.isNotEmpty)
+                          _buildDetailRow("Contact Number", order.contactNumber),
+                        if (order.receiptNumber.isNotEmpty)
+                          _buildDetailRow("Receipt Number", order.receiptNumber),
+                        if (order.deliveryTime.isNotEmpty)
+                          _buildDetailRow("Expected Delivery", order.deliveryTime),
+                        if (order.receiptImageUrl.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          GestureDetector(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  insetPadding: const EdgeInsets.all(16),
+                                  child: Stack(
+                                    alignment: Alignment.topRight,
+                                    children: [
+                                      InteractiveViewer(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(16),
+                                          child: CachedNetworkImage(
+                                            imageUrl: order.receiptImageUrl,
+                                            placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                                        onPressed: () => Navigator.pop(context),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryGreen.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.primaryGreen.withOpacity(0.3)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.image_outlined, color: AppColors.primaryGreen, size: 20),
+                                  const SizedBox(width: 8),
+                                  const Text("View Receipt / Proof", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 14)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ]
+                      ],
+                    ),
+                  ),
+                ],
                 
                 const SizedBox(height: 16),
 
@@ -521,6 +603,42 @@ class OrderDetailsScreen extends StatelessWidget {
     }
   }
 
+  Widget _buildDetailRow(String label, String value, {bool isLink = false}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(label, style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500)),
+          ),
+          Expanded(
+            flex: 3,
+            child: GestureDetector(
+              onTap: isLink ? () async {
+                final uri = Uri.tryParse(value);
+                if (uri != null && await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              } : null,
+              child: Text(
+                value, 
+                style: TextStyle(
+                  color: isLink ? Colors.blue : AppColors.textPrimary, 
+                  fontSize: 14, 
+                  fontWeight: FontWeight.w600,
+                  decoration: isLink ? TextDecoration.underline : TextDecoration.none,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   bool _canReportIssue(OrderModel order) {
     if (order.orderStatus != 'Delivered') return false;
     final deliveredEvent = order.timeline.reversed.firstWhere(
@@ -586,6 +704,13 @@ class _AnimatedTrackingTimeline extends StatelessWidget {
             // No event found for this step yet
             if (stepName == 'New') {
                timeString = DateFormat('dd MMM, hh:mm a').format(order.createdAt);
+            } else if (stepName == 'Delivered') {
+               if (order.deliveryTime.isNotEmpty) {
+                 timeString = "Expected: ${order.deliveryTime}";
+               } else {
+                 final est = order.maxDispatchDate.add(const Duration(days: 5));
+                 timeString = "Expected by ${DateFormat('dd MMM').format(est)}";
+               }
             }
           }
 

@@ -72,12 +72,15 @@ void main() async {
   );
 }
 
+final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: globalNavigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'FreshGa HomeMades',
       theme: AppTheme.lightTheme,

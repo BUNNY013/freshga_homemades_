@@ -79,8 +79,7 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
     }
 
     if (tokens.length === 0) {
-      console.log("No FCM tokens found for followers.");
-      return null;
+      console.log("No FCM tokens found for followers, but we will still save in-app notifications.");
     }
 
     // 4. Build the Payload
@@ -102,15 +101,57 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
       payload.notification.image = imageUrl;
     }
 
-    // 5. Blast the Notification
-    try {
-      const response = await admin.messaging().sendEachForMulticast({
-        tokens: tokens,
-        ...payload
-      });
-      console.log(response.successCount + " messages were sent successfully.");
-    } catch (error) {
-      console.error("Error sending push notification:", error);
+    // 5. Save to In-App Notifications (if high value)
+    if (type === "offer" || type === "new_launch") {
+      const db = admin.firestore();
+      let chunkedBatches = [];
+      let currentBatch = db.batch();
+      let opCount = 0;
+
+      for (const followerId of userIds) {
+        const notifRef = db.collection("customers").doc(followerId).collection("notifications").doc();
+        currentBatch.set(notifRef, {
+          title: notificationTitle,
+          message: notificationBody,
+          type: "promo",
+          storeId: storeId,
+          productId: updateData.productId || null,
+          imageUrl: imageUrl || null,
+          isUnread: true,
+          createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        opCount++;
+        
+        if (opCount === 450) { 
+          chunkedBatches.push(currentBatch.commit());
+          currentBatch = db.batch();
+          opCount = 0;
+        }
+      }
+      
+      if (opCount > 0) {
+        chunkedBatches.push(currentBatch.commit());
+      }
+      
+      try {
+        await Promise.all(chunkedBatches);
+        console.log(`Saved in-app notifications for ${userIds.length} followers.`);
+      } catch (err) {
+        console.error("Error saving in-app notifications:", err);
+      }
+    }
+
+    // 6. Blast the Push Notification
+    if (tokens.length > 0) {
+      try {
+        const response = await admin.messaging().sendEachForMulticast({
+          tokens: tokens,
+          ...payload
+        });
+        console.log(response.successCount + " push messages were sent successfully.");
+      } catch (error) {
+        console.error("Error sending push notification:", error);
+      }
     }
 
     return null;
@@ -150,6 +191,64 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
   } catch (error) {
     console.error("Error sending order notification to vendor:", error);
   }
+
+  // Notify the Customer
+  const customerId = orderData.customerId;
+  const storeName = storeData.storeName || "FreshGa Store";
+  
+  if (customerId) {
+    const title = "Order Placed Successfully! 🎉";
+    const body = `Your order #${orderData.orderId.substring(0,8)} from ${storeName} has been placed. Waiting for the kitchen to accept it.`;
+    
+    // Save to database
+    const notificationData = {
+      title: title,
+      message: body,
+      type: "order_update",
+      orderId: orderData.orderId,
+      isUnread: true,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    
+    try {
+      await admin.firestore().collection("customers").doc(customerId).collection("notifications").add(notificationData);
+    } catch (error) {
+      console.error("Error saving order placed notification to DB:", error);
+    }
+    
+    // Send push notification
+    const customerSnap = await admin.firestore().collection("customers").doc(customerId).get();
+    if (customerSnap.exists && customerSnap.data().fcmToken) {
+      const customerPayload = {
+        notification: {
+          title: title,
+          body: body,
+        },
+        data: {
+          type: "order_update",
+          orderId: orderData.orderId,
+          click_action: "FLUTTER_NOTIFICATION_CLICK"
+        },
+        android: {
+          priority: "high",
+          notification: { sound: "default", channelId: "high_importance_channel" }
+        },
+        apns: {
+          payload: { aps: { sound: "default" } }
+        }
+      };
+      
+      try {
+        await admin.messaging().send({
+          token: customerSnap.data().fcmToken,
+          ...customerPayload
+        });
+      } catch (error) {
+        console.error("Error sending order placed notification to customer:", error);
+      }
+    }
+  }
+
   return null;
 });
 
@@ -161,18 +260,100 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
     return null; // Status didn't change
   }
 
+  const orderStatus = afterData.orderStatus;
   const customerId = afterData.customerId;
+  let storeName = afterData.storeName || "Store";
+  const fullOrderId = afterData.orderId;
+
+  // Fetch real store name if possible
+  if (afterData.storeId) {
+    try {
+      const storeSnap = await admin.firestore().collection("stores").doc(afterData.storeId).get();
+      if (storeSnap.exists && storeSnap.data().storeName) {
+        storeName = storeSnap.data().storeName;
+      }
+    } catch (e) {
+      console.error("Error fetching store info", e);
+    }
+  }
+
+  let title = "Order Update";
+  let body = `Your order #${fullOrderId} is now ${orderStatus}.`;
+
+  switch (orderStatus) {
+    case "Accepted":
+      title = "Order Accepted! 🎉";
+      body = `${storeName} has accepted your order #${fullOrderId} and is preparing it now.`;
+      break;
+    case "Shipped":
+      title = "Order Shipped! 🚚";
+      let shippingText = "is on its way!";
+      if (afterData.shippingProvider) {
+          shippingText = `has been shipped via ${afterData.shippingProvider}`;
+          if (afterData.trackingId) {
+             shippingText += ` (Tracking ID: ${afterData.trackingId})`;
+          }
+      }
+      body = `Your order #${fullOrderId} from ${storeName} ${shippingText}`;
+      break;
+    case "Delivered":
+      title = "Order Delivered! ✅";
+      body = `Your order #${fullOrderId} from ${storeName} has been delivered. Enjoy your homemade treats!`;
+      break;
+    case "Cancelled":
+    case "Declined":
+      title = "Order Cancelled ❌";
+      body = `Your order #${fullOrderId} from ${storeName} has been cancelled.`;
+      break;
+    case "Packed":
+    case "New":
+      // Do not send push notifications for these transitional statuses
+      return null;
+  }
+
+  // 1. Save notification to database for in-app history
+  const notificationData = {
+    title: title,
+    message: body,
+    type: "order_update",
+    orderId: afterData.orderId,
+    isUnread: true,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  try {
+    await admin.firestore().collection("customers").doc(customerId).collection("notifications").add(notificationData);
+  } catch (error) {
+    console.error("Error saving notification to DB:", error);
+  }
+
+  // 2. Send push notification if token exists
   const customerSnap = await admin.firestore().collection("customers").doc(customerId).get();
   if (!customerSnap.exists || !customerSnap.data().fcmToken) return null;
 
   const payload = {
     notification: {
-      title: "Order Update",
-      body: `Your order #${afterData.orderId.substring(0,8)} is now ${afterData.orderStatus}.`,
+      title: title,
+      body: body,
     },
     data: {
+      type: "order_update",
       orderId: afterData.orderId,
       click_action: "FLUTTER_NOTIFICATION_CLICK"
+    },
+    android: {
+      priority: "high",
+      notification: {
+        sound: "default",
+        channelId: "high_importance_channel"
+      }
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: "default"
+        }
+      }
     }
   };
 

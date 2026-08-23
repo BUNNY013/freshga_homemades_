@@ -111,30 +111,28 @@ class StickyAddToCartBar extends StatelessWidget {
                         ),
                       );
                     },
-                    child: ElevatedButton(
-                      onPressed: isAdding || !provider.isStoreActive || provider.currentProduct?.status == 'Unavailable' || isStateRestricted ? null : () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isStateRestricted 
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isStateRestricted 
                             ? Colors.grey.shade400 
                             : (provider.currentProduct?.status == 'Unavailable' 
                                 ? Colors.red.shade400 
                                 : (!provider.isStoreActive ? Colors.grey.shade400 : AppColors.primaryGreen)),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: isAdding
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          ? const Center(
+                              child: SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              ),
                             )
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.shopping_cart_outlined, size: 20),
+                                const Icon(Icons.shopping_cart_outlined, size: 20, color: Colors.white),
                                 const SizedBox(width: 8),
                                 Text(
                                   isStateRestricted
@@ -142,12 +140,12 @@ class StickyAddToCartBar extends StatelessWidget {
                                       : (!provider.isStoreActive 
                                           ? "Store Paused" 
                                           : (provider.currentProduct?.status == 'Unavailable' ? "Unavailable" : "Add to Cart")),
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                                 const Spacer(),
                                 Text(
                                   "₹${(provider.currentVariantPrice * provider.quantity).toInt()}",
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                                 ),
                               ],
                             ),

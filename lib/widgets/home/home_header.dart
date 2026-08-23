@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../providers/customer_provider.dart';
 import '../../../providers/wishlist_provider.dart';
@@ -72,14 +74,35 @@ class HomeHeader extends StatelessWidget {
         ),
         Row(
           children: [
-            IconButton(
-              icon: const Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseAuth.instance.currentUser != null
+                  ? FirebaseFirestore.instance
+                      .collection('customers')
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .collection('notifications')
+                      .where('isUnread', isEqualTo: true)
+                      .snapshots()
+                  : const Stream.empty(),
+              builder: (context, snapshot) {
+                int unreadCount = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                return IconButton(
+                  icon: Badge(
+                    isLabelVisible: unreadCount > 0,
+                    label: Text(
+                      unreadCount > 99 ? '99+' : unreadCount.toString(),
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                    backgroundColor: AppColors.primaryGreen,
+                    child: const Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                    );
+                  },
                 );
-              },
+              }
             ),
             IconButton(
               icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
