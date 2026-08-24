@@ -170,26 +170,52 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
   const ownerId = storeData.ownerId;
   
   const userSnap = await admin.firestore().collection("users").doc(ownerId).get();
-  if (!userSnap.exists || !userSnap.data().fcmToken) return null;
+  const fcmToken = userSnap.exists ? userSnap.data().fcmToken : null;
 
-  const payload = {
-    notification: {
-      title: "New Order Received!",
-      body: `You have a new order (#${orderData.orderId.substring(0,8)}) for ₹${orderData.totalAmount}.`,
-    },
-    data: {
-      orderId: orderData.orderId,
-      click_action: "FLUTTER_NOTIFICATION_CLICK"
-    }
+  // Save to DB for Vendor
+  const vendorNotification = {
+    vendorId: ownerId,
+    title: "New Order Received! 🚨",
+    message: `You have a new order (#${orderData.orderId.substring(0,8)}) for ₹${orderData.totalAmount}.`,
+    type: "order",
+    relatedId: orderData.orderId,
+    isRead: false,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
   };
 
   try {
-    await admin.messaging().send({
-      token: userSnap.data().fcmToken,
-      ...payload
-    });
+    await admin.firestore().collection("notifications").add(vendorNotification);
   } catch (error) {
-    console.error("Error sending order notification to vendor:", error);
+    console.error("Error saving vendor notification to DB:", error);
+  }
+
+  if (fcmToken) {
+    const payload = {
+      notification: {
+        title: vendorNotification.title,
+        body: vendorNotification.message,
+      },
+      data: {
+        orderId: orderData.orderId,
+        click_action: "FLUTTER_NOTIFICATION_CLICK"
+      },
+      android: {
+        priority: "high",
+        notification: { sound: "default", channelId: "high_importance_channel" }
+      },
+      apns: {
+        payload: { aps: { sound: "default" } }
+      }
+    };
+
+    try {
+      await admin.messaging().send({
+        token: fcmToken,
+        ...payload
+      });
+    } catch (error) {
+      console.error("Error sending order notification to vendor:", error);
+    }
   }
 
   // Notify the Customer
@@ -365,6 +391,46 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
   } catch (error) {
     console.error("Error sending order update to customer:", error);
   }
+
+  // Notify Vendor if Cancelled
+  if (orderStatus === "Cancelled" || orderStatus === "Declined") {
+    const storeId = afterData.storeId;
+    if (storeId) {
+      try {
+        const storeSnap = await admin.firestore().collection("stores").doc(storeId).get();
+        if (storeSnap.exists) {
+          const ownerId = storeSnap.data().ownerId;
+          const userSnap = await admin.firestore().collection("users").doc(ownerId).get();
+          const fcmToken = userSnap.exists ? userSnap.data().fcmToken : null;
+
+          const vendorNotification = {
+            vendorId: ownerId,
+            title: "Order Cancelled ❌",
+            message: `Order #${fullOrderId} has been cancelled. Do not prepare.`,
+            type: "alert",
+            relatedId: afterData.orderId,
+            isRead: false,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          };
+
+          await admin.firestore().collection("notifications").add(vendorNotification);
+
+          if (fcmToken) {
+            await admin.messaging().send({
+              token: fcmToken,
+              notification: { title: vendorNotification.title, body: vendorNotification.message },
+              data: { orderId: afterData.orderId, type: "order_cancelled", click_action: "FLUTTER_NOTIFICATION_CLICK" },
+              android: { priority: "high", notification: { sound: "default", channelId: "high_importance_channel" } },
+              apns: { payload: { aps: { sound: "default" } } }
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Error sending cancellation to vendor:", err);
+      }
+    }
+  }
+
   return null;
 });
 
@@ -454,5 +520,105 @@ exports.autoMarkDelivered = onSchedule("every 12 hours", async (event) => {
       console.error("Error auto-delivering orders:", error);
     }
   }
+});
+
+exports.vendorSLAWarnings = onSchedule("every 30 minutes", async (event) => {
+  const db = admin.firestore();
+  const now = admin.firestore.Timestamp.now();
+  const nowMs = now.toDate().getTime();
+
+  let count = 0;
+
+  // 1. Accept Warnings (4 hours left)
+  const newOrdersSnap = await db.collection("orders")
+    .where("orderStatus", "==", "New")
+    .get();
+
+  for (const doc of newOrdersSnap.docs) {
+    const order = doc.data();
+    if (!order.expiresAt || order.vendorAcceptWarningSent === true) continue;
+    
+    const expiresMs = order.expiresAt.toDate().getTime();
+    const hoursLeft = (expiresMs - nowMs) / (1000 * 60 * 60);
+
+    if (hoursLeft <= 4 && hoursLeft > 0) {
+      await doc.ref.update({ vendorAcceptWarningSent: true });
+      
+      const storeSnap = await db.collection("stores").doc(order.storeId).get();
+      if (!storeSnap.exists) continue;
+      const ownerId = storeSnap.data().ownerId;
+
+      const title = "Urgent: Accept Order! ⏳";
+      const body = `Order #${order.orderId.substring(0,8)} expires in ${Math.floor(hoursLeft)} hours. Accept it now!`;
+
+      await db.collection("notifications").add({
+        vendorId: ownerId,
+        title: title,
+        message: body,
+        type: "alert",
+        relatedId: order.orderId,
+        isRead: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const userSnap = await db.collection("users").doc(ownerId).get();
+      if (userSnap.exists && userSnap.data().fcmToken) {
+        await admin.messaging().send({
+          token: userSnap.data().fcmToken,
+          notification: { title: title, body: body },
+          data: { orderId: order.orderId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
+          android: { priority: "high" }
+        }).catch(e => console.error(e));
+      }
+      count++;
+    }
+  }
+
+  // 2. Dispatch Warnings (12 hours left)
+  const acceptedOrdersSnap = await db.collection("orders")
+    .where("orderStatus", "in", ["Accepted", "Packed"])
+    .get();
+
+  for (const doc of acceptedOrdersSnap.docs) {
+    const order = doc.data();
+    if (!order.maxDispatchDate || order.vendorDispatchWarningSent === true) continue;
+    
+    const dispatchMs = order.maxDispatchDate.toDate().getTime();
+    const hoursLeft = (dispatchMs - nowMs) / (1000 * 60 * 60);
+
+    if (hoursLeft <= 12 && hoursLeft > 0) {
+      await doc.ref.update({ vendorDispatchWarningSent: true });
+      
+      const storeSnap = await db.collection("stores").doc(order.storeId).get();
+      if (!storeSnap.exists) continue;
+      const ownerId = storeSnap.data().ownerId;
+
+      const title = "Urgent: Dispatch Soon! 🚚";
+      const body = `Order #${order.orderId.substring(0,8)} must be dispatched in ${Math.floor(hoursLeft)} hours.`;
+
+      await db.collection("notifications").add({
+        vendorId: ownerId,
+        title: title,
+        message: body,
+        type: "alert",
+        relatedId: order.orderId,
+        isRead: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const userSnap = await db.collection("users").doc(ownerId).get();
+      if (userSnap.exists && userSnap.data().fcmToken) {
+        await admin.messaging().send({
+          token: userSnap.data().fcmToken,
+          notification: { title: title, body: body },
+          data: { orderId: order.orderId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
+          android: { priority: "high" }
+        }).catch(e => console.error(e));
+      }
+      count++;
+    }
+  }
+  
+  if(count > 0) console.log(`Sent ${count} SLA warnings to vendors.`);
 });
 

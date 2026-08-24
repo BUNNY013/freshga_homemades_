@@ -103,13 +103,19 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    
     return Scaffold(
       backgroundColor: Colors.black,
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Stack(
           children: [
             // Homemade Background Image
-            Positioned.fill(
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: screenHeight,
               child: Image.asset(
                 'assets/images/login_bg_v3.png',
                 fit: BoxFit.cover,
@@ -119,10 +125,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             // Content
             Positioned.fill(
               child: SingleChildScrollView(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
                 physics: const ClampingScrollPhysics(),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height),
+                  constraints: BoxConstraints(minHeight: screenHeight - MediaQuery.of(context).viewInsets.bottom),
                   child: IntrinsicHeight(
                     child: SafeArea(
                       child: Column(
