@@ -11,150 +11,149 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
   if (!snap) return null;
   const updateData = snap.data();
 
-    // 1. Extract Details
-    const storeId = updateData.storeId;
-    const storeName = updateData.storeName || "FreshGa Store";
-    const productName = updateData.productName || "Product";
-    const type = updateData.type || "community_update";
-    const price = updateData.price || 0;
-    const discountPrice = updateData.discountPrice || 0;
-    const imageUrl = updateData.imageUrl || null;
+  // 1. Extract Details
+  const storeId = updateData.storeId;
+  const storeName = updateData.storeName || "FreshGa Store";
+  const productName = updateData.productName || "Product";
+  const type = updateData.type || "community_update";
+  const price = updateData.price || 0;
+  const discountPrice = updateData.discountPrice || 0;
+  const imageUrl = updateData.imageUrl || null;
 
-    let notificationTitle = storeName;
-    let notificationBody = updateData.description || "Tap to see what's new!";
+  let notificationTitle = storeName;
+  let notificationBody = updateData.description || "Tap to see what's new!";
 
-    // Dynamically format the body based on the update type
-    if (type === "offer" && price > 0 && discountPrice > 0 && discountPrice < price) {
-      const percentOff = Math.round(((price - discountPrice) / price) * 100);
-      notificationBody = `${percentOff}% off on ${productName}!`;
-    } else if (type === "new_launch") {
-      notificationBody = `New Launch: ${productName} is now available!`;
-    } else if (type === "restock") {
-      notificationBody = `Back in Stock: ${productName}!`;
-    } else if (updateData.title) {
-       // Fallback for custom community updates
-       notificationBody = `${updateData.title} - ${notificationBody}`;
-    }
+  // Dynamically format the body based on the update type
+  if (type === "offer" && price > 0 && discountPrice > 0 && discountPrice < price) {
+    const percentOff = Math.round(((price - discountPrice) / price) * 100);
+    notificationBody = `${percentOff}% off on ${productName}!`;
+  } else if (type === "new_launch") {
+    notificationBody = `New Launch: ${productName} is now available!`;
+  } else if (type === "restock") {
+    notificationBody = `Back in Stock: ${productName}!`;
+  } else if (updateData.title) {
+    // Fallback for custom community updates
+    notificationBody = `${updateData.title} - ${notificationBody}`;
+  }
 
-    if (!storeId) {
-      console.log("No storeId found in the update.");
-      return null;
-    }
-
-    // 2. Find all customers who follow this store
-    const followersSnap = await admin.firestore().collection(`stores/${storeId}/followers`).get();
-
-    if (followersSnap.empty) {
-      console.log(`No followers found for store ${storeId}.`);
-      return null;
-    }
-
-    const userIds = [];
-    followersSnap.forEach(doc => {
-      // document ID is the userId
-      userIds.push(doc.id);
-    });
-
-    const tokens = [];
-
-    // 3. Fetch fcmTokens for these users from the 'customers' collection
-    // Firestore getAll allows fetching up to 100 documents at once
-    const chunks = [];
-    for (let i = 0; i < userIds.length; i += 100) {
-      chunks.push(userIds.slice(i, i + 100));
-    }
-
-    for (const chunk of chunks) {
-      const refs = chunk.map(id => admin.firestore().collection("customers").doc(id));
-      const customerDocs = await admin.firestore().getAll(...refs);
-      
-      customerDocs.forEach(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          if (data.fcmToken) {
-            tokens.push(data.fcmToken);
-          }
-        }
-      });
-    }
-
-    if (tokens.length === 0) {
-      console.log("No FCM tokens found for followers, but we will still save in-app notifications.");
-    }
-
-    // 4. Build the Payload
-    const payload = {
-      notification: {
-        title: notificationTitle,
-        body: notificationBody,
-      },
-      data: {
-        updateId: snap.id,
-        storeId: storeId,
-        productId: updateData.productId || "",
-        click_action: "FLUTTER_NOTIFICATION_CLICK"
-      }
-    };
-
-    // Attach image if available
-    if (imageUrl) {
-      payload.notification.image = imageUrl;
-    }
-
-    // 5. Save to In-App Notifications (if high value)
-    if (type === "offer" || type === "new_launch") {
-      const db = admin.firestore();
-      let chunkedBatches = [];
-      let currentBatch = db.batch();
-      let opCount = 0;
-
-      for (const followerId of userIds) {
-        const notifRef = db.collection("customers").doc(followerId).collection("notifications").doc();
-        currentBatch.set(notifRef, {
-          title: notificationTitle,
-          message: notificationBody,
-          type: "promo",
-          storeId: storeId,
-          productId: updateData.productId || null,
-          imageUrl: imageUrl || null,
-          isUnread: true,
-          createdAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-        opCount++;
-        
-        if (opCount === 450) { 
-          chunkedBatches.push(currentBatch.commit());
-          currentBatch = db.batch();
-          opCount = 0;
-        }
-      }
-      
-      if (opCount > 0) {
-        chunkedBatches.push(currentBatch.commit());
-      }
-      
-      try {
-        await Promise.all(chunkedBatches);
-        console.log(`Saved in-app notifications for ${userIds.length} followers.`);
-      } catch (err) {
-        console.error("Error saving in-app notifications:", err);
-      }
-    }
-
-    // 6. Blast the Push Notification
-    if (tokens.length > 0) {
-      try {
-        const response = await admin.messaging().sendEachForMulticast({
-          tokens: tokens,
-          ...payload
-        });
-        console.log(response.successCount + " push messages were sent successfully.");
-      } catch (error) {
-        console.error("Error sending push notification:", error);
-      }
-    }
-
+  if (!storeId) {
+    console.log("No storeId found in the update.");
     return null;
+  }
+
+  // 2. Find all customers who follow this store
+  const followersSnap = await admin.firestore().collection(`stores/${storeId}/followers`).get();
+
+  if (followersSnap.empty) {
+    console.log(`No followers found for store ${storeId}.`);
+    return null;
+  }
+
+  const userIds = [];
+  followersSnap.forEach(doc => {
+    // document ID is the userId
+    userIds.push(doc.id);
+  });
+
+  const tokens = [];
+
+  // 3. Fetch fcmTokens for these users from the 'customers' collection
+  // Firestore getAll allows fetching up to 100 documents at once
+  const chunks = [];
+  for (let i = 0; i < userIds.length; i += 100) {
+    chunks.push(userIds.slice(i, i + 100));
+  }
+
+  for (const chunk of chunks) {
+    const refs = chunk.map(id => admin.firestore().collection("customers").doc(id));
+    const customerDocs = await admin.firestore().getAll(...refs);
+
+    customerDocs.forEach(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        if (data.fcmToken) tokens.push(data.fcmToken);
+        if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+      }
+    });
+  }
+
+  if (tokens.length === 0) {
+    console.log("No FCM tokens found for followers, but we will still save in-app notifications.");
+  }
+
+  // 4. Build the Payload
+  const payload = {
+    notification: {
+      title: notificationTitle,
+      body: notificationBody,
+    },
+    data: {
+      updateId: snap.id,
+      storeId: storeId,
+      productId: updateData.productId || "",
+      click_action: "FLUTTER_NOTIFICATION_CLICK"
+    }
+  };
+
+  // Attach image if available
+  if (imageUrl) {
+    payload.notification.image = imageUrl;
+  }
+
+  // 5. Save to In-App Notifications (if high value)
+  if (type === "offer" || type === "new_launch") {
+    const db = admin.firestore();
+    let chunkedBatches = [];
+    let currentBatch = db.batch();
+    let opCount = 0;
+
+    for (const followerId of userIds) {
+      const notifRef = db.collection("customers").doc(followerId).collection("notifications").doc();
+      currentBatch.set(notifRef, {
+        title: notificationTitle,
+        message: notificationBody,
+        type: "promo",
+        storeId: storeId,
+        productId: updateData.productId || null,
+        imageUrl: imageUrl || null,
+        isUnread: true,
+        createdAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      opCount++;
+
+      if (opCount === 450) {
+        chunkedBatches.push(currentBatch.commit());
+        currentBatch = db.batch();
+        opCount = 0;
+      }
+    }
+
+    if (opCount > 0) {
+      chunkedBatches.push(currentBatch.commit());
+    }
+
+    try {
+      await Promise.all(chunkedBatches);
+      console.log(`Saved in-app notifications for ${userIds.length} followers.`);
+    } catch (err) {
+      console.error("Error saving in-app notifications:", err);
+    }
+  }
+
+  // 6. Blast the Push Notification
+  if (tokens.length > 0) {
+    try {
+      const response = await admin.messaging().sendEachForMulticast({
+        tokens: tokens,
+        ...payload
+      });
+      console.log(response.successCount + " push messages were sent successfully.");
+    } catch (error) {
+      console.error("Error sending push notification:", error);
+    }
+  }
+
+  return null;
 });
 
 exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => {
@@ -165,18 +164,25 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
   const storeId = orderData.storeId;
   const storeSnap = await admin.firestore().collection("stores").doc(storeId).get();
   if (!storeSnap.exists) return null;
-  
+
   const storeData = storeSnap.data();
   const ownerId = storeData.ownerId;
-  
+
   const userSnap = await admin.firestore().collection("users").doc(ownerId).get();
-  const fcmToken = userSnap.exists ? userSnap.data().fcmToken : null;
+
+  const tokens = [];
+  if (userSnap.exists) {
+    const data = userSnap.data();
+    if (data.fcmToken) tokens.push(data.fcmToken);
+    if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+  }
+  const uniqueTokens = [...new Set(tokens)];
 
   // Save to DB for Vendor
   const vendorNotification = {
     vendorId: ownerId,
     title: "New Order Received! 🚨",
-    message: `You have a new order (#${orderData.orderId.substring(0,8)}) for ₹${orderData.totalAmount}.`,
+    message: `You have a new order (#${orderData.orderId.substring(0, 8)}) for ₹${orderData.totalAmount}.`,
     type: "order",
     relatedId: orderData.orderId,
     isRead: false,
@@ -189,7 +195,7 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
     console.error("Error saving vendor notification to DB:", error);
   }
 
-  if (fcmToken) {
+  if (uniqueTokens.length > 0) {
     const payload = {
       notification: {
         title: vendorNotification.title,
@@ -209,8 +215,8 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
     };
 
     try {
-      await admin.messaging().send({
-        token: fcmToken,
+      await admin.messaging().sendEachForMulticast({
+        tokens: uniqueTokens,
         ...payload
       });
     } catch (error) {
@@ -221,11 +227,11 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
   // Notify the Customer
   const customerId = orderData.customerId;
   const storeName = storeData.storeName || "FreshGa Store";
-  
+
   if (customerId) {
     const title = "Order Placed Successfully! 🎉";
-    const body = `Your order #${orderData.orderId.substring(0,8)} from ${storeName} has been placed. Waiting for the kitchen to accept it.`;
-    
+    const body = `Your order #${orderData.orderId.substring(0, 8)} from ${storeName} has been placed. Waiting for the kitchen to accept it.`;
+
     // Save to database
     const notificationData = {
       title: title,
@@ -235,16 +241,24 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
       isUnread: true,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     };
-    
+
     try {
       await admin.firestore().collection("customers").doc(customerId).collection("notifications").add(notificationData);
     } catch (error) {
       console.error("Error saving order placed notification to DB:", error);
     }
-    
-    // Send push notification
+
     const customerSnap = await admin.firestore().collection("customers").doc(customerId).get();
-    if (customerSnap.exists && customerSnap.data().fcmToken) {
+
+    const tokens = [];
+    if (customerSnap.exists) {
+      const data = customerSnap.data();
+      if (data.fcmToken) tokens.push(data.fcmToken);
+      if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+    }
+    const uniqueTokens = [...new Set(tokens)];
+
+    if (uniqueTokens.length > 0) {
       const customerPayload = {
         notification: {
           title: title,
@@ -263,10 +277,10 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
           payload: { aps: { sound: "default" } }
         }
       };
-      
+
       try {
-        await admin.messaging().send({
-          token: customerSnap.data().fcmToken,
+        await admin.messaging().sendEachForMulticast({
+          tokens: uniqueTokens,
           ...customerPayload
         });
       } catch (error) {
@@ -315,10 +329,10 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
       title = "Order Shipped! 🚚";
       let shippingText = "is on its way!";
       if (afterData.shippingProvider) {
-          shippingText = `has been shipped via ${afterData.shippingProvider}`;
-          if (afterData.trackingId) {
-             shippingText += ` (Tracking ID: ${afterData.trackingId})`;
-          }
+        shippingText = `has been shipped via ${afterData.shippingProvider}`;
+        if (afterData.trackingId) {
+          shippingText += ` (Tracking ID: ${afterData.trackingId})`;
+        }
       }
       body = `Your order #${fullOrderId} from ${storeName} ${shippingText}`;
       break;
@@ -355,7 +369,16 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
 
   // 2. Send push notification if token exists
   const customerSnap = await admin.firestore().collection("customers").doc(customerId).get();
-  if (!customerSnap.exists || !customerSnap.data().fcmToken) return null;
+
+  const tokens = [];
+  if (customerSnap.exists) {
+    const data = customerSnap.data();
+    if (data.fcmToken) tokens.push(data.fcmToken);
+    if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+  }
+  const uniqueTokens = [...new Set(tokens)];
+
+  if (uniqueTokens.length === 0) return null;
 
   const payload = {
     notification: {
@@ -384,8 +407,8 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
   };
 
   try {
-    await admin.messaging().send({
-      token: customerSnap.data().fcmToken,
+    await admin.messaging().sendEachForMulticast({
+      tokens: uniqueTokens,
       ...payload
     });
   } catch (error) {
@@ -401,7 +424,14 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
         if (storeSnap.exists) {
           const ownerId = storeSnap.data().ownerId;
           const userSnap = await admin.firestore().collection("users").doc(ownerId).get();
-          const fcmToken = userSnap.exists ? userSnap.data().fcmToken : null;
+
+          const tokens = [];
+          if (userSnap.exists) {
+            const data = userSnap.data();
+            if (data.fcmToken) tokens.push(data.fcmToken);
+            if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+          }
+          const uniqueTokens = [...new Set(tokens)];
 
           const vendorNotification = {
             vendorId: ownerId,
@@ -415,9 +445,9 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
 
           await admin.firestore().collection("notifications").add(vendorNotification);
 
-          if (fcmToken) {
-            await admin.messaging().send({
-              token: fcmToken,
+          if (uniqueTokens.length > 0) {
+            await admin.messaging().sendEachForMulticast({
+              tokens: uniqueTokens,
               notification: { title: vendorNotification.title, body: vendorNotification.message },
               data: { orderId: afterData.orderId, type: "order_cancelled", click_action: "FLUTTER_NOTIFICATION_CLICK" },
               android: { priority: "high", notification: { sound: "default", channelId: "high_importance_channel" } },
@@ -436,7 +466,7 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
 
 exports.scheduledSLACheck = onSchedule("every 15 minutes", async (event) => {
   const now = admin.firestore.Timestamp.now();
-  
+
   const snapshot = await admin.firestore().collection("orders")
     .where("orderStatus", "==", "New")
     .where("expiresAt", "<", now)
@@ -473,7 +503,7 @@ exports.scheduledSLACheck = onSchedule("every 15 minutes", async (event) => {
 
 exports.autoMarkDelivered = onSchedule("every 12 hours", async (event) => {
   const now = admin.firestore.Timestamp.now();
-  
+
   // Find all orders that are currently "Shipped"
   const snapshot = await admin.firestore().collection("orders")
     .where("orderStatus", "==", "Shipped")
@@ -493,7 +523,7 @@ exports.autoMarkDelivered = onSchedule("every 12 hours", async (event) => {
     // Expected Delivery Date = maxDispatchDate + 5 days
     // Add 1 extra day as a grace period
     const maxDispatchDate = order.maxDispatchDate.toDate();
-    const autoDeliveryDate = new Date(maxDispatchDate.getTime() + (6 * 24 * 60 * 60 * 1000)); 
+    const autoDeliveryDate = new Date(maxDispatchDate.getTime() + (6 * 24 * 60 * 60 * 1000));
 
     if (now.toDate() > autoDeliveryDate) {
       const timeline = order.timeline || [];
@@ -522,14 +552,14 @@ exports.autoMarkDelivered = onSchedule("every 12 hours", async (event) => {
   }
 });
 
-exports.vendorSLAWarnings = onSchedule("every 30 minutes", async (event) => {
+exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
   const db = admin.firestore();
   const now = admin.firestore.Timestamp.now();
   const nowMs = now.toDate().getTime();
 
   let count = 0;
 
-  // 1. Accept Warnings (4 hours left)
+  // 1. Accept Warnings (1 hour left)
   const newOrdersSnap = await db.collection("orders")
     .where("orderStatus", "==", "New")
     .get();
@@ -537,19 +567,19 @@ exports.vendorSLAWarnings = onSchedule("every 30 minutes", async (event) => {
   for (const doc of newOrdersSnap.docs) {
     const order = doc.data();
     if (!order.expiresAt || order.vendorAcceptWarningSent === true) continue;
-    
+
     const expiresMs = order.expiresAt.toDate().getTime();
     const hoursLeft = (expiresMs - nowMs) / (1000 * 60 * 60);
 
-    if (hoursLeft <= 4 && hoursLeft > 0) {
+    if (hoursLeft <= 1 && hoursLeft > 0) {
       await doc.ref.update({ vendorAcceptWarningSent: true });
-      
+
       const storeSnap = await db.collection("stores").doc(order.storeId).get();
       if (!storeSnap.exists) continue;
       const ownerId = storeSnap.data().ownerId;
 
       const title = "Urgent: Accept Order! ⏳";
-      const body = `Order #${order.orderId.substring(0,8)} expires in ${Math.floor(hoursLeft)} hours. Accept it now!`;
+      const body = `Order #${order.orderId.substring(0, 8)} expires in ${Math.floor(hoursLeft)} hours. Accept it now!`;
 
       await db.collection("notifications").add({
         vendorId: ownerId,
@@ -562,9 +592,17 @@ exports.vendorSLAWarnings = onSchedule("every 30 minutes", async (event) => {
       });
 
       const userSnap = await db.collection("users").doc(ownerId).get();
-      if (userSnap.exists && userSnap.data().fcmToken) {
-        await admin.messaging().send({
-          token: userSnap.data().fcmToken,
+      const tokens = [];
+      if (userSnap.exists) {
+        const data = userSnap.data();
+        if (data.fcmToken) tokens.push(data.fcmToken);
+        if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+      }
+      const uniqueTokens = [...new Set(tokens)];
+
+      if (uniqueTokens.length > 0) {
+        await admin.messaging().sendEachForMulticast({
+          tokens: uniqueTokens,
           notification: { title: title, body: body },
           data: { orderId: order.orderId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
           android: { priority: "high" }
@@ -574,7 +612,7 @@ exports.vendorSLAWarnings = onSchedule("every 30 minutes", async (event) => {
     }
   }
 
-  // 2. Dispatch Warnings (12 hours left)
+  // 2. Dispatch Overdue Warning (Past max dispatch date)
   const acceptedOrdersSnap = await db.collection("orders")
     .where("orderStatus", "in", ["Accepted", "Packed"])
     .get();
@@ -582,19 +620,19 @@ exports.vendorSLAWarnings = onSchedule("every 30 minutes", async (event) => {
   for (const doc of acceptedOrdersSnap.docs) {
     const order = doc.data();
     if (!order.maxDispatchDate || order.vendorDispatchWarningSent === true) continue;
-    
+
     const dispatchMs = order.maxDispatchDate.toDate().getTime();
     const hoursLeft = (dispatchMs - nowMs) / (1000 * 60 * 60);
 
-    if (hoursLeft <= 12 && hoursLeft > 0) {
+    if (hoursLeft <= 0) {
       await doc.ref.update({ vendorDispatchWarningSent: true });
-      
+
       const storeSnap = await db.collection("stores").doc(order.storeId).get();
       if (!storeSnap.exists) continue;
       const ownerId = storeSnap.data().ownerId;
 
-      const title = "Urgent: Dispatch Soon! 🚚";
-      const body = `Order #${order.orderId.substring(0,8)} must be dispatched in ${Math.floor(hoursLeft)} hours.`;
+      const title = "OVERDUE: Dispatch Immediately! 🚨";
+      const body = `Order #${order.orderId.substring(0, 8)} is overdue for dispatch. Please ship immediately!`;
 
       await db.collection("notifications").add({
         vendorId: ownerId,
@@ -607,9 +645,17 @@ exports.vendorSLAWarnings = onSchedule("every 30 minutes", async (event) => {
       });
 
       const userSnap = await db.collection("users").doc(ownerId).get();
-      if (userSnap.exists && userSnap.data().fcmToken) {
-        await admin.messaging().send({
-          token: userSnap.data().fcmToken,
+      const tokens = [];
+      if (userSnap.exists) {
+        const data = userSnap.data();
+        if (data.fcmToken) tokens.push(data.fcmToken);
+        if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+      }
+      const uniqueTokens = [...new Set(tokens)];
+
+      if (uniqueTokens.length > 0) {
+        await admin.messaging().sendEachForMulticast({
+          tokens: uniqueTokens,
           notification: { title: title, body: body },
           data: { orderId: order.orderId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
           android: { priority: "high" }
@@ -618,7 +664,60 @@ exports.vendorSLAWarnings = onSchedule("every 30 minutes", async (event) => {
       count++;
     }
   }
-  
-  if(count > 0) console.log(`Sent ${count} SLA warnings to vendors.`);
+
+  if (count > 0) console.log(`Sent ${count} SLA warnings to vendors.`);
+});
+
+/**
+ * Triggered when a new review is added to the "reviews" collection.
+ */
+exports.updateStoreRating = onDocumentCreated('reviews/{reviewId}', async (event) => {
+  const snap = event.data;
+  if (!snap) return null;
+  const newReview = snap.data();
+  const storeId = newReview.storeId;
+  const newReviewRating = newReview.rating;
+
+  // If the review is missing crucial data, abort.
+  if (!storeId || typeof newReviewRating !== 'number') {
+    console.log('Review is missing storeId or rating.');
+    return null;
+  }
+
+  const storeRef = admin.firestore().collection('stores').doc(storeId);
+
+  try {
+    // We use a Firestore Transaction to ensure data consistency
+    await admin.firestore().runTransaction(async (transaction) => {
+      const storeDoc = await transaction.get(storeRef);
+
+      if (!storeDoc.exists) {
+        throw new Error('Store does not exist!');
+      }
+
+      const storeData = storeDoc.data();
+
+      // Fetch current values, defaulting to 0 if they don't exist yet
+      const oldRating = storeData.rating || 0.0;
+      const oldTotalReviews = storeData.totalReviews || 0;
+
+      // Calculate the new weighted average
+      const newTotalReviews = oldTotalReviews + 1;
+      const newRating = ((oldRating * oldTotalReviews) + newReviewRating) / newTotalReviews;
+
+      // Update the store document with the new values
+      transaction.update(storeRef, {
+        rating: newRating,
+        totalReviews: newTotalReviews,
+      });
+    });
+
+    console.log(`Successfully updated store ${storeId} to rating ${newRating}`);
+    return null;
+
+  } catch (error) {
+    console.error('Error updating store rating:', error);
+    return null;
+  }
 });
 

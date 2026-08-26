@@ -17,9 +17,11 @@ import '../../widgets/product/suggested_products_section.dart';
 import '../../widgets/product/sticky_add_to_cart_bar.dart';
 import '../../widgets/product/product_loading_shimmer.dart';
 import '../../widgets/cart/floating_cart_bar.dart';
+import '../../widgets/states/app_state_widgets.dart';
 import 'product_ratings_screen.dart';
 import '../store/store_screen.dart';
 import '../../widgets/modals/report_modal.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final String productId;
@@ -116,7 +118,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
           final product = provider.currentProduct;
           if (product == null) {
-            return const Center(child: Text("Product not found"));
+            return Scaffold(
+              backgroundColor: Colors.white,
+              appBar: AppBar(
+                elevation: 0,
+                backgroundColor: Colors.white,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              body: Center(
+                child: ErrorStateWidget(
+                  title: "Product Not Found",
+                  message: provider.productError ?? "We couldn't find the product you're looking for.",
+                  onRetry: () {
+                    provider.loadProductDetails(widget.productId);
+                  },
+                ),
+              ),
+            );
           }
 
           final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
@@ -500,7 +521,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   const SizedBox(width: 12),
                                   _buildGlassButton(
                                     icon: Icons.share_outlined,
-                                    onTap: () {},
+                                    onTap: () {
+                                      Share.share('Check out this delicious item on FreshGa Homemades!\nhttps://freshga-homemades.web.app/product/${widget.productId}');
+                                    },
                                   ),
                                   const SizedBox(width: 12),
                                   Container(

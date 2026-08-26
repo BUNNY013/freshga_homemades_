@@ -21,6 +21,7 @@ class ProductProvider with ChangeNotifier {
   // New states for product details
   ProductModel? _currentProduct;
   bool _isLoadingProduct = false;
+  String? _productError;
   bool _isStoreActive = true;
   
   List<ProductModel> _similarProducts = [];
@@ -40,6 +41,7 @@ class ProductProvider with ChangeNotifier {
 
   ProductModel? get currentProduct => _currentProduct;
   bool get isLoadingProduct => _isLoadingProduct;
+  String? get productError => _productError;
   bool get isStoreActive => _isStoreActive;
   List<ProductModel> get similarProducts => _similarProducts;
   bool get isLoadingSimilar => _isLoadingSimilar;
@@ -164,6 +166,7 @@ class ProductProvider with ChangeNotifier {
   Future<void> loadProductDetails(String productId) async {
     _isLoadingProduct = true;
     _currentProduct = null;
+    _productError = null;
     _selectedVariantIndex = 0;
     _quantity = 1;
     notifyListeners();
@@ -190,6 +193,7 @@ class ProductProvider with ChangeNotifier {
         _fetchRecommendations(_currentProduct!);
       }
     } catch (e) {
+      _productError = e.toString();
       debugPrint('Error loading product: $e');
     } finally {
       _isLoadingProduct = false;

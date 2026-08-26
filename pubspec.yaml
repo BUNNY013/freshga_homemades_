@@ -60,6 +60,10 @@ dependencies:
   connectivity_plus: ^7.3.1
   package_info_plus: ^10.2.1
   lottie: ^3.3.3
+  app_links: ^6.1.1
+  share_plus: ^13.3.0
+  permission_handler: ^11.0.0
+
 
 dev_dependencies:
   flutter_test:

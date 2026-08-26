@@ -12,7 +12,6 @@ import '../../../../screens/dev/seeder_screen.dart';
 import '../../../../screens/login_screen.dart';
 import '../wishlist/liked_products_screen.dart';
 import 'settings_screen.dart';
-import 'notification_settings_screen.dart';
 import 'address_book_screen.dart';
 import 'help_support_screen.dart';
 import 'about_screen.dart';
@@ -115,15 +114,6 @@ class ProfileScreen extends StatelessWidget {
                 _buildSectionTitle('App Settings & Preferences'),
                 const SizedBox(height: 10),
                 _buildSectionCard([
-                  _buildMenuTile(
-                    icon: Icons.notifications_outlined,
-                    title: 'Notification Settings',
-                    subtitle: 'Configure alerts for order updates and new batches',
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationSettingsScreen()));
-                    },
-                  ),
-                  const Divider(height: 1),
                   _buildMenuTile(
                     icon: Icons.settings_outlined,
                     title: 'General App Settings',

@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../models/notification_model.dart';
 import '../orders/order_details_screen.dart';
 import '../product/product_details_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -13,9 +14,41 @@ class NotificationScreen extends StatefulWidget {
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _NotificationScreenState extends State<NotificationScreen> with WidgetsBindingObserver {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  bool _isPermissionDenied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkNotificationPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkNotificationPermission();
+    }
+  }
+
+  Future<void> _checkNotificationPermission() async {
+    final status = await Permission.notification.status;
+    setState(() {
+      _isPermissionDenied = status.isDenied || status.isPermanentlyDenied;
+    });
+  }
+
+  Future<void> _requestPermission() async {
+    await openAppSettings();
+  }
 
   String get _formatTime {
     return "Just now"; // A simple helper could be added for timeago, but we'll use a basic format for now
@@ -137,13 +170,65 @@ class _NotificationScreenState extends State<NotificationScreen> {
       ),
       body: user == null
           ? _buildEmptyState()
-          : StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('customers')
-                  .doc(user.uid)
-                  .collection('notifications')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots(),
+          : Column(
+              children: [
+                if (_isPermissionDenied)
+                  Container(
+                    margin: const EdgeInsets.only(left: 16, right: 16, top: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.orange.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.notifications_off_rounded, color: Colors.orange),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Turn on notifications",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "Don't miss updates on your orders and favorite stores.",
+                                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        TextButton(
+                          onPressed: _requestPermission,
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          child: const Text("Enable"),
+                        ),
+                      ],
+                    ),
+                  ),
+                Expanded(
+                  child: StreamBuilder<QuerySnapshot>(
+                    stream: _firestore
+                        .collection('customers')
+                        .doc(user.uid)
+                        .collection('notifications')
+                        .orderBy('createdAt', descending: true)
+                        .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -303,6 +388,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 );
               },
             ),
+          ),
+        ],
+      ),
     );
   }
 

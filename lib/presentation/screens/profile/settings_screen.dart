@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import 'notification_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -34,18 +33,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 12),
             _buildSectionCard([
-              _buildNavTile(
-                icon: Icons.notifications_outlined,
-                title: 'Notification Settings',
-                subtitle: 'Customize push & WhatsApp alerts',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const NotificationSettingsScreen()),
-                  );
-                },
-              ),
-              const Divider(height: 1),
               _buildNavTile(
                 icon: Icons.language_rounded,
                 title: 'App Language',

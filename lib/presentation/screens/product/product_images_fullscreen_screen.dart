@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/product_model.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProductImagesFullscreenScreen extends StatefulWidget {
   final ProductModel product;
@@ -80,7 +81,9 @@ class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenS
                   ),
                   _buildGlassButton(
                     icon: Icons.share_outlined,
-                    onTap: () {},
+                    onTap: () {
+                      Share.share('Check out ${widget.product.name} on FreshGa Homemades!\nhttps://freshga-homemades.web.app/product/${widget.product.id}');
+                    },
                   ),
                 ],
               ),

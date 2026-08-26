@@ -295,22 +295,14 @@ class _OrdersTabState extends State<_OrdersTab> {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             "No orders found",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
           Text(
             "We couldn't find any orders matching\nyour criteria.",
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 15,
-              height: 1.4,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
         ],

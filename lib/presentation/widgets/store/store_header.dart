@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/store_model.dart';
 import '../modals/report_modal.dart';
+import 'package:share_plus/share_plus.dart';
 
 class StoreHeader extends StatelessWidget {
   final StoreModel store;
@@ -41,7 +42,9 @@ class StoreHeader extends StatelessWidget {
             ),
             child: IconButton(
               icon: const Icon(Icons.share_outlined, color: Colors.white, size: 24),
-              onPressed: () {},
+              onPressed: () {
+                Share.share('Check out ${store.name} on FreshGa Homemades!\nhttps://freshga-homemades.web.app/store/${store.id}');
+              },
             ),
           ),
         ),

@@ -102,7 +102,7 @@ class NotificationService {
 
     try {
       await _firestore.collection('customers').doc(user.uid).set({
-        'fcmToken': token,
+        'fcmTokens': FieldValue.arrayUnion([token]),
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
       debugPrint("FCM token securely saved for user ${user.uid}");

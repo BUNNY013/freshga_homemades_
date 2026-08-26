@@ -6,6 +6,7 @@ import '../../providers/customer_provider.dart';
 import '../../presentation/widgets/product/freshga_product_card.dart';
 import '../../widgets/search/store_search_card.dart';
 import '../../widgets/search/search_loading_shimmer.dart';
+import '../../presentation/widgets/states/empty_state_widget.dart';
 
 import '../categories/widgets/filter_sort_bar.dart';
 import '../../models/product_model.dart';
@@ -425,20 +426,16 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
     if (products.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.search_off_rounded, size: 48, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              const Text("No products found", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              const Text("Try adjusting your filters or search terms", style: TextStyle(color: AppColors.textSecondary)),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40.0),
+          child: EmptyStateWidget.noSearchResults(
+            title: "No products found",
+            message: "Try adjusting your filters or search terms",
+            onClearFilters: _selectedFilters.isNotEmpty ? () {
+              setState(() {
+                _selectedFilters.clear();
+                _appliedFilters = 0;
+              });
+            } : null,
           ),
         ),
       );
@@ -507,20 +504,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
     if (stores.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                child: const Icon(Icons.storefront_outlined, size: 48, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              const Text("No stores found", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
-              const SizedBox(height: 8),
-              const Text("We couldn't find any homemade sellers for this query.", style: TextStyle(color: AppColors.textSecondary), textAlign: TextAlign.center),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40.0),
+          child: EmptyStateWidget(
+            icon: Icons.storefront_outlined,
+            title: "No stores found",
+            message: "We couldn't find any homemade sellers for this query.",
+            buttonText: _selectedFilters.isNotEmpty ? 'Clear Filters' : null,
+            onAction: _selectedFilters.isNotEmpty ? () {
+              setState(() {
+                _selectedFilters.clear();
+                _appliedFilters = 0;
+              });
+            } : null,
           ),
         ),
       );

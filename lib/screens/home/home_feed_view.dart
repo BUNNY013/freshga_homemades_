@@ -16,6 +16,7 @@ import '../../widgets/home/search_bar_widget.dart';
 import '../../presentation/widgets/product/freshga_product_card.dart';
 import '../../widgets/skeletons.dart';
 import '../../widgets/animations/fade_slide_animation.dart';
+import '../../presentation/widgets/states/app_state_widgets.dart';
 
 class HomeFeedView extends StatefulWidget {
   const HomeFeedView({super.key});
@@ -138,19 +139,10 @@ class _HomeFeedViewState extends State<HomeFeedView> {
 
                     if (homeProvider.error != null) {
                       return SliverFillRemaining(
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.error_outline, size: 48, color: AppColors.terracotta),
-                              const SizedBox(height: 16),
-                              Text("home.error_sections".tr(), style: Theme.of(context).textTheme.titleMedium),
-                              TextButton(
-                                onPressed: _onRefresh,
-                                child: Text("home.retry".tr(), style: const TextStyle(color: AppColors.primaryGreen)),
-                              )
-                            ],
-                          ),
+                        child: ErrorStateWidget(
+                          title: "home.error_sections".tr(),
+                          message: homeProvider.error!,
+                          onRetry: _onRefresh,
                         ),
                       );
                     }

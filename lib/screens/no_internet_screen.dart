@@ -73,23 +73,15 @@ class _NoInternetScreenState extends State<NoInternetScreen> with SingleTickerPr
                   const SizedBox(height: 32),
                   
                   // Text Content
-                  const Text(
+                  Text(
                     'No Internet Connection',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Looks like you\'re offline. Please check your internet connection and try again.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.textSecondary,
-                      height: 1.4,
-                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),
@@ -117,20 +109,12 @@ class _NoInternetScreenState extends State<NoInternetScreen> with SingleTickerPr
                                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.refresh_rounded, size: 18),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Try Again',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                          : const Text(
+                              'Try Again',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                     ),
                   ),

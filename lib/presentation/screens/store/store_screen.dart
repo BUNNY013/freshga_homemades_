@@ -10,6 +10,7 @@ import '../../widgets/store/store_info_section.dart';
 import '../../widgets/store/store_tab_bar.dart';
 import '../../widgets/store/about_store_section.dart';
 import '../../widgets/store/store_loading_shimmer.dart';
+import '../../widgets/states/app_state_widgets.dart';
 
 import '../../widgets/store/dynamic_category_chips.dart';
 import '../../widgets/store/store_product_list_item.dart';
@@ -508,22 +509,24 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 }
 
   Widget _buildErrorState(String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-          const SizedBox(height: 16),
-          Text(message, style: const TextStyle(color: AppColors.textSecondary)),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              Provider.of<StoreProvider>(context, listen: false).loadStoreData(widget.storeId);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryGreen),
-            child: const Text("Retry", style: TextStyle(color: Colors.white)),
-          )
-        ],
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Center(
+        child: ErrorStateWidget(
+          title: "Error Loading Store",
+          message: message,
+          onRetry: () {
+            Provider.of<StoreProvider>(context, listen: false).loadStoreData(widget.storeId);
+          },
+        ),
       ),
     );
   }
