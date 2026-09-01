@@ -10,7 +10,10 @@ class AboutScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('About FreshGa Homemades', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text(
+          'About FreshGa Homemades',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
         backgroundColor: Colors.white,
         elevation: 0.5,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -26,7 +29,10 @@ class AboutScreen extends StatelessWidget {
               height: 90,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.primaryGreen, AppColors.primaryGreen.withOpacity(0.7)],
+                  colors: [
+                    AppColors.primaryGreen,
+                    AppColors.primaryGreen.withOpacity(0.7),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -40,13 +46,21 @@ class AboutScreen extends StatelessWidget {
                 ],
               ),
               child: const Center(
-                child: Icon(Icons.home_work_rounded, size: 48, color: Colors.white),
+                child: Icon(
+                  Icons.home_work_rounded,
+                  size: 48,
+                  color: Colors.white,
+                ),
               ),
             ),
             const SizedBox(height: 16),
             const Text(
               'FreshGa Homemades',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 4),
             Container(
@@ -57,14 +71,22 @@ class AboutScreen extends StatelessWidget {
               ),
               child: const Text(
                 'v1.0.0 (Beta Build)',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryGreen),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryGreen,
+                ),
               ),
             ),
             const SizedBox(height: 24),
             const Text(
               'Empowering local homemade artisans and bringing authentic, hygienic, and tradition-rich foods directly from verified homemakers to your doorstep.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 32),
 
@@ -73,7 +95,8 @@ class AboutScreen extends StatelessWidget {
               _buildTile(
                 icon: Icons.verified_user_outlined,
                 title: 'FSSAI Registered Artisans',
-                subtitle: 'All homemade vendors follow strict food safety guidelines.',
+                subtitle:
+                    'All homemade vendors follow strict food safety guidelines.',
               ),
               const Divider(height: 1),
               _buildTile(
@@ -85,7 +108,8 @@ class AboutScreen extends StatelessWidget {
               _buildTile(
                 icon: Icons.local_shipping_outlined,
                 title: 'Direct from Home Kitchens',
-                subtitle: 'Freshly packed and safely delivered to your address.',
+                subtitle:
+                    'Freshly packed and safely delivered to your address.',
               ),
             ]),
 
@@ -128,7 +152,10 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 32),
             Text(
               'Made with ❤️ for Homemakers & Food Lovers',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary.withOpacity(0.7)),
+              style: TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 20),
           ],
@@ -154,7 +181,11 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTile({required IconData icon, required String title, required String subtitle}) {
+  Widget _buildTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -172,9 +203,22 @@ class AboutScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
@@ -183,11 +227,23 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLinkTile(BuildContext context, {required IconData icon, required String title, required VoidCallback onTap}) {
+  Widget _buildLinkTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       onTap: onTap,
       leading: Icon(icon, color: AppColors.textPrimary, size: 22),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: AppColors.textPrimary)),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+          color: AppColors.textPrimary,
+        ),
+      ),
       trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
     );
   }
@@ -200,13 +256,22 @@ class AboutScreen extends StatelessWidget {
         content: SizedBox(
           width: double.maxFinite,
           child: SingleChildScrollView(
-            child: Text(content, style: const TextStyle(height: 1.4, fontSize: 13)),
+            child: Text(
+              content,
+              style: const TextStyle(height: 1.4, fontSize: 13),
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Close',
+              style: TextStyle(
+                color: AppColors.primaryGreen,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),

@@ -6,11 +6,14 @@ class BannerService {
 
   Future<List<BannerModel>> getActiveBanners() async {
     try {
-      final snapshot = await _firestore.collection('banners')
+      final snapshot = await _firestore
+          .collection('banners')
           .where('isActive', isEqualTo: true)
           .orderBy('order')
           .get();
-      return snapshot.docs.map((doc) => BannerModel.fromJson(doc.data(), doc.id)).toList();
+      return snapshot.docs
+          .map((doc) => BannerModel.fromJson(doc.data(), doc.id))
+          .toList();
     } catch (e) {
       throw Exception('Failed to load banners: $e');
     }

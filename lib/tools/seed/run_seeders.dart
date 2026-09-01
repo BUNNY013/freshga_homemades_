@@ -8,7 +8,7 @@ import 'product_seeder.dart';
 import '../../firebase_options.dart';
 
 /// Runner script to execute all seeders in order.
-/// Usage: 
+/// Usage:
 /// 1. Make sure you have a valid Firebase configuration.
 /// 2. Run this script directly or call `runSeeders()` from a hidden dev menu.
 void main() async {
@@ -19,12 +19,25 @@ void main() async {
 }
 
 Future<void> clearOldData() async {
-  print('🧹 Clearing old generated data (categories, tags, stores, products)...');
+  print(
+    '🧹 Clearing old generated data (categories, tags, stores, products)...',
+  );
   final db = FirebaseFirestore.instance;
-  final collections = ['categories', 'sub_categories', 'subcategories', 'tags', 'stores', 'products', 'store_subscriptions'];
-  
+  final collections = [
+    'categories',
+    'sub_categories',
+    'subcategories',
+    'tags',
+    'stores',
+    'products',
+    'store_subscriptions',
+  ];
+
   for (String col in collections) {
-    final snapshot = await db.collection(col).where('createdBySeeder', isEqualTo: true).get();
+    final snapshot = await db
+        .collection(col)
+        .where('createdBySeeder', isEqualTo: true)
+        .get();
     if (snapshot.docs.isNotEmpty) {
       var batch = db.batch();
       int count = 0;

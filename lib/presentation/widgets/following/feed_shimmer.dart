@@ -49,11 +49,7 @@ class FeedShimmer extends StatelessWidget {
                             color: Colors.white,
                           ),
                           const SizedBox(height: 6),
-                          Container(
-                            width: 80,
-                            height: 10,
-                            color: Colors.white,
-                          ),
+                          Container(width: 80, height: 10, color: Colors.white),
                         ],
                       ),
                       const Spacer(),
@@ -68,7 +64,7 @@ class FeedShimmer extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Middle and Right layout
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,18 +75,42 @@ class FeedShimmer extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(width: double.infinity, height: 16, color: Colors.white),
+                            Container(
+                              width: double.infinity,
+                              height: 16,
+                              color: Colors.white,
+                            ),
                             const SizedBox(height: 4),
-                            Container(width: 140, height: 16, color: Colors.white),
+                            Container(
+                              width: 140,
+                              height: 16,
+                              color: Colors.white,
+                            ),
                             const SizedBox(height: 12),
-                            Container(width: double.infinity, height: 12, color: Colors.white),
+                            Container(
+                              width: double.infinity,
+                              height: 12,
+                              color: Colors.white,
+                            ),
                             const SizedBox(height: 4),
-                            Container(width: double.infinity, height: 12, color: Colors.white),
+                            Container(
+                              width: double.infinity,
+                              height: 12,
+                              color: Colors.white,
+                            ),
                             const SizedBox(height: 4),
-                            Container(width: 100, height: 12, color: Colors.white),
-                            
+                            Container(
+                              width: 100,
+                              height: 12,
+                              color: Colors.white,
+                            ),
+
                             const SizedBox(height: 24),
-                            Container(width: 60, height: 20, color: Colors.white),
+                            Container(
+                              width: 60,
+                              height: 20,
+                              color: Colors.white,
+                            ),
                             const SizedBox(height: 12),
                             Container(
                               width: 80,

@@ -5,7 +5,7 @@ import '../services/home_section_service.dart';
 
 class HomeProvider with ChangeNotifier {
   final HomeSectionService _service = HomeSectionService();
-  
+
   List<HomeSectionModel> _sections = [];
   bool _isLoading = false;
   String? _error;
@@ -35,10 +35,12 @@ class HomeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _service.getActiveSections(limit: 10); // Load first 10 sections
+      final result = await _service.getActiveSections(
+        limit: 10,
+      ); // Load first 10 sections
       _sections = List<HomeSectionModel>.from(result['sections']);
       _lastDoc = result['lastDoc'];
-      
+
       if (_sections.length < 10) {
         _hasMore = false;
       }
@@ -61,13 +63,13 @@ class HomeProvider with ChangeNotifier {
         startAfter: _lastDoc,
         limit: 3, // Load 3 more sections per page
       );
-      
+
       final newSections = List<HomeSectionModel>.from(result['sections']);
       if (newSections.isNotEmpty) {
         _sections.addAll(newSections);
         _lastDoc = result['lastDoc'];
       }
-      
+
       if (newSections.length < 3) {
         _hasMore = false;
       }

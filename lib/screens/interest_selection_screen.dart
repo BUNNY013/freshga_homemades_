@@ -7,7 +7,8 @@ class InterestSelectionScreen extends StatefulWidget {
   const InterestSelectionScreen({super.key});
 
   @override
-  State<InterestSelectionScreen> createState() => _InterestSelectionScreenState();
+  State<InterestSelectionScreen> createState() =>
+      _InterestSelectionScreenState();
 }
 
 class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
@@ -22,7 +23,8 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
     {"name": "Healthy Foods", "icon": "🥗", "selected": false},
   ];
 
-  int get _selectedCount => _interests.where((i) => i["selected"] == true).length;
+  int get _selectedCount =>
+      _interests.where((i) => i["selected"] == true).length;
 
   void _toggleInterest(int index) {
     setState(() {
@@ -77,12 +79,12 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                   children: [
                     Text(
                       "What do you love?",
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        height: 1.2,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.displayLarge?.copyWith(height: 1.2),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     Text(
                       "Pick at least 3 categories so we can personalize your homemade discovery feed.",
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -98,7 +100,7 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                       children: List.generate(_interests.length, (index) {
                         final interest = _interests[index];
                         final isSelected = interest["selected"] as bool;
-                        
+
                         return GestureDetector(
                           onTap: () => _toggleInterest(index),
                           child: AnimatedContainer(
@@ -108,22 +110,23 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                               vertical: 16,
                             ),
                             decoration: BoxDecoration(
-                              color: isSelected 
-                                  ? AppColors.primaryGreen 
+                              color: isSelected
+                                  ? AppColors.primaryGreen
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(100),
                               border: Border.all(
-                                color: isSelected 
-                                    ? AppColors.primaryGreen 
+                                color: isSelected
+                                    ? AppColors.primaryGreen
                                     : AppColors.textSecondary.withOpacity(0.2),
                               ),
                               boxShadow: isSelected
                                   ? [
                                       BoxShadow(
-                                        color: AppColors.primaryGreen.withOpacity(0.3),
+                                        color: AppColors.primaryGreen
+                                            .withOpacity(0.3),
                                         blurRadius: 8,
                                         offset: const Offset(0, 4),
-                                      )
+                                      ),
                                     ]
                                   : [],
                             ),
@@ -137,14 +140,15 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   interest["name"] as String,
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: isSelected 
-                                        ? Colors.white 
-                                        : AppColors.textPrimary,
-                                    fontWeight: isSelected 
-                                        ? FontWeight.w600 
-                                        : FontWeight.normal,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyLarge
+                                      ?.copyWith(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : AppColors.textPrimary,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.normal,
+                                      ),
                                 ),
                               ],
                             ),
@@ -156,7 +160,7 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                 ),
               ),
             ),
-            
+
             // Bottom Action Area
             Container(
               padding: const EdgeInsets.all(24),
@@ -176,11 +180,11 @@ class _InterestSelectionScreenState extends State<InterestSelectionScreen> {
                   child: ElevatedButton(
                     onPressed: _selectedCount >= 3 ? _continue : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _selectedCount >= 3 
-                          ? AppColors.primaryGreen 
+                      backgroundColor: _selectedCount >= 3
+                          ? AppColors.primaryGreen
                           : AppColors.textSecondary.withOpacity(0.2),
-                      foregroundColor: _selectedCount >= 3 
-                          ? Colors.white 
+                      foregroundColor: _selectedCount >= 3
+                          ? Colors.white
                           : AppColors.textSecondary,
                     ),
                     child: Text(

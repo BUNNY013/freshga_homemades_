@@ -29,7 +29,11 @@ class SoftUpdateOverlay extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.system_update, size: 48, color: AppColors.primaryGreen),
+                      const Icon(
+                        Icons.system_update,
+                        size: 48,
+                        color: AppColors.primaryGreen,
+                      ),
                       const SizedBox(height: 16),
                       const Text(
                         'Update Available',
@@ -59,9 +63,14 @@ class SoftUpdateOverlay extends StatelessWidget {
                               },
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.textSecondary,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                               ),
-                              child: const Text('Later', style: TextStyle(fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                'Later',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -70,18 +79,28 @@ class SoftUpdateOverlay extends StatelessWidget {
                               onPressed: () async {
                                 final url = Uri.parse(updateProvider.storeUrl);
                                 if (await canLaunchUrl(url)) {
-                                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                                  await launchUrl(
+                                    url,
+                                    mode: LaunchMode.externalApplication,
+                                  );
                                 }
                                 updateProvider.dismissSoftUpdate();
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryGreen,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 elevation: 0,
                               ),
-                              child: const Text('Update', style: TextStyle(fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                'Update',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ),
                         ],

@@ -9,8 +9,11 @@ class SocialLinksRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool hasAny = store.instagramLink.isNotEmpty || store.youtubeLink.isNotEmpty || store.facebookLink.isNotEmpty;
-    
+    bool hasAny =
+        store.instagramLink.isNotEmpty ||
+        store.youtubeLink.isNotEmpty ||
+        store.facebookLink.isNotEmpty;
+
     if (!hasAny) return const SizedBox.shrink();
 
     return Padding(
@@ -18,9 +21,12 @@ class SocialLinksRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          if (store.instagramLink.isNotEmpty) _buildSocialIcon(Icons.camera_alt_outlined, "Instagram"),
-          if (store.youtubeLink.isNotEmpty) _buildSocialIcon(Icons.play_circle_outline, "YouTube"),
-          if (store.facebookLink.isNotEmpty) _buildSocialIcon(Icons.facebook, "Facebook"),
+          if (store.instagramLink.isNotEmpty)
+            _buildSocialIcon(Icons.camera_alt_outlined, "Instagram"),
+          if (store.youtubeLink.isNotEmpty)
+            _buildSocialIcon(Icons.play_circle_outline, "YouTube"),
+          if (store.facebookLink.isNotEmpty)
+            _buildSocialIcon(Icons.facebook, "Facebook"),
         ],
       ),
     );
@@ -39,7 +45,14 @@ class SocialLinksRow extends StatelessWidget {
           children: [
             Icon(icon, size: 16, color: AppColors.textSecondary),
             const SizedBox(width: 6),
-            Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       ),

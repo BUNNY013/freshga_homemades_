@@ -9,7 +9,11 @@ class RichStoreProfileCard extends StatefulWidget {
   final String storeId;
   final String storeName;
 
-  const RichStoreProfileCard({super.key, required this.storeId, required this.storeName});
+  const RichStoreProfileCard({
+    super.key,
+    required this.storeId,
+    required this.storeName,
+  });
 
   @override
   State<RichStoreProfileCard> createState() => _RichStoreProfileCardState();
@@ -50,29 +54,40 @@ class _RichStoreProfileCardState extends State<RichStoreProfileCard> {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Container(
-                    color: Colors.grey.shade100, 
+                    color: Colors.grey.shade100,
                     child: const Center(
                       child: SizedBox(
-                        width: 20, height: 20, 
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen)
-                      )
-                    )
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primaryGreen,
+                        ),
+                      ),
+                    ),
                   );
                 }
                 if (snapshot.hasData && snapshot.data != null) {
                   return CachedNetworkImage(
                     imageUrl: snapshot.data!.logoUrl,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(color: Colors.grey.shade50),
-                    errorWidget: (context, url, error) => Container(color: Colors.grey.shade50, child: const Icon(Icons.store, color: Colors.grey)),
+                    placeholder: (context, url) =>
+                        Container(color: Colors.grey.shade50),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey.shade50,
+                      child: const Icon(Icons.store, color: Colors.grey),
+                    ),
                   );
                 }
-                return Container(color: Colors.grey.shade50, child: const Icon(Icons.store, color: Colors.grey));
+                return Container(
+                  color: Colors.grey.shade50,
+                  child: const Icon(Icons.store, color: Colors.grey),
+                );
               },
             ),
           ),
           const SizedBox(width: 16),
-          
+
           // Store Details
           Expanded(
             child: Column(
@@ -97,7 +112,12 @@ class _RichStoreProfileCardState extends State<RichStoreProfileCard> {
           // Visit Button
           GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => StoreScreen(storeId: widget.storeId)));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StoreScreen(storeId: widget.storeId),
+                ),
+              );
             },
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

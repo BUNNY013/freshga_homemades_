@@ -37,7 +37,11 @@ class RecentSearchTile extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.close_rounded, color: Colors.grey, size: 18),
+              icon: const Icon(
+                Icons.close_rounded,
+                color: Colors.grey,
+                size: 18,
+              ),
               onPressed: onRemove,
               constraints: const BoxConstraints(),
               padding: EdgeInsets.zero,

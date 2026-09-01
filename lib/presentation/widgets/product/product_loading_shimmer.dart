@@ -13,8 +13,12 @@ class ProductLoadingShimmer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image Shimmer
-            _buildShimmerBlock(height: 400, width: double.infinity, borderRadius: 0),
-            
+            _buildShimmerBlock(
+              height: 400,
+              width: double.infinity,
+              borderRadius: 0,
+            ),
+
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -29,7 +33,7 @@ class ProductLoadingShimmer extends StatelessWidget {
                   // Price
                   _buildShimmerBlock(height: 24, width: 80),
                   const SizedBox(height: 24),
-                  
+
                   // Variants
                   _buildShimmerBlock(height: 16, width: 100),
                   const SizedBox(height: 12),
@@ -43,7 +47,7 @@ class ProductLoadingShimmer extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Benefits
                   _buildShimmerBlock(height: 16, width: 150),
                   const SizedBox(height: 12),
@@ -54,14 +58,18 @@ class ProductLoadingShimmer extends StatelessWidget {
                   _buildShimmerBlock(height: 16, width: 200),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildShimmerBlock({required double height, double? width, double borderRadius = 8}) {
+  Widget _buildShimmerBlock({
+    required double height,
+    double? width,
+    double borderRadius = 8,
+  }) {
     return Container(
       height: height,
       width: width,

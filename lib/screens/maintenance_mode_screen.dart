@@ -10,7 +10,8 @@ class MaintenanceModeScreen extends StatefulWidget {
   State<MaintenanceModeScreen> createState() => _MaintenanceModeScreenState();
 }
 
-class _MaintenanceModeScreenState extends State<MaintenanceModeScreen> with SingleTickerProviderStateMixin {
+class _MaintenanceModeScreenState extends State<MaintenanceModeScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
@@ -21,7 +22,10 @@ class _MaintenanceModeScreenState extends State<MaintenanceModeScreen> with Sing
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
     _controller.forward();
   }
 
@@ -61,7 +65,7 @@ class _MaintenanceModeScreenState extends State<MaintenanceModeScreen> with Sing
                         },
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Title
                       const Text(
                         'We\'re Under Maintenance',
@@ -73,7 +77,7 @@ class _MaintenanceModeScreenState extends State<MaintenanceModeScreen> with Sing
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Dynamic Message
                       Text(
                         maintenance.message,
@@ -85,11 +89,14 @@ class _MaintenanceModeScreenState extends State<MaintenanceModeScreen> with Sing
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 32),
-                      
+
                       // Expected Time Badge (if provided)
                       if (maintenance.endTime.isNotEmpty)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 16,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF6F6F6),
                             borderRadius: BorderRadius.circular(16),
@@ -97,7 +104,11 @@ class _MaintenanceModeScreenState extends State<MaintenanceModeScreen> with Sing
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.access_time_rounded, color: AppColors.primaryGreen, size: 24),
+                              const Icon(
+                                Icons.access_time_rounded,
+                                color: AppColors.primaryGreen,
+                                size: 24,
+                              ),
                               const SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,9 +134,10 @@ class _MaintenanceModeScreenState extends State<MaintenanceModeScreen> with Sing
                             ],
                           ),
                         ),
-                      
-                      if (maintenance.endTime.isNotEmpty) const SizedBox(height: 32),
-                      
+
+                      if (maintenance.endTime.isNotEmpty)
+                        const SizedBox(height: 32),
+
                       // Footer
                       const Text(
                         'Thank you for your patience.',
@@ -135,14 +147,15 @@ class _MaintenanceModeScreenState extends State<MaintenanceModeScreen> with Sing
                         ),
                       ),
                       const SizedBox(height: 40),
-                      
+
                       // Logo Placeholder at the bottom
                       Image.asset(
                         'assets/FreshGa-homemades-icon.png',
                         width: 100,
                         height: 50,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => const SizedBox(height: 50),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const SizedBox(height: 50),
                       ),
                     ],
                   ),

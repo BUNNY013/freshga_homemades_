@@ -7,13 +7,15 @@ import 'data/categories_data.dart';
 class CategorySeeder {
   static Future<void> seedCategories() async {
     print('📦 Seeding categories from Dart constant...');
-    
+
     final lines = categoriesRawData.split('\n');
     final firestore = FirebaseFirestore.instance;
     final batch = firestore.batch();
     final categoriesCol = firestore.collection('categories');
 
-    final categoryRegex = RegExp(r'(?:[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])?\s*\d+\.\s+(.*)');
+    final categoryRegex = RegExp(
+      r'(?:[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])?\s*\d+\.\s+(.*)',
+    );
 
     int sortOrder = 1;
     int count = 0;
@@ -23,9 +25,9 @@ class CategorySeeder {
       if (match != null) {
         final rawName = match.group(1)!.trim();
         final slug = SlugGenerator.generate(rawName);
-        
+
         final docRef = categoriesCol.doc(slug);
-        
+
         final keywords = KeywordGenerator.generateForEntity(name: rawName);
 
         final catModel = CategoryModel(
@@ -34,11 +36,13 @@ class CategorySeeder {
           slug: slug,
           description: 'Explore the best homemade $rawName',
           image: {
-            'url': 'https://placehold.co/400x400/2E7D32/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
+            'url':
+                'https://placehold.co/400x400/2E7D32/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
             'storagePath': '',
           },
           banner: {
-            'url': 'https://placehold.co/800x600/1B5E20/FFFFFF/png?text=${Uri.encodeComponent(rawName)}', 
+            'url':
+                'https://placehold.co/800x600/1B5E20/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
           },
           itemCount: 0,
           status: 'active',

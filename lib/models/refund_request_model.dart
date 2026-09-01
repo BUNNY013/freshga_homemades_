@@ -48,7 +48,8 @@ class RefundRequestModel {
   final String reason;
   final String description;
   final List<String> imageUrls;
-  final String status; // 'Pending Vendor', 'Approved by Vendor', 'Disputed', 'Refund Processed', 'Rejected'
+  final String
+  status; // 'Pending Vendor', 'Approved by Vendor', 'Disputed', 'Refund Processed', 'Rejected'
   final double refundAmount;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -80,8 +81,12 @@ class RefundRequestModel {
       customerName: json['customerName'] ?? 'Customer',
       customerPhone: json['customerPhone'] ?? '',
       customerAddress: json['customerAddress'] ?? '',
-      items: (json['items'] as List<dynamic>?)
-              ?.map((item) => RefundItemModel.fromJson(item as Map<String, dynamic>))
+      items:
+          (json['items'] as List<dynamic>?)
+              ?.map(
+                (item) =>
+                    RefundItemModel.fromJson(item as Map<String, dynamic>),
+              )
               .toList() ??
           [],
       reason: json['reason'] ?? '',
@@ -89,8 +94,16 @@ class RefundRequestModel {
       imageUrls: List<String>.from(json['imageUrls'] ?? []),
       status: json['status'] ?? 'Pending Vendor',
       refundAmount: (json['refundAmount'] ?? 0.0).toDouble(),
-      createdAt: json['createdAt'] != null ? (json['createdAt'] is Timestamp ? (json['createdAt'] as Timestamp).toDate() : DateTime.parse(json['createdAt'].toString())) : DateTime.now(),
-      updatedAt: json['updatedAt'] != null ? (json['updatedAt'] is Timestamp ? (json['updatedAt'] as Timestamp).toDate() : DateTime.parse(json['updatedAt'].toString())) : DateTime.now(),
+      createdAt: json['createdAt'] != null
+          ? (json['createdAt'] is Timestamp
+                ? (json['createdAt'] as Timestamp).toDate()
+                : DateTime.parse(json['createdAt'].toString()))
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] is Timestamp
+                ? (json['updatedAt'] as Timestamp).toDate()
+                : DateTime.parse(json['updatedAt'].toString()))
+          : DateTime.now(),
     );
   }
 

@@ -18,7 +18,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
   @override
   Widget build(BuildContext context) {
     if (widget.banners.isEmpty) return const SizedBox();
-    
+
     return Column(
       children: [
         CarouselSlider(
@@ -27,7 +27,7 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
             autoPlay: true,
             enlargeCenterPage: true,
             viewportFraction: 0.92,
-            aspectRatio: 16/9,
+            aspectRatio: 16 / 9,
             onPageChanged: (index, reason) {
               setState(() {
                 _currentIndex = index;
@@ -63,16 +63,24 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                         ],
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 12.0,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        if (banner.badgeText != null && banner.badgeText!.isNotEmpty) ...[
+                        if (banner.badgeText != null &&
+                            banner.badgeText!.isNotEmpty) ...[
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.wb_sunny, color: Colors.amber, size: 14),
+                              const Icon(
+                                Icons.wb_sunny,
+                                color: Colors.amber,
+                                size: 14,
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 banner.badgeText!.toUpperCase(),
@@ -87,7 +95,8 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                           ),
                           const SizedBox(height: 8),
                         ],
-                        if (banner.title != null && banner.title!.isNotEmpty) ...[
+                        if (banner.title != null &&
+                            banner.title!.isNotEmpty) ...[
                           Text(
                             banner.title!.replaceAll('\\n', '\n'),
                             style: const TextStyle(
@@ -101,7 +110,8 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                           ),
                           const SizedBox(height: 6),
                         ],
-                        if (banner.subtitle != null && banner.subtitle!.isNotEmpty) ...[
+                        if (banner.subtitle != null &&
+                            banner.subtitle!.isNotEmpty) ...[
                           Text(
                             banner.subtitle!.replaceAll('\\n', '\n'),
                             style: const TextStyle(
@@ -114,16 +124,22 @@ class _HeroBannerCarouselState extends State<HeroBannerCarousel> {
                           ),
                           const SizedBox(height: 10),
                         ],
-                        if (banner.buttonText != null && banner.buttonText!.isNotEmpty)
+                        if (banner.buttonText != null &&
+                            banner.buttonText!.isNotEmpty)
                           ElevatedButton(
                             onPressed: () {
                               // Handle banner tap (e.g., navigation)
                               // if (banner.linkUrl.isNotEmpty) { ... }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E7036), // FreshGa Green
+                              backgroundColor: const Color(
+                                0xFF1E7036,
+                              ), // FreshGa Green
                               foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
+                              ),
                               minimumSize: Size.zero,
                               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               shape: RoundedRectangleBorder(

@@ -11,7 +11,8 @@ class AllFollowedStoresScreen extends StatefulWidget {
   const AllFollowedStoresScreen({super.key});
 
   @override
-  State<AllFollowedStoresScreen> createState() => _AllFollowedStoresScreenState();
+  State<AllFollowedStoresScreen> createState() =>
+      _AllFollowedStoresScreenState();
 }
 
 class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
@@ -64,13 +65,19 @@ class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
-                          onChanged: (val) => setState(() => _searchQuery = val),
+                          onChanged: (val) =>
+                              setState(() => _searchQuery = val),
                           decoration: InputDecoration(
                             hintText: 'Search followed stores...',
-                            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 14,
+                            ),
                             border: InputBorder.none,
                             isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
                           ),
                         ),
                       ),
@@ -84,24 +91,42 @@ class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
                 child: stores.isEmpty
                     ? Center(
                         child: Text(
-                          _searchQuery.isEmpty ? "You aren't following any stores." : "No stores found.",
-                          style: const TextStyle(color: AppColors.textSecondary),
+                          _searchQuery.isEmpty
+                              ? "You aren't following any stores."
+                              : "No stores found.",
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       )
                     : ListView.separated(
                         itemCount: stores.length,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        separatorBuilder: (context, index) => Divider(color: Colors.grey.shade100, height: 24),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        separatorBuilder: (context, index) =>
+                            Divider(color: Colors.grey.shade100, height: 24),
                         itemBuilder: (context, index) {
                           final store = stores[index];
-                          
+
                           // Mock data for UI fidelity based on the image
                           final storeNameStr = store['storeName'] ?? 'Store';
-                          final username = '@${storeNameStr.toString().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '')}';
+                          final username =
+                              '@${storeNameStr.toString().toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '')}';
                           final productsCount = 18 + (index * 7) % 50;
-                          final locations = ['Hyderabad, TS', 'Vijayawada, AP', 'Guntur, AP', 'Ongole, AP', 'Bengaluru, KA', 'Kochi, KL', 'Chennai, TN', 'Mumbai, MH'];
+                          final locations = [
+                            'Hyderabad, TS',
+                            'Vijayawada, AP',
+                            'Guntur, AP',
+                            'Ongole, AP',
+                            'Bengaluru, KA',
+                            'Kochi, KL',
+                            'Chennai, TN',
+                            'Mumbai, MH',
+                          ];
                           final location = locations[index % locations.length];
-                          
+
                           // Mock badges matching the image
                           String? badgeText;
                           Color? badgeColor;
@@ -110,7 +135,9 @@ class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
                             badgeColor = AppColors.primaryGreen;
                           } else if (index == 1) {
                             badgeText = 'Offer';
-                            badgeColor = const Color(0xFFF43F5E); // Premium Pink
+                            badgeColor = const Color(
+                              0xFFF43F5E,
+                            ); // Premium Pink
                           } else if (index == 3) {
                             badgeText = 'Restock';
                             badgeColor = const Color(0xFFE67E22); // Orange
@@ -121,7 +148,8 @@ class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreScreen(storeId: store['storeId']),
+                                  builder: (context) =>
+                                      StoreScreen(storeId: store['storeId']),
                                 ),
                               );
                             },
@@ -137,24 +165,35 @@ class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: badgeColor?.withOpacity(0.4) ?? Colors.grey.shade200, 
-                                        width: 1.5
+                                        color:
+                                            badgeColor?.withOpacity(0.4) ??
+                                            Colors.grey.shade200,
+                                        width: 1.5,
                                       ),
                                     ),
                                     padding: const EdgeInsets.all(3),
                                     child: CircleAvatar(
                                       backgroundColor: Colors.grey[100],
-                                      backgroundImage: (store['storeLogo'] != null && store['storeLogo'].toString().isNotEmpty)
-                                          ? CachedNetworkImageProvider(store['storeLogo'])
-                                          : const CachedNetworkImageProvider('https://images.unsplash.com/photo-1556910103-1c02745a872f?w=100&h=100&fit=crop'),
+                                      backgroundImage:
+                                          (store['storeLogo'] != null &&
+                                              store['storeLogo']
+                                                  .toString()
+                                                  .isNotEmpty)
+                                          ? CachedNetworkImageProvider(
+                                              store['storeLogo'],
+                                            )
+                                          : const CachedNetworkImageProvider(
+                                              'https://images.unsplash.com/photo-1556910103-1c02745a872f?w=100&h=100&fit=crop',
+                                            ),
                                     ),
                                   ),
                                   const SizedBox(width: 16),
-                                  
+
                                   // Middle Info
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           storeNameStr,
@@ -162,7 +201,9 @@ class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
                                             fontSize: 15,
                                             fontWeight: FontWeight.w700,
                                             color: AppColors.textPrimary,
-                                            fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                                            fontFamily:
+                                                GoogleFonts.plusJakartaSans()
+                                                    .fontFamily,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -188,12 +229,15 @@ class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
                                       ],
                                     ),
                                   ),
-                                  
+
                                   // Right side (Badge + Arrow)
                                   if (badgeText != null && badgeColor != null)
                                     Container(
                                       margin: const EdgeInsets.only(right: 12),
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: badgeColor.withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(12),
@@ -204,12 +248,18 @@ class _AllFollowedStoresScreenState extends State<AllFollowedStoresScreen> {
                                           fontSize: 11,
                                           fontWeight: FontWeight.w700,
                                           color: badgeColor,
-                                          fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                                          fontFamily:
+                                              GoogleFonts.plusJakartaSans()
+                                                  .fontFamily,
                                         ),
                                       ),
                                     ),
-                                    
-                                  const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 20),
+
+                                  const Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: Colors.grey,
+                                    size: 20,
+                                  ),
                                 ],
                               ),
                             ),

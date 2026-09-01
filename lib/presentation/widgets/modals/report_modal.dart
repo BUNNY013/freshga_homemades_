@@ -95,7 +95,10 @@ class _ReportModalState extends State<ReportModal> {
   Future<void> _submitReport() async {
     if (_selectedReason == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a reason for reporting'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Please select a reason for reporting'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -127,7 +130,9 @@ class _ReportModalState extends State<ReportModal> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Report submitted successfully. Our Trust & Safety team will review it within 24 hours.'),
+            content: Text(
+              'Report submitted successfully. Our Trust & Safety team will review it within 24 hours.',
+            ),
             backgroundColor: Colors.green,
             duration: Duration(seconds: 4),
           ),
@@ -136,7 +141,10 @@ class _ReportModalState extends State<ReportModal> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error submitting report: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error submitting report: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -177,7 +185,11 @@ class _ReportModalState extends State<ReportModal> {
                 children: [
                   Text(
                     _title,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.red),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -187,7 +199,11 @@ class _ReportModalState extends State<ReportModal> {
               ),
               Text(
                 'Reporting: ${widget.targetName}',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -197,15 +213,17 @@ class _ReportModalState extends State<ReportModal> {
               const SizedBox(height: 8),
 
               // Reason Radio List
-              ..._reasons.map((reason) => RadioListTile<String>(
-                    value: reason,
-                    groupValue: _selectedReason,
-                    onChanged: (val) => setState(() => _selectedReason = val),
-                    title: Text(reason, style: const TextStyle(fontSize: 14)),
-                    contentPadding: EdgeInsets.zero,
-                    activeColor: Colors.red,
-                    dense: true,
-                  )),
+              ..._reasons.map(
+                (reason) => RadioListTile<String>(
+                  value: reason,
+                  groupValue: _selectedReason,
+                  onChanged: (val) => setState(() => _selectedReason = val),
+                  title: Text(reason, style: const TextStyle(fontSize: 14)),
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: Colors.red,
+                  dense: true,
+                ),
+              ),
 
               const SizedBox(height: 16),
               const Text(
@@ -235,16 +253,27 @@ class _ReportModalState extends State<ReportModal> {
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   onPressed: _isSubmitting ? null : _submitReport,
                   child: _isSubmitting
                       ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
                         )
-                      : const Text('Submit Report', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      : const Text(
+                          'Submit Report',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ],

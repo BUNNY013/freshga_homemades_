@@ -35,26 +35,53 @@ class FloatingCartBar extends StatelessWidget {
                     color: Colors.white.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Text("2", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "2",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("₹698", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text("Plus taxes", style: TextStyle(color: Colors.white70, fontSize: 10)),
+                    Text(
+                      "₹698",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      "Plus taxes",
+                      style: TextStyle(color: Colors.white70, fontSize: 10),
+                    ),
                   ],
                 ),
               ],
             ),
             const Row(
               children: [
-                Text("View Cart", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(
+                  "View Cart",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
                 SizedBox(width: 4),
-                Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 14),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  color: Colors.white,
+                  size: 14,
+                ),
               ],
-            )
+            ),
           ],
         ),
       ),

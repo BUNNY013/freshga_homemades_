@@ -41,7 +41,9 @@ class CategoryHeroCard extends StatelessWidget {
               top: 0,
               bottom: 0,
               child: ClipRRect(
-                borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
+                borderRadius: const BorderRadius.horizontal(
+                  right: Radius.circular(16),
+                ),
                 child: CachedNetworkImage(
                   key: ValueKey(category.imageUrl),
                   imageUrl: category.imageUrl,
@@ -75,7 +77,9 @@ class CategoryHeroCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    category.description.isNotEmpty ? category.description : "Traditional flavors,\nmade with love \u{1F33F}",
+                    category.description.isNotEmpty
+                        ? category.description
+                        : "Traditional flavors,\nmade with love \u{1F33F}",
                     style: const TextStyle(
                       fontSize: 13,
                       color: Color(0xFF4A5D54),
@@ -108,7 +112,11 @@ class CategoryHeroCard extends StatelessWidget {
           Positioned(
             right: -20,
             bottom: -20,
-            child: Icon(Icons.storefront, size: 160, color: AppColors.primaryGreen.withOpacity(0.05)),
+            child: Icon(
+              Icons.storefront,
+              size: 160,
+              color: AppColors.primaryGreen.withOpacity(0.05),
+            ),
           ),
           Positioned(
             left: 20,

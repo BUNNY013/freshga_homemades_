@@ -19,23 +19,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       "title": "Homemade Brands From Real Kitchens",
       "description": "Discover authentic homemade foods from trusted creators.",
-      "image": "https://images.unsplash.com/photo-1556910103-1c02745a872f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "image":
+          "https://images.unsplash.com/photo-1556910103-1c02745a872f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       "title": "Follow Your Favorite Homemade Stores",
-      "description": "Stay connected with creators and get notified about new launches.",
-      "image": "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "description":
+          "Stay connected with creators and get notified about new launches.",
+      "image":
+          "https://images.unsplash.com/photo-1544376798-89aa6b82c6cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       "title": "Pickles, Honey, Snacks & Traditional Foods",
-      "description": "Explore handcrafted products from regional homemade brands.",
-      "image": "https://images.unsplash.com/photo-1589153549641-799ff02eeb4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "description":
+          "Explore handcrafted products from regional homemade brands.",
+      "image":
+          "https://images.unsplash.com/photo-1589153549641-799ff02eeb4a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     },
     {
       "title": "Trusted & Verified Sellers",
-      "description": "Every seller is carefully verified for quality and trust.",
-      "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    }
+      "description":
+          "Every seller is carefully verified for quality and trust.",
+      "image":
+          "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    },
   ];
 
   void _onNext() {
@@ -54,9 +61,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await prefs.setBool('hasSeenOnboarding', true);
 
     if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const AuthWrapper()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const AuthWrapper()));
   }
 
   @override
@@ -74,12 +81,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
             itemCount: _onboardingData.length,
             itemBuilder: (context, index) {
-              return OnboardingPage(
-                data: _onboardingData[index],
-              );
+              return OnboardingPage(data: _onboardingData[index]);
             },
           ),
-          
+
           // Bottom Controls
           Positioned(
             bottom: 40,
@@ -107,7 +112,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                
+
                 // Get Started / Next Button
                 SizedBox(
                   width: double.infinity,
@@ -120,7 +125,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                 ),
-                
+
                 if (_currentPage != _onboardingData.length - 1) ...[
                   const SizedBox(height: 16),
                   TextButton(
@@ -134,10 +139,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     ),
                   ),
                 ] else
-                  const SizedBox(height: 64), // maintain height when skip is gone
+                  const SizedBox(
+                    height: 64,
+                  ), // maintain height when skip is gone
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -147,10 +154,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 class OnboardingPage extends StatelessWidget {
   final Map<String, String> data;
 
-  const OnboardingPage({
-    super.key,
-    required this.data,
-  });
+  const OnboardingPage({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -189,7 +193,7 @@ class OnboardingPage extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Text Section
         Expanded(
           flex: 4,
@@ -201,10 +205,9 @@ class OnboardingPage extends StatelessWidget {
                 Text(
                   data["title"]!,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontSize: 26,
-                    height: 1.2,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontSize: 26, height: 1.2),
                 ),
                 const SizedBox(height: 16),
                 Text(

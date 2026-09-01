@@ -12,6 +12,8 @@ class AddressModel {
   final String pincode;
   final String addressType; // 'Home', 'Work', 'Other'
   final bool isDefault;
+  final double? latitude;
+  final double? longitude;
 
   AddressModel({
     String? id,
@@ -25,6 +27,8 @@ class AddressModel {
     required this.pincode,
     this.addressType = 'Home',
     this.isDefault = false,
+    this.latitude,
+    this.longitude,
   }) : id = id ?? const Uuid().v4();
 
   factory AddressModel.fromMap(Map<String, dynamic> map, [String? id]) {
@@ -40,6 +44,12 @@ class AddressModel {
       pincode: map['pincode'] ?? '',
       addressType: map['addressType'] ?? 'Home',
       isDefault: map['isDefault'] ?? false,
+      latitude: map['latitude'] != null
+          ? (map['latitude'] as num).toDouble()
+          : null,
+      longitude: map['longitude'] != null
+          ? (map['longitude'] as num).toDouble()
+          : null,
     );
   }
 
@@ -56,9 +66,11 @@ class AddressModel {
       'pincode': pincode,
       'addressType': addressType,
       'isDefault': isDefault,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     };
   }
-  
+
   AddressModel copyWith({
     String? id,
     String? name,
@@ -71,6 +83,8 @@ class AddressModel {
     String? pincode,
     String? addressType,
     bool? isDefault,
+    double? latitude,
+    double? longitude,
   }) {
     return AddressModel(
       id: id ?? this.id,
@@ -84,6 +98,8 @@ class AddressModel {
       pincode: pincode ?? this.pincode,
       addressType: addressType ?? this.addressType,
       isDefault: isDefault ?? this.isDefault,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
     );
   }
 

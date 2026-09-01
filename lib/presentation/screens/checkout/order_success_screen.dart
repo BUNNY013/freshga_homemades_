@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../screens/customer_home_screen.dart';
 import '../orders/order_details_screen.dart';
+
 class OrderSuccessScreen extends StatelessWidget {
   final String orderId;
   final double amountPaid;
@@ -30,7 +31,7 @@ class OrderSuccessScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              
+
               // Success Animation / Icon
               Stack(
                 alignment: Alignment.center,
@@ -41,14 +42,21 @@ class OrderSuccessScreen extends StatelessWidget {
                     return Transform.translate(
                       offset: Offset(
                         (index * 20.0 - 70) * (isEven ? 1 : -1),
-                        (index * 15.0 - 50) * (isEven ? -1 : 1)
+                        (index * 15.0 - 50) * (isEven ? -1 : 1),
                       ),
                       child: Container(
                         width: isEven ? 6.0 : 4.0,
                         height: isEven ? 6.0 : 4.0,
                         decoration: BoxDecoration(
-                          color: [Colors.green, Colors.orange, Colors.red, Colors.teal][index % 4],
-                          shape: index % 3 == 0 ? BoxShape.rectangle : BoxShape.circle,
+                          color: [
+                            Colors.green,
+                            Colors.orange,
+                            Colors.red,
+                            Colors.teal,
+                          ][index % 4],
+                          shape: index % 3 == 0
+                              ? BoxShape.rectangle
+                              : BoxShape.circle,
                         ),
                       ),
                     );
@@ -66,9 +74,9 @@ class OrderSuccessScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 32),
-              
+
               // Text
               const Text(
                 "Payment Successful!",
@@ -81,9 +89,9 @@ class OrderSuccessScreen extends StatelessWidget {
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 40),
-              
+
               // Order Summary Card
               Container(
                 padding: const EdgeInsets.all(20),
@@ -95,7 +103,13 @@ class OrderSuccessScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Order Summary", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const Text(
+                      "Order Summary",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     _buildSummaryRow("Order ID", "#$orderId"),
                     const SizedBox(height: 16),
@@ -107,9 +121,9 @@ class OrderSuccessScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               const Spacer(),
-              
+
               // Action Buttons
               SizedBox(
                 width: double.infinity,
@@ -119,20 +133,33 @@ class OrderSuccessScreen extends StatelessWidget {
                     // Navigate to Home as root, then push Order Details
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (_) => const CustomerHomeScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const CustomerHomeScreen(),
+                      ),
                       (route) => false,
                     );
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => OrderDetailsScreen(orderId: orderId)),
+                      MaterialPageRoute(
+                        builder: (_) => OrderDetailsScreen(orderId: orderId),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryGreen,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     elevation: 0,
                   ),
-                  child: const Text("View Order Details", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text(
+                    "View Order Details",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -144,14 +171,25 @@ class OrderSuccessScreen extends StatelessWidget {
                     // Navigate back to Home
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (_) => const CustomerHomeScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const CustomerHomeScreen(),
+                      ),
                       (route) => false,
                     );
                   },
                   style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: const Text("Continue Shopping", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 16)),
+                  child: const Text(
+                    "Continue Shopping",
+                    style: TextStyle(
+                      color: AppColors.primaryGreen,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -165,8 +203,18 @@ class OrderSuccessScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 14, fontWeight: FontWeight.w500)),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
       ],
     );
   }

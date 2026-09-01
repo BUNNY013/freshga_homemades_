@@ -6,11 +6,17 @@ class CollectionModel {
   final List<String> productIds;
 
   CollectionModel({
-    required this.id, required this.title, required this.subtitle, 
-    required this.bannerUrl, required this.productIds
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.bannerUrl,
+    required this.productIds,
   });
 
-  factory CollectionModel.fromJson(Map<String, dynamic> json, String documentId) {
+  factory CollectionModel.fromJson(
+    Map<String, dynamic> json,
+    String documentId,
+  ) {
     return CollectionModel(
       id: documentId,
       title: json['title'] ?? '',

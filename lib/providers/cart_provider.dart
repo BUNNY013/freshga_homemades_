@@ -9,7 +9,7 @@ import '../services/store_service.dart';
 
 class CartProvider with ChangeNotifier {
   static const String _cartPrefsKey = 'freshga_cart_items';
-  
+
   Map<String, CartItemModel> _items = {};
 
   Map<String, CartItemModel> get items => {..._items};
@@ -26,7 +26,7 @@ class CartProvider with ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? cartJsonString = prefs.getString(_cartPrefsKey);
-      
+
       if (cartJsonString != null) {
         final Map<String, dynamic> cartMap = json.decode(cartJsonString);
         _items = cartMap.map(
@@ -55,24 +55,45 @@ class CartProvider with ChangeNotifier {
     return '${productId}_$variantId';
   }
 
-  void addToCart({
+  Future<String?> addToCart({
     required ProductModel product,
     required ProductVariantModel variant,
     int quantity = 1,
-  }) {
+  }) async {
+    // 1. Live Validation
+    try {
+      final liveProduct = await ProductService().getProduct(product.id);
+      if (liveProduct == null || !liveProduct.status.startsWith('Live')) {
+        return "This product is no longer available.";
+      }
+      final liveVariant = liveProduct.variants.firstWhere(
+        (v) => v.id == variant.id,
+        orElse: () => variant,
+      );
+      if (liveVariant.isOutOfStock) {
+        return "This item is currently out of stock.";
+      }
+      variant = liveVariant; // Use latest variant data
+    } catch (e) {
+      debugPrint("Live check failed: $e");
+    }
+
     final cartItemId = _generateCartItemId(product.id, variant.id);
 
     if (_items.containsKey(cartItemId)) {
       final currentQty = _items[cartItemId]!.quantity;
       final newQty = currentQty + quantity;
-      
-      if (newQty > 10) return; // Hard bulk limit
+
+      if (variant.manageStock && newQty > variant.stock) {
+        return "Only ${variant.stock} left in stock for ${variant.label.isNotEmpty ? variant.label : product.name}.";
+      }
+
+      if (newQty > 10)
+        return "Maximum 10 items allowed per order."; // Hard bulk limit
 
       _items.update(
         cartItemId,
-        (existingCartItem) => existingCartItem.copyWith(
-          quantity: newQty,
-        ),
+        (existingCartItem) => existingCartItem.copyWith(quantity: newQty),
       );
     } else {
       _items.putIfAbsent(
@@ -86,17 +107,22 @@ class CartProvider with ChangeNotifier {
           productName: product.name,
           imageUrl: product.imageUrl,
           variantLabel: variant.label,
-          price: variant.discountPrice > 0 ? variant.discountPrice : variant.price,
+          price: variant.discountPrice > 0
+              ? variant.discountPrice
+              : variant.price,
           originalPrice: variant.price,
           quantity: quantity,
           addedAt: DateTime.now(),
-          isAvailable: variant.inStock,
+          isAvailable: !variant.isOutOfStock,
           dispatchTime: product.dispatchTime,
+          manageStock: variant.manageStock,
+          stock: variant.stock,
         ),
       );
     }
     _saveCart();
     notifyListeners();
+    return null; // Success
   }
 
   void removeFromCart(String cartItemId) {
@@ -105,19 +131,26 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void incrementQuantity(String cartItemId) {
+  String? incrementQuantity(String cartItemId) {
     if (_items.containsKey(cartItemId)) {
-      if (_items[cartItemId]!.quantity >= 10) return; // Hard bulk limit
-      
+      final item = _items[cartItemId]!;
+      if (!item.isAvailable) return "This item is currently unavailable.";
+      if (item.quantity >= 10)
+        return "Maximum 10 items allowed per order."; // Hard bulk limit
+      if (item.manageStock && (item.quantity + 1) > item.stock) {
+        return "Only ${item.stock} left in stock for ${item.variantLabel.isNotEmpty ? item.variantLabel : item.productName}.";
+      }
+
       _items.update(
         cartItemId,
-        (existingCartItem) => existingCartItem.copyWith(
-          quantity: existingCartItem.quantity + 1,
-        ),
+        (existingCartItem) =>
+            existingCartItem.copyWith(quantity: existingCartItem.quantity + 1),
       );
       _saveCart();
       notifyListeners();
+      return null;
     }
+    return "Item not found in cart.";
   }
 
   void decrementQuantity(String cartItemId) {
@@ -126,9 +159,8 @@ class CartProvider with ChangeNotifier {
     if (_items[cartItemId]!.quantity > 1) {
       _items.update(
         cartItemId,
-        (existingCartItem) => existingCartItem.copyWith(
-          quantity: existingCartItem.quantity - 1,
-        ),
+        (existingCartItem) =>
+            existingCartItem.copyWith(quantity: existingCartItem.quantity - 1),
       );
     } else {
       _items.remove(cartItemId);
@@ -158,6 +190,10 @@ class CartProvider with ChangeNotifier {
       groupedItems[item.storeId]!.add(item);
     }
     return groupedItems;
+  }
+
+  List<CartItemModel> getStoreItems(String storeId) {
+    return _items.values.where((item) => item.storeId == storeId).toList();
   }
 
   int get totalItems {
@@ -205,7 +241,9 @@ class CartProvider with ChangeNotifier {
   }
 
   Future<List<String>> validateCartForCheckout(String storeId) async {
-    final storeItems = _items.values.where((item) => item.storeId == storeId).toList();
+    final storeItems = _items.values
+        .where((item) => item.storeId == storeId)
+        .toList();
     if (storeItems.isEmpty) return [];
 
     List<String> messages = [];
@@ -215,7 +253,9 @@ class CartProvider with ChangeNotifier {
     // Check store subscription/active status
     final isStoreActive = await storeService.isStoreActive(storeId);
     if (!isStoreActive) {
-      messages.add('This store is currently offline. Orders cannot be placed at this time.');
+      messages.add(
+        'This store is currently offline. Orders cannot be placed at this time.',
+      );
       for (var item in storeItems) {
         _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
       }
@@ -224,55 +264,119 @@ class CartProvider with ChangeNotifier {
       return messages;
     }
 
-    await Future.wait(storeItems.map((item) async {
-      try {
-        final liveProduct = await productService.getProduct(item.productId);
-        if (liveProduct == null || !liveProduct.status.startsWith('Live')) {
-           _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
-           messages.add('${item.productName} is no longer available.');
-           return;
-        }
+    await Future.wait(
+      storeItems.map((item) async {
+        try {
+          final liveProduct = await productService.getProduct(item.productId);
+          if (liveProduct == null || !liveProduct.status.startsWith('Live')) {
+            _items.update(
+              item.cartItemId,
+              (i) => i.copyWith(isAvailable: false),
+            );
+            messages.add('${item.productName} is no longer available.');
+            return;
+          }
 
-        final variant = liveProduct.variants.firstWhere(
-           (v) => v.id == item.variantId,
-           orElse: () => ProductVariantModel(id: '', label: '', price: 0, discountPrice: 0, stock: 0, inStock: false, isArchived: true)
-        );
+          final variant = liveProduct.variants.firstWhere(
+            (v) => v.id == item.variantId,
+            orElse: () => ProductVariantModel(
+              id: '',
+              label: '',
+              price: 0,
+              discountPrice: 0,
+              stock: 0,
+              inStock: false,
+              isArchived: true,
+            ),
+          );
 
-        if (variant.id.isEmpty || variant.isArchived) {
-           _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
-           messages.add('${item.productName} (${item.variantLabel}) is no longer available.');
-           return;
-        }
+          if (variant.id.isEmpty || variant.isArchived) {
+            _items.update(
+              item.cartItemId,
+              (i) => i.copyWith(isAvailable: false),
+            );
+            messages.add(
+              '${item.productName} (${item.variantLabel}) is no longer available.',
+            );
+            return;
+          }
 
-        double livePrice = variant.discountPrice > 0 ? variant.discountPrice : variant.price;
-        if (livePrice != item.price) {
-           _items.update(item.cartItemId, (i) => i.copyWith(price: livePrice));
-           messages.add('${item.productName} price changed from ₹${item.price.toInt()} to ₹${livePrice.toInt()}.');
-        }
+          double livePrice = variant.discountPrice > 0
+              ? variant.discountPrice
+              : variant.price;
+          if (livePrice != item.price) {
+            _items.update(item.cartItemId, (i) => i.copyWith(price: livePrice));
+            messages.add(
+              '${item.productName} price changed from ₹${item.price.toInt()} to ₹${livePrice.toInt()}.',
+            );
+          }
 
-        if (!variant.inStock) {
-           if (item.isAvailable) {
-              _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: false));
+          if (variant.isOutOfStock) {
+            if (item.isAvailable) {
+              _items.update(
+                item.cartItemId,
+                (i) => i.copyWith(
+                  isAvailable: false,
+                  stock: variant.stock,
+                  manageStock: variant.manageStock,
+                ),
+              );
               messages.add('${item.productName} is currently unavailable.');
-           }
-        } else if (!item.isAvailable) {
-           _items.update(item.cartItemId, (i) => i.copyWith(isAvailable: true));
-           messages.add('${item.productName} is now available again.');
+            }
+          } else {
+            if (!item.isAvailable) {
+              _items.update(
+                item.cartItemId,
+                (i) => i.copyWith(
+                  isAvailable: true,
+                  stock: variant.stock,
+                  manageStock: variant.manageStock,
+                ),
+              );
+              messages.add('${item.productName} is now available again.');
+            }
+
+            if (variant.manageStock && item.quantity > variant.stock) {
+              _items.update(
+                item.cartItemId,
+                (i) => i.copyWith(
+                  quantity: variant.stock,
+                  stock: variant.stock,
+                  manageStock: variant.manageStock,
+                ),
+              );
+              messages.add(
+                '${item.productName} (${item.variantLabel}) was reduced to ${variant.stock} as only ${variant.stock} left in stock.',
+              );
+            } else {
+              // Just sync stock quietly
+              _items.update(
+                item.cartItemId,
+                (i) => i.copyWith(
+                  stock: variant.stock,
+                  manageStock: variant.manageStock,
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          debugPrint('Validation failed for ${item.productId}: $e');
         }
-      } catch (e) {
-        debugPrint('Validation failed for ${item.productId}: $e');
-      }
-    }));
+      }),
+    );
 
     if (messages.isNotEmpty) {
       _saveCart();
       notifyListeners();
     }
-    
+
     return messages;
   }
 
-  Future<String?> validateCheckoutAddress(String storeId, AddressModel deliveryAddress) async {
+  Future<String?> validateCheckoutAddress(
+    String storeId,
+    AddressModel deliveryAddress,
+  ) async {
     try {
       final storeService = StoreService();
       final store = await storeService.getStore(storeId);

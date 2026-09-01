@@ -36,11 +36,16 @@ class EmptyCartScreen extends StatelessWidget {
               return Stack(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.favorite_border, color: AppColors.textPrimary),
+                    icon: const Icon(
+                      Icons.favorite_border,
+                      color: AppColors.textPrimary,
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const LikedProductsScreen(),
+                        ),
                       );
                     },
                   ),
@@ -54,7 +59,10 @@ class EmptyCartScreen extends StatelessWidget {
                           color: Colors.red,
                           shape: BoxShape.circle,
                         ),
-                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
                         child: Text(
                           '$count',
                           style: const TextStyle(

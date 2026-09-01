@@ -8,14 +8,16 @@ import 'data/categories_data.dart';
 class TagsSeeder {
   static Future<void> seedTags() async {
     print('🌱 Seeding tags collection and mapping subcategories...');
-    
+
     final firestore = FirebaseFirestore.instance;
     final batch = firestore.batch();
     final tagsCol = firestore.collection('tags');
 
     // 1. We will read the categories data to figure out which tag applies to which subcategory
     final lines = categoriesRawData.split('\n');
-    final categoryRegex = RegExp(r'(?:[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])?\s*\d+\.\s+(.*)');
+    final categoryRegex = RegExp(
+      r'(?:[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])?\s*\d+\.\s+(.*)',
+    );
     final subCategoryRegex = RegExp(r'^\s*•\s+(.*)');
 
     String currentCategoryName = '';
@@ -32,9 +34,11 @@ class TagsSeeder {
       if (subMatch != null && currentCategoryName.isNotEmpty) {
         final rawName = subMatch.group(1)!.trim();
         final slug = SlugGenerator.generate('$currentCategoryName $rawName');
-        
-        final mappedTags = TagMapper.autoMapTagsForCategory(currentCategoryName);
-        
+
+        final mappedTags = TagMapper.autoMapTagsForCategory(
+          currentCategoryName,
+        );
+
         for (var tag in mappedTags) {
           final tagSlug = SlugGenerator.generate(tag);
           tagToSubIds.putIfAbsent(tagSlug, () => []).add(slug);
@@ -47,10 +51,10 @@ class TagsSeeder {
       final name = tagData['name'] as String;
       final icon = tagData['icon'] as String;
       final isFilterable = tagData['isFilterable'] as bool;
-      
+
       final slug = SlugGenerator.generate(name);
       final docRef = tagsCol.doc(slug);
-      
+
       final keywords = KeywordGenerator.generateForEntity(name: name);
       final subCategoryIds = tagToSubIds[slug] ?? [];
 
@@ -72,6 +76,8 @@ class TagsSeeder {
     }
 
     await batch.commit();
-    print('✅ Successfully seeded $count tags mapped to their exact subcategories.');
+    print(
+      '✅ Successfully seeded $count tags mapped to their exact subcategories.',
+    );
   }
 }

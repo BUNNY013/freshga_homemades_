@@ -14,11 +14,14 @@ class OrderModel {
   final double platformFee;
   final String paymentStatus;
   final String deliveryAddress;
+  final double? deliveryLatitude;
+  final double? deliveryLongitude;
   final String customerPhone;
-  final String orderStatus; // 'New', 'Accepted', 'Packed', 'Shipped', 'Delivered', 'Declined'
+  final String
+  orderStatus; // 'New', 'Accepted', 'Packed', 'Shipped', 'Delivered', 'Declined'
   final String paymentMethod; // 'Online', 'COD'
   final String payoutStatus; // 'pending', 'paid'
-  
+
   // Tracking & Lifecycle
   final String shippingMethod;
   final String shippingProvider;
@@ -34,11 +37,11 @@ class OrderModel {
   final bool isIssueReported;
   final String issueStatus;
   final String issueId;
-  
+
   // SLAs
   final DateTime expiresAt;
   final DateTime maxDispatchDate;
-  
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -56,6 +59,8 @@ class OrderModel {
     this.platformFee = 0.0,
     required this.paymentStatus,
     required this.deliveryAddress,
+    this.deliveryLatitude,
+    this.deliveryLongitude,
     this.customerPhone = '',
     required this.orderStatus,
     this.paymentMethod = 'Online',
@@ -87,7 +92,8 @@ class OrderModel {
       storeName: json['storeName'] ?? '',
       customerId: json['customerId'] ?? '',
       customerName: json['customerName'] ?? 'Customer',
-      items: (json['items'] as List<dynamic>?)
+      items:
+          (json['items'] as List<dynamic>?)
               ?.map((item) => OrderItem.fromJson(item as Map<String, dynamic>))
               .toList() ??
           [],
@@ -98,6 +104,12 @@ class OrderModel {
       platformFee: (json['platformFee'] ?? 0.0).toDouble(),
       paymentStatus: json['paymentStatus'] ?? 'Pending',
       deliveryAddress: json['deliveryAddress'] ?? '',
+      deliveryLatitude: json['deliveryLatitude'] != null
+          ? (json['deliveryLatitude'] as num).toDouble()
+          : null,
+      deliveryLongitude: json['deliveryLongitude'] != null
+          ? (json['deliveryLongitude'] as num).toDouble()
+          : null,
       customerPhone: json['customerPhone'] ?? '',
       orderStatus: json['orderStatus'] ?? 'New',
       paymentMethod: json['paymentMethod'] ?? 'Online',
@@ -111,17 +123,33 @@ class OrderModel {
       deliveryTime: json['deliveryTime'] ?? '',
       receiptImageUrl: json['receiptImageUrl'] ?? '',
       rejectionReason: json['rejectionReason'] ?? '',
-      timeline: json['timeline'] != null 
-          ? List<Map<String, dynamic>>.from(json['timeline']) 
+      timeline: json['timeline'] != null
+          ? List<Map<String, dynamic>>.from(json['timeline'])
           : [],
       isRated: json['isRated'] ?? false,
       isIssueReported: json['isIssueReported'] ?? false,
       issueStatus: json['issueStatus'] ?? '',
       issueId: json['issueId'] ?? '',
-      expiresAt: json['expiresAt'] != null ? (json['expiresAt'] is Timestamp ? (json['expiresAt'] as Timestamp).toDate() : DateTime.parse(json['expiresAt'].toString())) : DateTime.now().add(const Duration(hours: 24)),
-      maxDispatchDate: json['maxDispatchDate'] != null ? (json['maxDispatchDate'] is Timestamp ? (json['maxDispatchDate'] as Timestamp).toDate() : DateTime.parse(json['maxDispatchDate'].toString())) : DateTime.now().add(const Duration(days: 2)),
-      createdAt: json['createdAt'] != null ? (json['createdAt'] is Timestamp ? (json['createdAt'] as Timestamp).toDate() : DateTime.parse(json['createdAt'].toString())) : DateTime.now(),
-      updatedAt: json['updatedAt'] != null ? (json['updatedAt'] is Timestamp ? (json['updatedAt'] as Timestamp).toDate() : DateTime.parse(json['updatedAt'].toString())) : DateTime.now(),
+      expiresAt: json['expiresAt'] != null
+          ? (json['expiresAt'] is Timestamp
+                ? (json['expiresAt'] as Timestamp).toDate()
+                : DateTime.parse(json['expiresAt'].toString()))
+          : DateTime.now().add(const Duration(hours: 24)),
+      maxDispatchDate: json['maxDispatchDate'] != null
+          ? (json['maxDispatchDate'] is Timestamp
+                ? (json['maxDispatchDate'] as Timestamp).toDate()
+                : DateTime.parse(json['maxDispatchDate'].toString()))
+          : DateTime.now().add(const Duration(days: 2)),
+      createdAt: json['createdAt'] != null
+          ? (json['createdAt'] is Timestamp
+                ? (json['createdAt'] as Timestamp).toDate()
+                : DateTime.parse(json['createdAt'].toString()))
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? (json['updatedAt'] is Timestamp
+                ? (json['updatedAt'] as Timestamp).toDate()
+                : DateTime.parse(json['updatedAt'].toString()))
+          : DateTime.now(),
     );
   }
 
@@ -140,6 +168,8 @@ class OrderModel {
       'platformFee': platformFee,
       'paymentStatus': paymentStatus,
       'deliveryAddress': deliveryAddress,
+      if (deliveryLatitude != null) 'deliveryLatitude': deliveryLatitude,
+      if (deliveryLongitude != null) 'deliveryLongitude': deliveryLongitude,
       'customerPhone': customerPhone,
       'orderStatus': orderStatus,
       'paymentMethod': paymentMethod,
@@ -179,6 +209,8 @@ class OrderModel {
     double? platformFee,
     String? paymentStatus,
     String? deliveryAddress,
+    double? deliveryLatitude,
+    double? deliveryLongitude,
     String? customerPhone,
     String? orderStatus,
     String? paymentMethod,
@@ -207,6 +239,8 @@ class OrderModel {
       platformFee: platformFee ?? this.platformFee,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      deliveryLatitude: deliveryLatitude ?? this.deliveryLatitude,
+      deliveryLongitude: deliveryLongitude ?? this.deliveryLongitude,
       customerPhone: customerPhone ?? this.customerPhone,
       orderStatus: orderStatus ?? this.orderStatus,
       paymentMethod: paymentMethod ?? this.paymentMethod,

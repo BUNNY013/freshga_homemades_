@@ -6,7 +6,10 @@ class CustomerService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Get or Create Customer
-  Future<CustomerModel> getOrCreateCustomer(String uid, String phoneNumber) async {
+  Future<CustomerModel> getOrCreateCustomer(
+    String uid,
+    String phoneNumber,
+  ) async {
     final docRef = _firestore.collection('customers').doc(uid);
     final docSnap = await docRef.get();
 
@@ -56,6 +59,7 @@ class CustomerService {
       'locationUpdatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
+
   // Save Address
   Future<void> saveAddress(String uid, AddressModel address) async {
     final docRef = _firestore.collection('customers').doc(uid);
@@ -87,8 +91,7 @@ class CustomerService {
           'country': 'India',
           'pincode': address.pincode,
         },
-      if (makeDefault)
-        'locationSource': 'checkout_address',
+      if (makeDefault) 'locationSource': 'checkout_address',
     }, SetOptions(merge: true));
   }
 
@@ -97,7 +100,9 @@ class CustomerService {
     final docRef = _firestore.collection('customers').doc(uid);
     final snapshot = await docRef.get();
     if (snapshot.exists) {
-      final List<dynamic> addresses = List<dynamic>.from(snapshot.data()?['savedAddresses'] ?? []);
+      final List<dynamic> addresses = List<dynamic>.from(
+        snapshot.data()?['savedAddresses'] ?? [],
+      );
       addresses.removeWhere((addr) => addr['id'] == addressId);
       await docRef.update({'savedAddresses': addresses});
     }
@@ -108,8 +113,12 @@ class CustomerService {
     final docRef = _firestore.collection('customers').doc(uid);
     final snapshot = await docRef.get();
     if (snapshot.exists) {
-      final List<dynamic> addresses = List<dynamic>.from(snapshot.data()?['savedAddresses'] ?? []);
-      final index = addresses.indexWhere((addr) => addr['id'] == updatedAddress.id);
+      final List<dynamic> addresses = List<dynamic>.from(
+        snapshot.data()?['savedAddresses'] ?? [],
+      );
+      final index = addresses.indexWhere(
+        (addr) => addr['id'] == updatedAddress.id,
+      );
       if (index != -1) {
         if (updatedAddress.isDefault) {
           for (var i = 0; i < addresses.length; i++) {
@@ -120,9 +129,7 @@ class CustomerService {
         }
         addresses[index] = updatedAddress.toMap();
 
-        final updates = <String, dynamic>{
-          'savedAddresses': addresses,
-        };
+        final updates = <String, dynamic>{'savedAddresses': addresses};
         if (updatedAddress.isDefault) {
           updates['selectedLocation'] = {
             'city': updatedAddress.city,
@@ -143,7 +150,9 @@ class CustomerService {
     final docRef = _firestore.collection('customers').doc(uid);
     final snapshot = await docRef.get();
     if (snapshot.exists) {
-      final List<dynamic> addresses = List<dynamic>.from(snapshot.data()?['savedAddresses'] ?? []);
+      final List<dynamic> addresses = List<dynamic>.from(
+        snapshot.data()?['savedAddresses'] ?? [],
+      );
       AddressModel? targetAddr;
       for (var i = 0; i < addresses.length; i++) {
         final map = Map<String, dynamic>.from(addresses[i]);
@@ -154,9 +163,7 @@ class CustomerService {
           targetAddr = AddressModel.fromMap(map);
         }
       }
-      final updates = <String, dynamic>{
-        'savedAddresses': addresses,
-      };
+      final updates = <String, dynamic>{'savedAddresses': addresses};
       if (targetAddr != null) {
         updates['selectedLocation'] = {
           'city': targetAddr.city,

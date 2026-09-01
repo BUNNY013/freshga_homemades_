@@ -22,14 +22,27 @@ class StoreSearchBar extends StatelessWidget {
               ),
               child: TextField(
                 onChanged: (value) {
-                  Provider.of<StoreProvider>(context, listen: false).setSearchQuery(value);
+                  Provider.of<StoreProvider>(
+                    context,
+                    listen: false,
+                  ).setSearchQuery(value);
                 },
                 decoration: InputDecoration(
                   hintText: "Search products from $storeName...",
-                  hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey.shade500, size: 20),
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 13,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.grey.shade500,
+                    size: 20,
+                  ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ),

@@ -38,7 +38,7 @@ class TrustStripSection extends StatelessWidget {
             ),
             _buildDivider(),
             const _TrustItem(
-              icon: Icons.soup_kitchen_outlined, 
+              icon: Icons.soup_kitchen_outlined,
               title: "Handcrafted Joy",
               subtitle: "Fresh flavors",
             ),

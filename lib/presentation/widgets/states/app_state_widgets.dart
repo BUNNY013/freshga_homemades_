@@ -48,12 +48,24 @@ class ErrorStateWidget extends StatelessWidget {
                 color: Colors.red.shade50,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.error_outline_rounded, size: 64, color: Colors.red.shade600),
+              child: Icon(
+                Icons.error_outline_rounded,
+                size: 64,
+                color: Colors.red.shade600,
+              ),
             ),
             const SizedBox(height: 24),
-            Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 12),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+            Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onRetry,
@@ -62,8 +74,13 @@ class ErrorStateWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
@@ -105,9 +122,17 @@ class PermissionDeniedWidget extends StatelessWidget {
               child: Icon(icon, size: 64, color: Colors.orange.shade600),
             ),
             const SizedBox(height: 24),
-            Text(title, style: Theme.of(context).textTheme.titleLarge, textAlign: TextAlign.center),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 12),
-            Text(message, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
+            Text(
+              message,
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onOpenSettings,
@@ -116,8 +141,13 @@ class PermissionDeniedWidget extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
@@ -152,7 +182,11 @@ class SuccessStateOverlay extends StatelessWidget {
                   color: Colors.green.shade50,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check_circle_outline_rounded, size: 64, color: AppColors.primaryGreen),
+                child: const Icon(
+                  Icons.check_circle_outline_rounded,
+                  size: 64,
+                  color: AppColors.primaryGreen,
+                ),
               ),
               const SizedBox(height: 24),
               Text(

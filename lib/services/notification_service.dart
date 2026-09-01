@@ -45,7 +45,9 @@ class NotificationService {
       debugPrint('Got a message whilst in the foreground!');
       debugPrint('Message data: ${message.data}');
       if (message.notification != null) {
-        debugPrint('Message also contained a notification: ${message.notification}');
+        debugPrint(
+          'Message also contained a notification: ${message.notification}',
+        );
       }
     });
 
@@ -74,10 +76,10 @@ class NotificationService {
 
       if (settings.authorizationStatus == AuthorizationStatus.authorized) {
         debugPrint('User granted notification permissions.');
-        
+
         // 2. Fetch the FCM Device Token
         String? token = await _messaging.getToken();
-        
+
         if (token != null) {
           debugPrint('FCM Token generated: $token');
           await _saveTokenToDatabase(token);
@@ -88,7 +90,9 @@ class NotificationService {
           _saveTokenToDatabase(newToken);
         });
       } else {
-        debugPrint('User declined or has not accepted notification permissions.');
+        debugPrint(
+          'User declined or has not accepted notification permissions.',
+        );
       }
     } catch (e) {
       debugPrint("Failed to initialize notifications: $e");
@@ -121,10 +125,10 @@ class NotificationService {
         'fcmToken': FieldValue.delete(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
-      
+
       // Optionally delete the token from the device entirely
       await _messaging.deleteToken();
-      
+
       debugPrint("FCM token securely cleared for user ${user.uid}");
     } catch (e) {
       debugPrint("Failed to clear FCM token: $e");

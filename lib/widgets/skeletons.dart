@@ -210,7 +210,11 @@ class StoreSkeleton extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(width: 120, height: 14, color: Colors.white),
+                          Container(
+                            width: 120,
+                            height: 14,
+                            color: Colors.white,
+                          ),
                           const SizedBox(height: 8),
                           Container(width: 80, height: 12, color: Colors.white),
                         ],

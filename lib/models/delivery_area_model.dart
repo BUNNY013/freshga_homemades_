@@ -22,8 +22,8 @@ class DeliveryAreaModel {
       states: List<String>.from(json['states'] ?? []),
       ruleType: json['ruleType'] ?? 'free',
       deliveryCharge: (json['deliveryCharge'] ?? 0.0).toDouble(),
-      freeShippingThreshold: json['freeShippingThreshold'] != null 
-          ? (json['freeShippingThreshold']).toDouble() 
+      freeShippingThreshold: json['freeShippingThreshold'] != null
+          ? (json['freeShippingThreshold']).toDouble()
           : null,
     );
   }
@@ -40,7 +40,10 @@ class DeliveryAreaModel {
   }
 
   // Helper method to create default areas
-  static List<DeliveryAreaModel> createDefaultAreas(String vendorState, bool canSellPanIndia) {
+  static List<DeliveryAreaModel> createDefaultAreas(
+    String vendorState,
+    bool canSellPanIndia,
+  ) {
     List<DeliveryAreaModel> areas = [
       DeliveryAreaModel(
         areaId: 'area_mystate',
@@ -48,7 +51,7 @@ class DeliveryAreaModel {
         states: [vendorState],
         ruleType: 'free',
         deliveryCharge: 0.0,
-      )
+      ),
     ];
 
     if (canSellPanIndia) {
@@ -59,7 +62,7 @@ class DeliveryAreaModel {
           states: ['*'], // Represents all states not explicitly covered
           ruleType: 'free',
           deliveryCharge: 0.0,
-        )
+        ),
       );
     }
 

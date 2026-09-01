@@ -4,7 +4,7 @@ import '../services/banner_service.dart';
 
 class BannerProvider with ChangeNotifier {
   final BannerService _service = BannerService();
-  
+
   List<BannerModel> _banners = [];
   bool _isLoading = false;
 

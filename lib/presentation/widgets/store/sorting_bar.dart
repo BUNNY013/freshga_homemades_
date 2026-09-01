@@ -16,13 +16,33 @@ class SortingBar extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildSortChip(context, "Best Selling", StoreSortType.bestSelling, provider.sortType),
+                _buildSortChip(
+                  context,
+                  "Best Selling",
+                  StoreSortType.bestSelling,
+                  provider.sortType,
+                ),
                 const SizedBox(width: 8),
-                _buildSortChip(context, "Newest", StoreSortType.newest, provider.sortType),
+                _buildSortChip(
+                  context,
+                  "Newest",
+                  StoreSortType.newest,
+                  provider.sortType,
+                ),
                 const SizedBox(width: 8),
-                _buildSortChip(context, "Price: Low to High", StoreSortType.priceLowHigh, provider.sortType),
+                _buildSortChip(
+                  context,
+                  "Price: Low to High",
+                  StoreSortType.priceLowHigh,
+                  provider.sortType,
+                ),
                 const SizedBox(width: 8),
-                _buildSortChip(context, "Price: High to Low", StoreSortType.priceHighLow, provider.sortType),
+                _buildSortChip(
+                  context,
+                  "Price: High to Low",
+                  StoreSortType.priceHighLow,
+                  provider.sortType,
+                ),
               ],
             ),
           );
@@ -31,7 +51,12 @@ class SortingBar extends StatelessWidget {
     );
   }
 
-  Widget _buildSortChip(BuildContext context, String label, StoreSortType type, StoreSortType selectedType) {
+  Widget _buildSortChip(
+    BuildContext context,
+    String label,
+    StoreSortType type,
+    StoreSortType selectedType,
+  ) {
     final isSelected = type == selectedType;
     return GestureDetector(
       onTap: () {
@@ -40,24 +65,36 @@ class SortingBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE8F5E9) : Colors.white, // Light green if selected
+          color: isSelected
+              ? const Color(0xFFE8F5E9)
+              : Colors.white, // Light green if selected
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isSelected ? AppColors.primaryGreen.withOpacity(0.3) : Colors.grey.shade300),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryGreen.withOpacity(0.3)
+                : Colors.grey.shade300,
+          ),
         ),
         child: Row(
           children: [
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? AppColors.primaryGreen : AppColors.textSecondary,
+                color: isSelected
+                    ? AppColors.primaryGreen
+                    : AppColors.textSecondary,
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
             if (isSelected && type == StoreSortType.bestSelling) ...[
               const SizedBox(width: 4),
-              const Icon(Icons.keyboard_arrow_down, size: 14, color: AppColors.primaryGreen),
-            ]
+              const Icon(
+                Icons.keyboard_arrow_down,
+                size: 14,
+                color: AppColors.primaryGreen,
+              ),
+            ],
           ],
         ),
       ),

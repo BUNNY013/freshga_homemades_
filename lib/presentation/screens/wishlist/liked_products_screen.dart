@@ -21,7 +21,11 @@ class LikedProductsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: AppColors.textPrimary,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Consumer<WishlistProvider>(
@@ -58,7 +62,9 @@ class LikedProductsScreen extends StatelessWidget {
             builder: (context, wishlistProvider, child) {
               if (wishlistProvider.isLoading) {
                 return const Center(
-                  child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                  child: CircularProgressIndicator(
+                    color: AppColors.primaryGreen,
+                  ),
                 );
               }
 
@@ -72,12 +78,21 @@ class LikedProductsScreen extends StatelessWidget {
                 color: AppColors.primaryGreen,
                 onRefresh: () => wishlistProvider.refresh(),
                 child: ListView.separated(
-                  padding: const EdgeInsets.only(top: 16, left: 16, right: 16, bottom: 100),
+                  padding: const EdgeInsets.only(
+                    top: 16,
+                    left: 16,
+                    right: 16,
+                    bottom: 100,
+                  ),
                   itemCount: products.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 14),
                   itemBuilder: (context, index) {
                     final product = products[index];
-                    return _buildLikedItemCard(context, product, wishlistProvider);
+                    return _buildLikedItemCard(
+                      context,
+                      product,
+                      wishlistProvider,
+                    );
                   },
                 ),
               );
@@ -135,15 +150,26 @@ class LikedProductsScreen extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              icon: const Icon(Icons.explore_rounded, color: Colors.white, size: 18),
+              icon: const Icon(
+                Icons.explore_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
               label: const Text(
                 'Explore Specialties',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ),
           ],
@@ -227,7 +253,9 @@ class LikedProductsScreen extends StatelessWidget {
                           wishlistProvider.removeLike(product.id);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Removed ${product.name} from Liked Products'),
+                              content: Text(
+                                'Removed ${product.name} from Liked Products',
+                              ),
                               duration: const Duration(seconds: 2),
                               action: SnackBarAction(
                                 label: 'Undo',
@@ -257,11 +285,17 @@ class LikedProductsScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.storefront_rounded, size: 14, color: AppColors.textSecondary),
+                      const Icon(
+                        Icons.storefront_rounded,
+                        size: 14,
+                        color: AppColors.textSecondary,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          product.storeName.isNotEmpty ? product.storeName : 'Homemade Kitchen',
+                          product.storeName.isNotEmpty
+                              ? product.storeName
+                              : 'Homemade Kitchen',
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.textSecondary,
@@ -313,34 +347,53 @@ class LikedProductsScreen extends StatelessWidget {
                       ),
                       // Add to Cart button
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (product.variants.length > 1) {
                             showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
                               backgroundColor: Colors.transparent,
-                              builder: (ctx) => VariantSelectionBottomSheet(product: product),
+                              builder: (ctx) =>
+                                  VariantSelectionBottomSheet(product: product),
                             );
                             return;
                           }
                           if (product.variants.isNotEmpty) {
-                            final cartProvider = Provider.of<CartProvider>(context, listen: false);
-                            cartProvider.addToCart(
+                            final cartProvider = Provider.of<CartProvider>(
+                              context,
+                              listen: false,
+                            );
+                            final error = await cartProvider.addToCart(
                               product: product,
                               variant: product.variants.first,
                             );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Added ${product.name} to cart!'),
-                                backgroundColor: AppColors.primaryGreen,
-                                duration: const Duration(milliseconds: 1500),
-                              ),
-                            );
+                            if (error != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(error),
+                                  backgroundColor: Colors.red,
+                                  duration: const Duration(milliseconds: 1500),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Added ${product.name} to cart!',
+                                  ),
+                                  backgroundColor: AppColors.primaryGreen,
+                                  duration: const Duration(milliseconds: 1500),
+                                ),
+                              );
+                            }
                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryGreen,
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           shape: RoundedRectangleBorder(
@@ -350,7 +403,11 @@ class LikedProductsScreen extends StatelessWidget {
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.add_shopping_cart_rounded, size: 14, color: Colors.white),
+                            Icon(
+                              Icons.add_shopping_cart_rounded,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                             SizedBox(width: 4),
                             Text(
                               'Add',
@@ -376,7 +433,11 @@ class LikedProductsScreen extends StatelessWidget {
 
   Widget _buildPlaceholderIcon() {
     return const Center(
-      child: Icon(Icons.ramen_dining_rounded, color: AppColors.textSecondary, size: 28),
+      child: Icon(
+        Icons.ramen_dining_rounded,
+        color: AppColors.textSecondary,
+        size: 28,
+      ),
     );
   }
 }

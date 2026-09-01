@@ -11,10 +11,11 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   late AnimationController _scaleController;
   late AnimationController _fadeController;
-  
+
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
@@ -22,18 +23,15 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    
+
     // Logo scale animation
     _scaleController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    
+
     _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _scaleController,
-        curve: Curves.elasticOut,
-      ),
+      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
     );
 
     // Text fade and slide animation
@@ -42,19 +40,15 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       duration: const Duration(milliseconds: 800),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: Curves.easeIn,
-      ),
-    );
-    
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
-      CurvedAnimation(
-        parent: _fadeController,
-        curve: Curves.easeOutCubic,
-      ),
-    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeIn));
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
+          CurvedAnimation(parent: _fadeController, curve: Curves.easeOutCubic),
+        );
 
     _playAnimations();
   }
@@ -63,19 +57,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     await Future.delayed(const Duration(milliseconds: 300));
     if (!mounted) return;
     _scaleController.forward();
-    
+
     // Stagger the text animation
     await Future.delayed(const Duration(milliseconds: 600));
     if (!mounted) return;
     _fadeController.forward();
-    
+
     _checkNavigation();
   }
 
   Future<void> _checkNavigation() async {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    
+
     if (!mounted) return;
 
     Navigator.of(context).pushReplacement(
@@ -85,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           return FadeTransition(opacity: animation, child: child);
         },
         transitionDuration: const Duration(milliseconds: 800),
-      )
+      ),
     );
   }
 

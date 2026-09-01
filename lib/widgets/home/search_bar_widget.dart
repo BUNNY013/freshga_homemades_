@@ -17,7 +17,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     'home.search_hint_2'.tr(),
     'home.search_hint_3'.tr(),
   ];
-  
+
   int _currentIndex = 0;
   int _charIndex = 0;
   String _currentText = "";
@@ -91,7 +91,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                const Icon(Icons.search_rounded, color: AppColors.textSecondary),
+                const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: RichText(
@@ -99,15 +102,17 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                       children: [
                         TextSpan(
                           text: "home.search_prefix".tr(),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary.withOpacity(0.7),
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppColors.textSecondary.withOpacity(0.7),
+                              ),
                         ),
                         TextSpan(
                           text: "$_currentText|",
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary.withOpacity(0.7),
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: AppColors.textSecondary.withOpacity(0.7),
+                              ),
                         ),
                       ],
                     ),
@@ -122,7 +127,11 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
                     color: AppColors.primaryGreen.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.mic_none_rounded, color: AppColors.primaryGreen, size: 20),
+                  child: const Icon(
+                    Icons.mic_none_rounded,
+                    color: AppColors.primaryGreen,
+                    size: 20,
+                  ),
                 ),
               ],
             ),

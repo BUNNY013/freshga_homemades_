@@ -11,7 +11,8 @@ class MultiStoreBanner extends StatefulWidget {
   State<MultiStoreBanner> createState() => _MultiStoreBannerState();
 }
 
-class _MultiStoreBannerState extends State<MultiStoreBanner> with SingleTickerProviderStateMixin {
+class _MultiStoreBannerState extends State<MultiStoreBanner>
+    with SingleTickerProviderStateMixin {
   static const String _prefsKey = 'multi_store_cart_info_dismissed';
   bool _isDismissed = true; // Default true until checked
   bool _isVisible = false;
@@ -38,7 +39,7 @@ class _MultiStoreBannerState extends State<MultiStoreBanner> with SingleTickerPr
   Future<void> _checkDismissedStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final isDismissed = prefs.getBool(_prefsKey) ?? false;
-    
+
     if (mounted) {
       setState(() {
         _isDismissed = isDismissed;
@@ -50,7 +51,7 @@ class _MultiStoreBannerState extends State<MultiStoreBanner> with SingleTickerPr
   Future<void> _dismissBanner() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_prefsKey, true);
-    
+
     if (mounted) {
       _animationController.reverse().then((_) {
         if (mounted) {
@@ -115,7 +116,10 @@ class _MultiStoreBannerState extends State<MultiStoreBanner> with SingleTickerPr
           ),
           child: Row(
             children: [
-              const Icon(Icons.shopping_bag_outlined, color: AppColors.primaryGreen),
+              const Icon(
+                Icons.shopping_bag_outlined,
+                color: AppColors.primaryGreen,
+              ),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
@@ -124,7 +128,11 @@ class _MultiStoreBannerState extends State<MultiStoreBanner> with SingleTickerPr
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.close, size: 20, color: AppColors.textSecondary),
+                icon: const Icon(
+                  Icons.close,
+                  size: 20,
+                  color: AppColors.textSecondary,
+                ),
                 onPressed: _dismissBanner,
               ),
             ],

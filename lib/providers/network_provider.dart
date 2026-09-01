@@ -15,7 +15,9 @@ class NetworkProvider extends ChangeNotifier {
 
   NetworkProvider() {
     _initConnectivity();
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(_updateConnectionStatus);
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen(
+      _updateConnectionStatus,
+    );
     _startLatencyCheck();
   }
 
@@ -43,14 +45,19 @@ class NetworkProvider extends ChangeNotifier {
   }
 
   void _startLatencyCheck() {
-    _latencyTimer = Timer.periodic(const Duration(seconds: 30), (_) => _checkLatency());
+    _latencyTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _checkLatency(),
+    );
   }
 
   Future<void> _checkLatency() async {
     if (!_isOnline) return;
     try {
       final stopwatch = Stopwatch()..start();
-      await http.head(Uri.parse('https://gstatic.com/generate_204')).timeout(const Duration(seconds: 3));
+      await http
+          .head(Uri.parse('https://gstatic.com/generate_204'))
+          .timeout(const Duration(seconds: 3));
       stopwatch.stop();
       bool slow = stopwatch.elapsedMilliseconds > 1500;
       if (_isSlow != slow) {

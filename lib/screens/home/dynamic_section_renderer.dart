@@ -43,7 +43,7 @@ class DynamicSectionRenderer extends StatelessWidget {
           builder: (context, provider, child) {
             if (provider.isLoading) return const SectionShimmer();
             return CategoriesSection(
-              categories: provider.categories, 
+              categories: provider.categories,
               title: section.title.tr(),
               onViewAll: () {
                 CustomerHomeScreen.globalKey.currentState?.switchTab(1);
@@ -71,14 +71,20 @@ class DynamicSectionRenderer extends StatelessWidget {
         return Consumer<StoreProvider>(
           builder: (context, provider, child) {
             if (provider.isLoading) return const SectionShimmer();
-            return FeaturedStoresSection(stores: provider.stores, title: section.title);
+            return FeaturedStoresSection(
+              stores: provider.stores,
+              title: section.title,
+            );
           },
         );
       case 'collections':
         return Consumer<CollectionProvider>(
           builder: (context, provider, child) {
             if (provider.isLoading) return const SectionShimmer();
-            return CollectionsSection(collections: provider.collections, title: section.title);
+            return CollectionsSection(
+              collections: provider.collections,
+              title: section.title,
+            );
           },
         );
       case 'trustStrip':

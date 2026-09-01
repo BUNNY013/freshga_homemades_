@@ -7,7 +7,8 @@ class SearchLoadingShimmer extends StatefulWidget {
   State<SearchLoadingShimmer> createState() => _SearchLoadingShimmerState();
 }
 
-class _SearchLoadingShimmerState extends State<SearchLoadingShimmer> with SingleTickerProviderStateMixin {
+class _SearchLoadingShimmerState extends State<SearchLoadingShimmer>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Color?> _colorAnimation;
 
@@ -42,7 +43,10 @@ class _SearchLoadingShimmerState extends State<SearchLoadingShimmer> with Single
           itemCount: 5,
           itemBuilder: (context, index) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 children: [
                   Container(

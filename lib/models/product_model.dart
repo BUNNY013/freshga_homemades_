@@ -27,16 +27,18 @@ class ProductVariantModel {
     this.heightCm = 0.0,
   });
 
+  bool get isOutOfStock => manageStock && stock <= 0;
+
   factory ProductVariantModel.fromJson(Map<String, dynamic> json) {
     return ProductVariantModel(
       id: json['id']?.toString() ?? json['variantId']?.toString() ?? '',
-      label: (json['value'] != null && json['unit'] != null) 
-          ? "${json['value']}${json['unit']}" 
+      label: (json['value'] != null && json['unit'] != null)
+          ? "${json['value']}${json['unit']}"
           : json['label']?.toString() ?? '',
       price: (json['price'] ?? 0.0).toDouble(),
       discountPrice: (json['discountPrice'] ?? 0.0).toDouble(),
       stock: json['stock'] ?? 0,
-      inStock: json['inStock'] ?? true,
+      inStock: json['inStock'] ?? json['isAvailable'] ?? true,
       isArchived: json['isArchived'] ?? false,
       manageStock: json['manageStock'] ?? false,
       weightGrams: json['weightGrams'] ?? 0,
@@ -54,6 +56,7 @@ class ProductVariantModel {
       'discountPrice': discountPrice,
       'stock': stock,
       'inStock': inStock,
+      'isAvailable': inStock,
       'isArchived': isArchived,
       'manageStock': manageStock,
       'weightGrams': weightGrams,
@@ -95,12 +98,30 @@ class ProductModel {
   final bool canSellPanIndia;
 
   ProductModel({
-    required this.id, required this.storeId, required this.storeName, required this.name, required this.description,
-    required this.price, required this.originalPrice, required this.imageUrl, required this.images,
-    required this.isTrending, required this.rating, required this.reviewsCount, required this.weight,
-    required this.categoryId, required this.categoryName, required this.subCategoryIds,
-    required this.tags, required this.searchKeywords, required this.ingredients, required this.variants,
-    required this.ratingCounts, required this.ratingHighlights, required this.shelfLife, required this.dispatchTime,
+    required this.id,
+    required this.storeId,
+    required this.storeName,
+    required this.name,
+    required this.description,
+    required this.price,
+    required this.originalPrice,
+    required this.imageUrl,
+    required this.images,
+    required this.isTrending,
+    required this.rating,
+    required this.reviewsCount,
+    required this.weight,
+    required this.categoryId,
+    required this.categoryName,
+    required this.subCategoryIds,
+    required this.tags,
+    required this.searchKeywords,
+    required this.ingredients,
+    required this.variants,
+    required this.ratingCounts,
+    required this.ratingHighlights,
+    required this.shelfLife,
+    required this.dispatchTime,
     this.isStoreVerified = false,
     this.status = 'Live',
     this.state = '',
@@ -112,24 +133,32 @@ class ProductModel {
     List<String> images = rawImages.map((e) => e.toString()).toList();
     String firstImage = images.isNotEmpty ? images.first : '';
     if (firstImage.isEmpty) {
-        firstImage = json['imageUrl'] ?? '';
-        if (firstImage.isNotEmpty) {
-            images = [firstImage];
-        }
+      firstImage = json['imageUrl'] ?? '';
+      if (firstImage.isNotEmpty) {
+        images = [firstImage];
+      }
     }
 
-    List<ProductVariantModel> parsedVariants = (json['variants'] as List<dynamic>? ?? [])
-        .map((e) => ProductVariantModel.fromJson(Map<String, dynamic>.from(e)))
-        .where((v) => !v.isArchived)
-        .toList();
+    List<ProductVariantModel> parsedVariants =
+        (json['variants'] as List<dynamic>? ?? [])
+            .map(
+              (e) => ProductVariantModel.fromJson(Map<String, dynamic>.from(e)),
+            )
+            .where((v) => !v.isArchived)
+            .toList();
 
-    final firstVariant = parsedVariants.isNotEmpty ? parsedVariants.first : null;
+    final firstVariant = parsedVariants.isNotEmpty
+        ? parsedVariants.first
+        : null;
 
-    double currentPrice = firstVariant != null 
-        ? (firstVariant.discountPrice > 0 ? firstVariant.discountPrice : firstVariant.price) 
+    double currentPrice = firstVariant != null
+        ? (firstVariant.discountPrice > 0
+              ? firstVariant.discountPrice
+              : firstVariant.price)
         : (json['price'] ?? 0.0).toDouble();
 
-    double originalPrice = firstVariant?.price ?? (json['originalPrice'] ?? 0.0).toDouble();
+    double originalPrice =
+        firstVariant?.price ?? (json['originalPrice'] ?? 0.0).toDouble();
     String variantWeight = firstVariant?.label ?? "";
 
     return ProductModel(

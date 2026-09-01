@@ -31,7 +31,7 @@ class _DynamicCategoryChipsState extends State<DynamicCategoryChips> {
 
         final items = [
           {'id': 'All', 'name': 'All'},
-          ...categories.entries.map((e) => {'id': e.key, 'name': e.value})
+          ...categories.entries.map((e) => {'id': e.key, 'name': e.value}),
         ];
 
         if (_lastSelected != provider.selectedCategory) {
@@ -40,7 +40,10 @@ class _DynamicCategoryChipsState extends State<DynamicCategoryChips> {
           if (index != -1 && _scrollController.hasClients) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (_scrollController.hasClients) {
-                double offset = (index * 92.0) - (MediaQuery.of(context).size.width / 2) + 46.0;
+                double offset =
+                    (index * 92.0) -
+                    (MediaQuery.of(context).size.width / 2) +
+                    46.0;
                 if (offset < 0) offset = 0;
                 if (offset > _scrollController.position.maxScrollExtent) {
                   offset = _scrollController.position.maxScrollExtent;
@@ -68,9 +71,14 @@ class _DynamicCategoryChipsState extends State<DynamicCategoryChips> {
 
               String? imageUrl;
               if (cat['id'] != 'All') {
-                final catProvider = Provider.of<CategoryProvider>(context, listen: false);
+                final catProvider = Provider.of<CategoryProvider>(
+                  context,
+                  listen: false,
+                );
                 try {
-                  final categoryModel = catProvider.categories.firstWhere((c) => c.id == cat['id']);
+                  final categoryModel = catProvider.categories.firstWhere(
+                    (c) => c.id == cat['id'],
+                  );
                   imageUrl = categoryModel.imageUrl;
                 } catch (e) {
                   // Image not found
@@ -90,9 +98,13 @@ class _DynamicCategoryChipsState extends State<DynamicCategoryChips> {
                           height: 68,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: isSelected ? const Color(0xFFF0FDF4) : Colors.white,
+                            color: isSelected
+                                ? const Color(0xFFF0FDF4)
+                                : Colors.white,
                             border: Border.all(
-                              color: isSelected ? AppColors.primaryGreen : Colors.grey.shade200,
+                              color: isSelected
+                                  ? AppColors.primaryGreen
+                                  : Colors.grey.shade200,
                               width: isSelected ? 2 : 1,
                             ),
                             boxShadow: [
@@ -105,16 +117,35 @@ class _DynamicCategoryChipsState extends State<DynamicCategoryChips> {
                             ],
                           ),
                           child: ClipOval(
-                            child: cat['id'] == 'All' 
-                                ? Icon(Icons.grid_view, color: isSelected ? AppColors.primaryGreen : Colors.grey, size: 32)
+                            child: cat['id'] == 'All'
+                                ? Icon(
+                                    Icons.grid_view,
+                                    color: isSelected
+                                        ? AppColors.primaryGreen
+                                        : Colors.grey,
+                                    size: 32,
+                                  )
                                 : (imageUrl != null && imageUrl.isNotEmpty)
-                                    ? CachedNetworkImage(
-                                        imageUrl: imageUrl,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) => Container(color: Colors.grey.shade100),
-                                        errorWidget: (context, url, error) => Icon(Icons.fastfood_outlined, color: isSelected ? AppColors.primaryGreen : Colors.grey, size: 32),
-                                      )
-                                    : Icon(Icons.fastfood_outlined, color: isSelected ? AppColors.primaryGreen : Colors.grey, size: 32),
+                                ? CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) =>
+                                        Container(color: Colors.grey.shade100),
+                                    errorWidget: (context, url, error) => Icon(
+                                      Icons.fastfood_outlined,
+                                      color: isSelected
+                                          ? AppColors.primaryGreen
+                                          : Colors.grey,
+                                      size: 32,
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.fastfood_outlined,
+                                    color: isSelected
+                                        ? AppColors.primaryGreen
+                                        : Colors.grey,
+                                    size: 32,
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -126,10 +157,14 @@ class _DynamicCategoryChipsState extends State<DynamicCategoryChips> {
                           style: TextStyle(
                             fontSize: 11,
                             height: 1.2, // Tighter line height for 2 lines
-                            color: isSelected ? AppColors.primaryGreen : AppColors.textPrimary,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                            color: isSelected
+                                ? AppColors.primaryGreen
+                                : AppColors.textPrimary,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),

@@ -8,7 +8,11 @@ class StoreTabBarDelegate extends SliverPersistentHeaderDelegate {
   StoreTabBarDelegate(this.tabController);
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: Colors.white,
       child: Column(
@@ -19,8 +23,14 @@ class StoreTabBarDelegate extends SliverPersistentHeaderDelegate {
             unselectedLabelColor: AppColors.textSecondary,
             indicatorColor: AppColors.primaryGreen,
             indicatorWeight: 2,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.normal,
+              fontSize: 14,
+            ),
             tabs: [
               Tab(text: "store.shop".tr()),
               Tab(text: "store.about".tr()),

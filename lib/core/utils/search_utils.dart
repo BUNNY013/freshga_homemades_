@@ -1,6 +1,6 @@
 class SearchUtils {
   /// Generates a list of prefix-based searchable keywords from a given text.
-  /// 
+  ///
   /// Example: "Wild Forest Honey"
   /// Returns: ["w", "wi", "wil", "wild", "f", "fo", "for", "forest", "h", "ho", "hon", "hone", "honey", "wild honey", "forest honey"]
   static List<String> generateSearchKeywords(String text) {
@@ -30,17 +30,17 @@ class SearchUtils {
         } else {
           phrase = '$phrase ${words[j]}';
         }
-        
+
         // Add the exact multi-word phrase
         keywords.add(phrase);
-        
+
         // If it's a long phrase, we don't necessarily need every single character prefix of the entire phrase
         // But for exact searches it's useful. We already added individual word prefixes.
         // Let's add prefixes for the phrase itself to support typing "wild ho"
         String currentPhrasePrefix = '';
         for (int k = 0; k < phrase.length; k++) {
-           currentPhrasePrefix += phrase[k];
-           keywords.add(currentPhrasePrefix);
+          currentPhrasePrefix += phrase[k];
+          keywords.add(currentPhrasePrefix);
         }
       }
     }

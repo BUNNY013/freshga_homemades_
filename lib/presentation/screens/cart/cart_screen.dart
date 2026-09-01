@@ -28,6 +28,65 @@ class _CartScreenState extends State<CartScreen> {
   final Map<String, StoreModel> _storeCache = {};
   final StoreService _storeService = StoreService();
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _verifyLiveStock();
+    });
+  }
+
+  Future<void> _verifyLiveStock() async {
+    if (!mounted) return;
+    final cartProvider = context.read<CartProvider>();
+    final storeIds = cartProvider.getStoreGroupedItems().keys.toList();
+    if (storeIds.isEmpty) return;
+
+    List<String> allMessages = [];
+    for (String storeId in storeIds) {
+      final messages = await cartProvider.validateCartForCheckout(storeId);
+      allMessages.addAll(messages);
+    }
+
+    if (allMessages.isNotEmpty && mounted) {
+      showDialog(
+        context: context,
+        builder: (c) => AlertDialog(
+          title: const Text(
+            'Cart Updated',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: allMessages
+                  .map(
+                    (m) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text('• $m', style: const TextStyle(fontSize: 14)),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(c),
+              child: const Text(
+                'Review Cart',
+                style: TextStyle(
+                  color: AppColors.primaryGreen,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   Future<StoreModel?> _getStore(String storeId) async {
     if (_storeCache.containsKey(storeId)) return _storeCache[storeId];
     final store = await _storeService.getStore(storeId);
@@ -86,11 +145,16 @@ class _CartScreenState extends State<CartScreen> {
                   return Stack(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.favorite_border, color: AppColors.textPrimary),
+                        icon: const Icon(
+                          Icons.favorite_border,
+                          color: AppColors.textPrimary,
+                        ),
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const LikedProductsScreen(),
+                            ),
                           );
                         },
                       ),
@@ -104,7 +168,10 @@ class _CartScreenState extends State<CartScreen> {
                               color: Colors.red,
                               shape: BoxShape.circle,
                             ),
-                            constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
                             child: Text(
                               '$count',
                               style: const TextStyle(
@@ -138,11 +205,11 @@ class _CartScreenState extends State<CartScreen> {
                   final isExpanded = _expandedStores[storeId] ?? true;
 
                   return _buildStoreSection(
-                    context, 
-                    cartProvider, 
-                    storeId, 
-                    storeName, 
-                    items, 
+                    context,
+                    cartProvider,
+                    storeId,
+                    storeName,
+                    items,
                     isExpanded,
                   );
                 }).toList(),
@@ -155,12 +222,12 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildStoreSection(
-    BuildContext context, 
-    CartProvider cartProvider, 
-    String storeId, 
-    String storeName, 
-    List<CartItemModel> items, 
-    bool isExpanded
+    BuildContext context,
+    CartProvider cartProvider,
+    String storeId,
+    String storeName,
+    List<CartItemModel> items,
+    bool isExpanded,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
@@ -189,7 +256,9 @@ class _CartScreenState extends State<CartScreen> {
               child: Row(
                 children: [
                   FutureBuilder<StoreModel?>(
-                    future: _storeCache.containsKey(storeId) ? Future.value(_storeCache[storeId]) : _getStore(storeId),
+                    future: _storeCache.containsKey(storeId)
+                        ? Future.value(_storeCache[storeId])
+                        : _getStore(storeId),
                     builder: (context, snapshot) {
                       final store = snapshot.data;
                       if (store != null && store.logoUrl.isNotEmpty) {
@@ -200,10 +269,20 @@ class _CartScreenState extends State<CartScreen> {
                             width: 40,
                             height: 40,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(color: Colors.grey.shade100, width: 40, height: 40),
+                            placeholder: (context, url) => Container(
+                              color: Colors.grey.shade100,
+                              width: 40,
+                              height: 40,
+                            ),
                             errorWidget: (context, url, error) => Container(
-                              color: Colors.grey.shade100, width: 40, height: 40,
-                              child: const Icon(Icons.storefront, color: AppColors.primaryGreen, size: 20),
+                              color: Colors.grey.shade100,
+                              width: 40,
+                              height: 40,
+                              child: const Icon(
+                                Icons.storefront,
+                                color: AppColors.primaryGreen,
+                                size: 20,
+                              ),
                             ),
                           ),
                         );
@@ -215,7 +294,11 @@ class _CartScreenState extends State<CartScreen> {
                           color: Colors.grey.shade100,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.storefront, color: AppColors.primaryGreen, size: 20),
+                        child: const Icon(
+                          Icons.storefront,
+                          color: AppColors.primaryGreen,
+                          size: 20,
+                        ),
                       );
                     },
                   ),
@@ -228,18 +311,28 @@ class _CartScreenState extends State<CartScreen> {
                           children: [
                             Text(
                               storeName,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: AppColors.primaryGreen.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 "${cartProvider.getStoreItemCount(storeId)} items",
-                                style: const TextStyle(color: AppColors.primaryGreen, fontSize: 10, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: AppColors.primaryGreen,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -247,12 +340,20 @@ class _CartScreenState extends State<CartScreen> {
                         const SizedBox(height: 4),
                         Text(
                           "Dispatch in ${_getMaxDispatchTime(items)}",
-                          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                          style: const TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  Icon(isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: AppColors.textSecondary),
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.textSecondary,
+                  ),
                 ],
               ),
             ),
@@ -260,27 +361,39 @@ class _CartScreenState extends State<CartScreen> {
 
           // Store Items (Collapsible)
           AnimatedCrossFade(
-            crossFadeState: isExpanded ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+            crossFadeState: isExpanded
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
             duration: const Duration(milliseconds: 300),
             firstChild: Column(
               children: [
-                const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Color(0xFFF0F0F0),
+                ),
                 ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: items.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
+                  separatorBuilder: (_, __) => const Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: Color(0xFFF0F0F0),
+                  ),
                   itemBuilder: (context, index) {
                     return _buildCartItem(cartProvider, items[index]);
                   },
                 ),
-                
+
                 // Add More Items
                 InkWell(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => StoreScreen(storeId: storeId)),
+                      MaterialPageRoute(
+                        builder: (_) => StoreScreen(storeId: storeId),
+                      ),
                     );
                   },
                   child: Container(
@@ -292,19 +405,31 @@ class _CartScreenState extends State<CartScreen> {
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.add, color: AppColors.primaryGreen, size: 16),
+                        Icon(
+                          Icons.add,
+                          color: AppColors.primaryGreen,
+                          size: 16,
+                        ),
                         SizedBox(width: 8),
                         Text(
                           "Add more items from this store",
-                          style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 13),
+                          style: TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                
-                const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-                
+
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Color(0xFFF0F0F0),
+                ),
+
                 // Store Total & Checkout
                 Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -315,11 +440,17 @@ class _CartScreenState extends State<CartScreen> {
                         children: [
                           const Text(
                             "Store Total",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
                           ),
                           Text(
                             "₹${cartProvider.getStoreTotal(storeId).toInt()}",
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ],
                       ),
@@ -330,41 +461,84 @@ class _CartScreenState extends State<CartScreen> {
                         child: BouncingButton(
                           onTap: () async {
                             showDialog(
-                               context: context,
-                               barrierDismissible: false,
-                               builder: (c) => const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (c) => const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.primaryGreen,
+                                ),
+                              ),
                             );
-                            
-                            final messages = await cartProvider.validateCartForCheckout(storeId);
+
+                            final messages = await cartProvider
+                                .validateCartForCheckout(storeId);
                             if (!context.mounted) return;
                             Navigator.pop(context); // pop loading
-                            
+
                             if (messages.isNotEmpty) {
-                               showDialog(
-                                  context: context,
-                                  builder: (c) => AlertDialog(
-                                     title: const Text('Cart Updated', style: TextStyle(fontWeight: FontWeight.bold)),
-                                     content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: messages.map((m) => Padding(
-                                          padding: const EdgeInsets.only(bottom: 8.0),
-                                          child: Text('• $m', style: const TextStyle(fontSize: 14)),
-                                        )).toList(),
-                                     ),
-                                     actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(c), 
-                                          child: const Text('Review Cart', style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold))
-                                        ),
-                                     ],
+                              showDialog(
+                                context: context,
+                                builder: (c) => AlertDialog(
+                                  title: const Text(
+                                    'Cart Updated',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                               );
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: messages
+                                        .map(
+                                          (m) => Padding(
+                                            padding: const EdgeInsets.only(
+                                              bottom: 8.0,
+                                            ),
+                                            child: Text(
+                                              '• $m',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(c),
+                                      child: const Text(
+                                        'Review Cart',
+                                        style: TextStyle(
+                                          color: AppColors.primaryGreen,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else if (cartProvider
+                                .getStoreItems(storeId)
+                                .any((item) => !item.isAvailable)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please remove unavailable items to proceed with checkout.',
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
                             } else {
-                               Navigator.push(
-                                 context,
-                                 MaterialPageRoute(builder: (context) => CheckoutScreen(storeId: storeId)),
-                               );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      CheckoutScreen(storeId: storeId),
+                                ),
+                              );
                             }
                           },
                           child: Container(
@@ -379,10 +553,18 @@ class _CartScreenState extends State<CartScreen> {
                                 const SizedBox(width: 8),
                                 Text(
                                   "cart.checkout".tr(),
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
                                 ),
                                 const SizedBox(width: 8),
-                                const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+                                const Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                               ],
                             ),
                           ),
@@ -414,8 +596,10 @@ class _CartScreenState extends State<CartScreen> {
               width: 64,
               height: 64,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Container(color: Colors.grey.shade200, width: 64, height: 64),
-              errorWidget: (context, url, error) => Container(color: Colors.grey.shade200, width: 64, height: 64),
+              placeholder: (context, url) =>
+                  Container(color: Colors.grey.shade200, width: 64, height: 64),
+              errorWidget: (context, url, error) =>
+                  Container(color: Colors.grey.shade200, width: 64, height: 64),
             ),
           ),
           const SizedBox(width: 16),
@@ -430,21 +614,31 @@ class _CartScreenState extends State<CartScreen> {
                     Expanded(
                       child: Text(
                         item.productName,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     InkWell(
                       onTap: () => cartProvider.removeFromCart(item.cartItemId),
-                      child: const Icon(CupertinoIcons.trash, color: AppColors.textSecondary, size: 18),
+                      child: const Icon(
+                        CupertinoIcons.trash,
+                        color: AppColors.textSecondary,
+                        size: 18,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
                   item.variantLabel,
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -452,7 +646,11 @@ class _CartScreenState extends State<CartScreen> {
                   children: [
                     Text(
                       "₹${item.price.toInt()}",
-                      style: const TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 15),
+                      style: const TextStyle(
+                        color: AppColors.primaryGreen,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                     if (item.isAvailable)
                       Container(
@@ -463,20 +661,45 @@ class _CartScreenState extends State<CartScreen> {
                         child: Row(
                           children: [
                             InkWell(
-                              onTap: () => cartProvider.decrementQuantity(item.cartItemId),
+                              onTap: () => cartProvider.decrementQuantity(
+                                item.cartItemId,
+                              ),
                               child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 child: Icon(Icons.remove, size: 16),
                               ),
                             ),
                             Text(
                               "${item.quantity}",
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
                             ),
                             InkWell(
-                              onTap: () => cartProvider.incrementQuantity(item.cartItemId),
+                              onTap: () {
+                                final error = cartProvider.incrementQuantity(
+                                  item.cartItemId,
+                                );
+                                if (error != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(error),
+                                      backgroundColor: Colors.red,
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                }
+                              },
                               child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 child: Icon(Icons.add, size: 16),
                               ),
                             ),
@@ -485,14 +708,21 @@ class _CartScreenState extends State<CartScreen> {
                       )
                     else
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.red.shade50,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
                           "Not available",
-                          style: TextStyle(color: Colors.red, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                   ],

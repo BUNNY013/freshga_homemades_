@@ -52,11 +52,11 @@ class CustomerModel {
           ? List<Map<String, dynamic>>.from(map['recentLocations'])
           : null,
       locationSource: map['locationSource'],
-      locationUpdatedAt: map['locationUpdatedAt'] != null 
-          ? (map['locationUpdatedAt'] as Timestamp).toDate() 
+      locationUpdatedAt: map['locationUpdatedAt'] != null
+          ? (map['locationUpdatedAt'] as Timestamp).toDate()
           : null,
-      createdAt: map['createdAt'] != null 
-          ? (map['createdAt'] as Timestamp).toDate() 
+      createdAt: map['createdAt'] != null
+          ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
       fcmToken: map['fcmToken'],
       savedAddresses: () {
@@ -84,14 +84,16 @@ class CustomerModel {
       if (fullName != null) 'fullName': fullName,
       if (email != null) 'email': email,
       if (profileImageUrl != null) 'profileImageUrl': profileImageUrl,
-      if (notificationPreferences != null) 'notificationPreferences': notificationPreferences,
+      if (notificationPreferences != null)
+        'notificationPreferences': notificationPreferences,
       if (selectedLocation != null) 'selectedLocation': selectedLocation,
       if (recentLocations != null) 'recentLocations': recentLocations,
       if (locationSource != null) 'locationSource': locationSource,
       if (locationUpdatedAt != null) 'locationUpdatedAt': locationUpdatedAt,
       'createdAt': createdAt,
       if (fcmToken != null) 'fcmToken': fcmToken,
-      if (savedAddresses != null) 'savedAddresses': savedAddresses!.map((a) => a.toMap()).toList(),
+      if (savedAddresses != null)
+        'savedAddresses': savedAddresses!.map((a) => a.toMap()).toList(),
     };
   }
 

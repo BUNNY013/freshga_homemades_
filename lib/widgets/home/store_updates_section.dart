@@ -19,11 +19,11 @@ class StoreUpdatesSection extends StatelessWidget {
     return Consumer<FollowingProvider>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
-          return const SizedBox(); 
+          return const SizedBox();
         }
 
         if (provider.feed.isEmpty) {
-          return const SizedBox(); 
+          return const SizedBox();
         }
 
         return Column(
@@ -38,11 +38,13 @@ class StoreUpdatesSection extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 220, 
+              height: 220,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: provider.feed.length > 5 ? 5 : provider.feed.length, // Limit to 5 on home feed
+                itemCount: provider.feed.length > 5
+                    ? 5
+                    : provider.feed.length, // Limit to 5 on home feed
                 itemBuilder: (context, index) {
                   final update = provider.feed[index];
                   return _buildUpdateCard(context, update);
@@ -86,15 +88,23 @@ class StoreUpdatesSection extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: update.imageUrl.isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: update.imageUrl,
                           height: 100,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(height: 100, color: Colors.grey.shade200),
-                          errorWidget: (context, url, error) => Container(height: 100, color: Colors.grey.shade200),
+                          placeholder: (context, url) => Container(
+                            height: 100,
+                            color: Colors.grey.shade200,
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: 100,
+                            color: Colors.grey.shade200,
+                          ),
                         )
                       : Container(
                           height: 100,
@@ -108,7 +118,10 @@ class StoreUpdatesSection extends StatelessWidget {
                     top: 8,
                     left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: _getBadgeColor(update.type),
                         borderRadius: BorderRadius.circular(8),
@@ -125,7 +138,7 @@ class StoreUpdatesSection extends StatelessWidget {
                   ),
               ],
             ),
-            
+
             // Content
             Padding(
               padding: const EdgeInsets.all(12.0),
@@ -137,8 +150,16 @@ class StoreUpdatesSection extends StatelessWidget {
                       CircleAvatar(
                         radius: 8,
                         backgroundColor: Colors.grey.shade200,
-                        backgroundImage: update.storeLogo.isNotEmpty ? CachedNetworkImageProvider(update.storeLogo) : null,
-                        child: update.storeLogo.isEmpty ? const Icon(Icons.store, size: 8, color: Colors.grey) : null,
+                        backgroundImage: update.storeLogo.isNotEmpty
+                            ? CachedNetworkImageProvider(update.storeLogo)
+                            : null,
+                        child: update.storeLogo.isEmpty
+                            ? const Icon(
+                                Icons.store,
+                                size: 8,
+                                color: Colors.grey,
+                              )
+                            : null,
                       ),
                       const SizedBox(width: 6),
                       Expanded(

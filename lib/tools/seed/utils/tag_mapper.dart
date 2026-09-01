@@ -18,16 +18,24 @@ class TagMapper {
     final lowerCat = categoryName.toLowerCase();
     final List<String> tags = ['Homemade', 'Preservative Free']; // Default tags
 
-    if (lowerCat.contains('pickle') || lowerCat.contains('masala') || lowerCat.contains('podi')) {
+    if (lowerCat.contains('pickle') ||
+        lowerCat.contains('masala') ||
+        lowerCat.contains('podi')) {
       tags.add('Spicy');
       tags.add('Traditional');
     }
-    
-    if (lowerCat.contains('sweet') || lowerCat.contains('chocolate') || lowerCat.contains('honey') || lowerCat.contains('jaggery')) {
+
+    if (lowerCat.contains('sweet') ||
+        lowerCat.contains('chocolate') ||
+        lowerCat.contains('honey') ||
+        lowerCat.contains('jaggery')) {
       tags.add('Sweet');
     }
-    
-    if (lowerCat.contains('millet') || lowerCat.contains('healthy') || lowerCat.contains('nutrition') || lowerCat.contains('ayurvedic')) {
+
+    if (lowerCat.contains('millet') ||
+        lowerCat.contains('healthy') ||
+        lowerCat.contains('nutrition') ||
+        lowerCat.contains('ayurvedic')) {
       tags.add('Healthy');
       if (lowerCat.contains('millet')) tags.add('Millet Based');
     }

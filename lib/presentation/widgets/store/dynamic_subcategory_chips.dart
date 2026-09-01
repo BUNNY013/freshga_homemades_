@@ -21,7 +21,9 @@ class DynamicSubcategoryChips extends StatelessWidget {
 
         final items = [
           {'id': 'All', 'name': 'All'},
-          ...matchingSubs.map((s) => {'id': s['id'] as String, 'name': s['name'] as String})
+          ...matchingSubs.map(
+            (s) => {'id': s['id'] as String, 'name': s['name'] as String},
+          ),
         ];
 
         return Padding(
@@ -40,12 +42,17 @@ class DynamicSubcategoryChips extends StatelessWidget {
                   onTap: () => provider.setSubcategory(sub['id']!),
                   child: Container(
                     margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected ? Colors.white : Colors.transparent,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isSelected ? AppColors.primaryGreen : Colors.grey.shade300,
+                        color: isSelected
+                            ? AppColors.primaryGreen
+                            : Colors.grey.shade300,
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),
@@ -54,8 +61,12 @@ class DynamicSubcategoryChips extends StatelessWidget {
                         sub['name']!,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isSelected ? AppColors.primaryGreen : AppColors.textSecondary,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primaryGreen
+                              : AppColors.textSecondary,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w500,
                         ),
                       ),
                     ),

@@ -27,19 +27,25 @@ class _LocalBrandsSectionState extends State<LocalBrandsSection> {
   }
 
   void _checkAndLoadLocation() {
-    final customerProvider = Provider.of<CustomerProvider>(context, listen: true);
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: true,
+    );
     final customer = customerProvider.currentCustomer;
-    
+
     if (customer != null && customer.selectedLocation != null) {
       final city = customer.city ?? '';
       final state = customer.state ?? '';
-      
+
       if (city.isNotEmpty && city != _lastCity) {
         _lastCity = city;
         // Schedule microtask to avoid building state issues
         Future.microtask(() {
           if (mounted) {
-            Provider.of<StoreProvider>(context, listen: false).loadLocalStores(city, state);
+            Provider.of<StoreProvider>(
+              context,
+              listen: false,
+            ).loadLocalStores(city, state);
           }
         });
       }
@@ -62,7 +68,7 @@ class _LocalBrandsSectionState extends State<LocalBrandsSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SectionTitle(
-              title: widget.title, 
+              title: widget.title,
               onSeeAll: () {
                 Navigator.push(
                   context,
@@ -73,11 +79,11 @@ class _LocalBrandsSectionState extends State<LocalBrandsSection> {
                     ),
                   ),
                 );
-              }
+              },
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 250, 
+              height: 250,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),

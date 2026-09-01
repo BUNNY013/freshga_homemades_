@@ -4,9 +4,17 @@ class TrustFeatureModel {
   final String subtitle;
   final String iconName;
 
-  TrustFeatureModel({required this.id, required this.title, required this.subtitle, required this.iconName});
+  TrustFeatureModel({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.iconName,
+  });
 
-  factory TrustFeatureModel.fromJson(Map<String, dynamic> json, String documentId) {
+  factory TrustFeatureModel.fromJson(
+    Map<String, dynamic> json,
+    String documentId,
+  ) {
     return TrustFeatureModel(
       id: documentId,
       title: json['title'] ?? '',
@@ -16,10 +24,6 @@ class TrustFeatureModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'subtitle': subtitle,
-      'iconName': iconName,
-    };
+    return {'title': title, 'subtitle': subtitle, 'iconName': iconName};
   }
 }

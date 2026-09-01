@@ -28,20 +28,34 @@ class StoreStatsRow extends StatelessWidget {
             const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
             const SizedBox(width: 4),
             Text(
-              "${store.rating} (${store.reviewsCount})",
-              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+              store.reviewsCount == 0
+                  ? "New"
+                  : "${store.rating.toStringAsFixed(1)} (${store.reviewsCount})",
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
         const Text("•", style: TextStyle(color: AppColors.textSecondary)),
         Text(
           "${_formatNumber(store.followers)} Followers",
-          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const Text("•", style: TextStyle(color: AppColors.textSecondary)),
         Text(
           "${_formatNumber(store.totalOrders)}+ Orders",
-          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );

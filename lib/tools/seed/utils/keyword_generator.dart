@@ -4,8 +4,14 @@ class KeywordGenerator {
     if (text.isEmpty) return [];
 
     final List<String> keywords = [];
-    final String cleanText = text.toLowerCase().replaceAll(RegExp(r'[^a-z0-9\s]'), '');
-    final List<String> words = cleanText.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    final String cleanText = text.toLowerCase().replaceAll(
+      RegExp(r'[^a-z0-9\s]'),
+      '',
+    );
+    final List<String> words = cleanText
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
 
     // Add individual words
     keywords.addAll(words);
@@ -39,7 +45,7 @@ class KeywordGenerator {
     final Set<String> keywords = {};
 
     keywords.addAll(generateKeywords(name));
-    
+
     if (categoryName.isNotEmpty) {
       keywords.addAll(generateKeywords(categoryName));
     }

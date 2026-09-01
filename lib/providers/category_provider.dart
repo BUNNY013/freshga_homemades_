@@ -5,7 +5,7 @@ import '../services/category_service.dart';
 
 class CategoryProvider with ChangeNotifier {
   final CategoryService _service = CategoryService();
-  
+
   List<CategoryModel> _categories = [];
   Map<String, dynamic>? _bannerData;
   bool _isLoading = false;
@@ -26,15 +26,18 @@ class CategoryProvider with ChangeNotifier {
     notifyListeners();
 
     _categoriesSub?.cancel();
-    _categoriesSub = _service.streamActiveCategories().listen((cats) {
-      _categories = cats;
-      _isLoading = false;
-      notifyListeners();
-    }, onError: (e) {
-      debugPrint("Error streaming categories: $e");
-      _isLoading = false;
-      notifyListeners();
-    });
+    _categoriesSub = _service.streamActiveCategories().listen(
+      (cats) {
+        _categories = cats;
+        _isLoading = false;
+        notifyListeners();
+      },
+      onError: (e) {
+        debugPrint("Error streaming categories: $e");
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
 
     _bannerSub?.cancel();
     _bannerSub = _service.streamCategoryBanner().listen((banner) {

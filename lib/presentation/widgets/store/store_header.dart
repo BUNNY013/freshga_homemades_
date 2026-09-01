@@ -16,7 +16,8 @@ class StoreHeader extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: 220.0, // 170 banner + 50 overlap area
       pinned: false,
-      stretch: true, // Enables the premium stretch-to-zoom effect when pulling down
+      stretch:
+          true, // Enables the premium stretch-to-zoom effect when pulling down
       backgroundColor: Colors.white,
       elevation: 0,
       leading: Padding(
@@ -27,7 +28,11 @@ class StoreHeader extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24), // Bigger icon
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+              size: 24,
+            ), // Bigger icon
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -41,9 +46,15 @@ class StoreHeader extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: IconButton(
-              icon: const Icon(Icons.share_outlined, color: Colors.white, size: 24),
+              icon: const Icon(
+                Icons.share_outlined,
+                color: Colors.white,
+                size: 24,
+              ),
               onPressed: () {
-                Share.share('Check out ${store.name} on FreshGa Homemades!\nhttps://freshga-homemades.web.app/store/${store.id}');
+                Share.share(
+                  'Check out ${store.name} on FreshGa Homemades!\nhttps://freshga-homemades.web.app/store/${store.id}',
+                );
               },
             ),
           ),
@@ -57,7 +68,9 @@ class StoreHeader extends StatelessWidget {
             ),
             child: PopupMenuButton<String>(
               icon: const Icon(Icons.more_horiz, color: Colors.white, size: 24),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               position: PopupMenuPosition.under,
               elevation: 4,
               color: Colors.white,
@@ -77,9 +90,16 @@ class StoreHeader extends StatelessWidget {
                   value: 'report',
                   child: Row(
                     children: [
-                      const Icon(Icons.flag_outlined, size: 20, color: Colors.redAccent),
+                      const Icon(
+                        Icons.flag_outlined,
+                        size: 20,
+                        color: Colors.redAccent,
+                      ),
                       const SizedBox(width: 12),
-                      const Text('Report Store', style: TextStyle(color: Colors.redAccent)),
+                      const Text(
+                        'Report Store',
+                        style: TextStyle(color: Colors.redAccent),
+                      ),
                     ],
                   ),
                 ),
@@ -107,8 +127,12 @@ class StoreHeader extends StatelessWidget {
               child: CachedNetworkImage(
                 imageUrl: store.bannerUrl,
                 fit: BoxFit.cover,
-                placeholder: (context, url) => Container(color: Colors.grey.shade200),
-                errorWidget: (context, url, error) => Container(color: Colors.grey.shade200, child: const Icon(Icons.image_not_supported)),
+                placeholder: (context, url) =>
+                    Container(color: Colors.grey.shade200),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey.shade200,
+                  child: const Icon(Icons.image_not_supported),
+                ),
               ),
             ),
             // Gradient Overlay for text/icon visibility
@@ -148,7 +172,8 @@ class StoreHeader extends StatelessWidget {
             Positioned(
               left: 0,
               right: 0,
-              bottom: 0, // Logo rests exactly at the boundary of StoreInfoSection
+              bottom:
+                  0, // Logo rests exactly at the boundary of StoreInfoSection
               child: Center(
                 child: Hero(
                   tag: heroTag ?? 'store_logo_${store.id}',
@@ -171,8 +196,13 @@ class StoreHeader extends StatelessWidget {
                       child: CachedNetworkImage(
                         imageUrl: store.logoUrl,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(color: Colors.grey.shade100),
-                        errorWidget: (context, url, error) => const Icon(Icons.store, color: Colors.grey, size: 36),
+                        placeholder: (context, url) =>
+                            Container(color: Colors.grey.shade100),
+                        errorWidget: (context, url, error) => const Icon(
+                          Icons.store,
+                          color: Colors.grey,
+                          size: 36,
+                        ),
                       ),
                     ),
                   ),

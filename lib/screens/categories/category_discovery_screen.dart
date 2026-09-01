@@ -13,13 +13,11 @@ import 'category_products_screen.dart';
 class CategoryDiscoveryScreen extends StatefulWidget {
   final CategoryModel category;
 
-  const CategoryDiscoveryScreen({
-    super.key,
-    required this.category,
-  });
+  const CategoryDiscoveryScreen({super.key, required this.category});
 
   @override
-  State<CategoryDiscoveryScreen> createState() => _CategoryDiscoveryScreenState();
+  State<CategoryDiscoveryScreen> createState() =>
+      _CategoryDiscoveryScreenState();
 }
 
 class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
@@ -48,7 +46,9 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
           ),
           _buildSubCategoriesList(),
           _buildBottomRequestCard(),
-          const SliverToBoxAdapter(child: SizedBox(height: 100)), // padding for scrolling
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 100),
+          ), // padding for scrolling
         ],
       ),
     );
@@ -85,7 +85,10 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
             return Stack(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
+                  icon: const Icon(
+                    Icons.shopping_cart_outlined,
+                    color: AppColors.textPrimary,
+                  ),
                   onPressed: () {},
                 ),
                 if (cart.itemCount > 0)
@@ -150,7 +153,9 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w900,
-                          color: Color(0xFF1E3A2F), // Dark green text from image
+                          color: Color(
+                            0xFF1E3A2F,
+                          ), // Dark green text from image
                           height: 1.2,
                         ),
                       ),
@@ -169,7 +174,10 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
                         const SizedBox(height: 12),
                       ],
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE2F0DE), // Light green pill
                           borderRadius: BorderRadius.circular(12),
@@ -179,7 +187,9 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF2E5B42), // Dark green text for pill
+                            color: Color(
+                              0xFF2E5B42,
+                            ), // Dark green text for pill
                           ),
                         ),
                       ),
@@ -218,7 +228,9 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
           return const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.all(32.0),
-              child: Center(child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primaryGreen),
+              ),
             ),
           );
         }
@@ -256,30 +268,27 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
         return SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final subCategory = subCategories[index];
-                return _SubCategoryCard(
-                  subCategory: subCategory,
-                  category: widget.category,
-                  categoryService: _categoryService,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CategoryProductsScreen(
-                          categoryId: widget.category.id,
-                          categoryName: widget.category.name,
-                          selectedSubCategoryId: subCategory.id,
-                          selectedSubCategoryName: subCategory.name,
-                        ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final subCategory = subCategories[index];
+              return _SubCategoryCard(
+                subCategory: subCategory,
+                category: widget.category,
+                categoryService: _categoryService,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CategoryProductsScreen(
+                        categoryId: widget.category.id,
+                        categoryName: widget.category.name,
+                        selectedSubCategoryId: subCategory.id,
+                        selectedSubCategoryName: subCategory.name,
                       ),
-                    );
-                  },
-                );
-              },
-              childCount: subCategories.length,
-            ),
+                    ),
+                  );
+                },
+              );
+            }, childCount: subCategories.length),
           ),
         );
       },
@@ -303,21 +312,29 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
                 height: 60,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.primaryGreen.withOpacity(0.3), width: 1.5),
+                  border: Border.all(
+                    color: AppColors.primaryGreen.withOpacity(0.3),
+                    width: 1.5,
+                  ),
                   color: Colors.transparent,
                 ),
-                child: (widget.category.image?['url']?.toString() ?? '').isNotEmpty
+                child:
+                    (widget.category.image?['url']?.toString() ?? '').isNotEmpty
                     ? ClipOval(
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: CachedNetworkImage(
                             imageUrl: widget.category.image!['url'].toString(),
-                            fit: BoxFit.contain, 
+                            fit: BoxFit.contain,
                           ),
                         ),
                       )
                     : const Center(
-                        child: Icon(Icons.inventory_2_outlined, color: AppColors.primaryGreen, size: 28),
+                        child: Icon(
+                          Icons.inventory_2_outlined,
+                          color: AppColors.primaryGreen,
+                          size: 28,
+                        ),
                       ),
               ),
               const SizedBox(width: 16),
@@ -351,7 +368,10 @@ class _CategoryDiscoveryScreenState extends State<CategoryDiscoveryScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -395,7 +415,9 @@ class _SubCategoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.withOpacity(0.15)), // Faint border like screenshot
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.15),
+          ), // Faint border like screenshot
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.02),
@@ -404,7 +426,9 @@ class _SubCategoryCard extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.all(12), // Restored padding for a larger card feel
+        padding: const EdgeInsets.all(
+          12,
+        ), // Restored padding for a larger card feel
         child: Row(
           children: [
             SizedBox(
@@ -416,11 +440,18 @@ class _SubCategoryCard extends StatelessWidget {
                       fit: BoxFit.contain, // Float naturally
                       placeholder: (context, url) => const Center(
                         child: SizedBox(
-                          width: 20, height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen)
-                        )
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryGreen,
+                          ),
+                        ),
                       ),
-                      errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: Colors.grey),
+                      errorWidget: (context, url, error) => const Icon(
+                        Icons.image_not_supported,
+                        color: Colors.grey,
+                      ),
                     )
                   : const Icon(Icons.category, color: Colors.grey, size: 30),
             ),
@@ -440,7 +471,10 @@ class _SubCategoryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   StreamBuilder<int>(
-                    stream: categoryService.streamSubCategoryProductCount(category.id, subCategory.id),
+                    stream: categoryService.streamSubCategoryProductCount(
+                      category.id,
+                      subCategory.id,
+                    ),
                     builder: (context, snapshot) {
                       final count = snapshot.data ?? 0;
                       return Text(
@@ -456,10 +490,7 @@ class _SubCategoryCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: AppColors.textSecondary,
-            ),
+            const Icon(Icons.chevron_right, color: AppColors.textSecondary),
             const SizedBox(width: 4),
           ],
         ),

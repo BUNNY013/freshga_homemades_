@@ -17,7 +17,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('App Settings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text(
+          'App Settings',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
         backgroundColor: Colors.white,
         elevation: 0.5,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -29,7 +32,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             const Text(
               'General Preferences',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
             _buildSectionCard([
@@ -51,7 +58,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 24),
             const Text(
               'Data & Storage',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 12),
             _buildSectionCard([
@@ -102,10 +113,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         child: Icon(icon, color: AppColors.primaryGreen, size: 22),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.textPrimary)),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+          color: AppColors.textPrimary,
+        ),
+      ),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 2),
-        child: Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        child: Text(
+          subtitle,
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
       ),
       trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
     );
@@ -124,14 +145,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Select App Language', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Select App Language',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             ...languages.map((lang) {
               final isSelected = lang == _selectedLanguage;
@@ -140,8 +166,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   setState(() => _selectedLanguage = lang);
                   Navigator.pop(context);
                 },
-                title: Text(lang, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: AppColors.primaryGreen) : null,
+                title: Text(
+                  lang,
+                  style: TextStyle(
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                ),
+                trailing: isSelected
+                    ? const Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.primaryGreen,
+                      )
+                    : null,
               );
             }),
           ],
@@ -156,14 +194,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Select Appearance Theme', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Select Appearance Theme',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             ...themes.map((theme) {
               final isSelected = theme == _selectedTheme;
@@ -177,11 +220,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: Text(
                   theme,
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: theme.contains('Coming Soon') ? Colors.grey : AppColors.textPrimary,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: theme.contains('Coming Soon')
+                        ? Colors.grey
+                        : AppColors.textPrimary,
                   ),
                 ),
-                trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: AppColors.primaryGreen) : null,
+                trailing: isSelected
+                    ? const Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.primaryGreen,
+                      )
+                    : null,
               );
             }),
           ],

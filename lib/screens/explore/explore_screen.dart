@@ -40,18 +40,22 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   children: [
                     Text(
                       "Explore ",
-                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                    Text(
-                      "🌿",
-                      style: TextStyle(fontSize: 24),
-                    ),
+                    Text("🌿", style: TextStyle(fontSize: 24)),
                   ],
                 ),
                 const SizedBox(height: 4),
                 const Text(
                   "Discover homemade goodness",
-                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 24),
 
@@ -60,11 +64,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SearchScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const SearchScreen(),
+                      ),
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(24),
@@ -72,15 +81,24 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.search_rounded, color: AppColors.textPrimary),
+                        const Icon(
+                          Icons.search_rounded,
+                          color: AppColors.textPrimary,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             "Search products, stores, categories...",
-                            style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 14,
+                            ),
                           ),
                         ),
-                        const Icon(Icons.tune_rounded, color: AppColors.textPrimary),
+                        const Icon(
+                          Icons.tune_rounded,
+                          color: AppColors.textPrimary,
+                        ),
                       ],
                     ),
                   ),
@@ -91,7 +109,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 FutureBuilder<List<CategoryModel>>(
                   future: _categoriesFuture,
                   builder: (context, snapshot) {
-                    final int catCount = snapshot.hasData ? snapshot.data!.length : 0;
+                    final int catCount = snapshot.hasData
+                        ? snapshot.data!.length
+                        : 0;
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -101,19 +121,30 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           children: [
                             Text(
                               "Categories",
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                             SizedBox(height: 4),
                             Text(
                               "Shop by the type of homemade goodness",
-                              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ],
                         ),
                         if (snapshot.hasData)
                           Text(
                             "$catCount Categories",
-                            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1E7036)),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1E7036),
+                            ),
                           ),
                       ],
                     );
@@ -129,14 +160,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       return GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          childAspectRatio: 0.65,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 16,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              childAspectRatio: 0.65,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 16,
+                            ),
                         itemCount: 8,
-                        itemBuilder: (context, index) => const ShimmerLoading(width: double.infinity, height: 120),
+                        itemBuilder: (context, index) => const ShimmerLoading(
+                          width: double.infinity,
+                          height: 120,
+                        ),
                       );
                     }
 
@@ -154,7 +189,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 4,
-                        childAspectRatio: 0.58, // Adjusted for taller cards with image and 2 lines of text
+                        childAspectRatio:
+                            0.58, // Adjusted for taller cards with image and 2 lines of text
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 16,
                       ),
@@ -192,8 +228,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ? CachedNetworkImage(
                       imageUrl: category.imageUrl,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))),
-                      errorWidget: (context, url, error) => const Icon(Icons.category, color: Colors.grey),
+                      placeholder: (context, url) => const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.category, color: Colors.grey),
                     )
                   : const Icon(Icons.category, color: Colors.grey),
             ),
@@ -202,7 +245,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
         const SizedBox(height: 8),
         Text(
           category.name,
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,

@@ -15,18 +15,21 @@ class FollowingStoreList extends StatelessWidget {
     return Consumer<FollowingProvider>(
       builder: (context, provider, child) {
         final stores = provider.followingStoresData;
-        
+
         if (provider.isLoadingIds) {
           return _buildSkeleton();
         }
-        
+
         if (stores.isEmpty) return const SizedBox.shrink();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -72,7 +75,8 @@ class FollowingStoreList extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => StoreScreen(storeId: store['storeId']),
+                          builder: (context) =>
+                              StoreScreen(storeId: store['storeId']),
                         ),
                       );
                     },
@@ -85,11 +89,19 @@ class FollowingStoreList extends StatelessWidget {
                           CircleAvatar(
                             radius: 30,
                             backgroundColor: Colors.grey.shade100,
-                            backgroundImage: (store['storeLogo'] != null && store['storeLogo'].toString().isNotEmpty)
+                            backgroundImage:
+                                (store['storeLogo'] != null &&
+                                    store['storeLogo'].toString().isNotEmpty)
                                 ? CachedNetworkImageProvider(store['storeLogo'])
                                 : null,
-                            child: (store['storeLogo'] == null || store['storeLogo'].toString().isEmpty)
-                                ? Icon(Icons.storefront_rounded, color: AppColors.textSecondary, size: 24)
+                            child:
+                                (store['storeLogo'] == null ||
+                                    store['storeLogo'].toString().isEmpty)
+                                ? Icon(
+                                    Icons.storefront_rounded,
+                                    color: AppColors.textSecondary,
+                                    size: 24,
+                                  )
                                 : null,
                           ),
                           const SizedBox(height: 6),
@@ -154,7 +166,11 @@ class FollowingStoreList extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Container(width: 40, height: 10, color: Colors.grey.shade200),
+                    Container(
+                      width: 40,
+                      height: 10,
+                      color: Colors.grey.shade200,
+                    ),
                   ],
                 ),
               );

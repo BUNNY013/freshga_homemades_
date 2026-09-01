@@ -52,7 +52,8 @@ class _HomeFeedViewState extends State<HomeFeedView> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       final homeProvider = context.read<HomeProvider>();
       if (homeProvider.hasMore && !homeProvider.isPaginating) {
         homeProvider.loadMoreSections();
@@ -86,7 +87,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
               controller: _scrollController,
               slivers: [
                 _buildStickyHeader(context),
-                
+
                 // ENGINE 1: DYNAMIC SECTIONS
                 Consumer<HomeProvider>(
                   builder: (context, homeProvider, child) {
@@ -100,7 +101,10 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: List.generate(4, (index) => const CategorySkeleton()),
+                              children: List.generate(
+                                4,
+                                (index) => const CategorySkeleton(),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 40),
@@ -110,9 +114,19 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                             padding: const EdgeInsets.symmetric(horizontal: 20),
                             child: Row(
                               children: [
-                                Expanded(child: SizedBox(height: 220, child: const ProductSkeleton())),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 220,
+                                    child: const ProductSkeleton(),
+                                  ),
+                                ),
                                 const SizedBox(width: 16),
-                                Expanded(child: SizedBox(height: 220, child: const ProductSkeleton())),
+                                Expanded(
+                                  child: SizedBox(
+                                    height: 220,
+                                    child: const ProductSkeleton(),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -155,7 +169,9 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                               return const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 24.0),
                                 child: Center(
-                                  child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primaryGreen,
+                                  ),
                                 ),
                               );
                             }
@@ -163,10 +179,14 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                           }
 
                           final section = homeProvider.sections[index];
-                          
+
                           // Dynamically reduce padding around the Trust Strip to keep it tight
-                          bool nextIsTrust = index < homeProvider.sections.length - 1 && homeProvider.sections[index + 1].type == 'trustStrip';
-                          double bottomGap = 24.0; // Default gap between major sections
+                          bool nextIsTrust =
+                              index < homeProvider.sections.length - 1 &&
+                              homeProvider.sections[index + 1].type ==
+                                  'trustStrip';
+                          double bottomGap =
+                              24.0; // Default gap between major sections
                           if (section.type == 'trustStrip' || nextIsTrust) {
                             bottomGap = 8.0;
                           }
@@ -182,7 +202,9 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                             ),
                           );
                         },
-                        childCount: homeProvider.sections.length + (homeProvider.isPaginating ? 1 : 0),
+                        childCount:
+                            homeProvider.sections.length +
+                            (homeProvider.isPaginating ? 1 : 0),
                       ),
                     );
                   },
@@ -192,9 +214,11 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                 Consumer2<HomeProvider, ProductProvider>(
                   builder: (context, homeProvider, productProvider, child) {
                     // Only show discovery grid when sections are exhausted
-                    if (homeProvider.hasMore) return const SliverToBoxAdapter(child: SizedBox());
-                    
-                    if (productProvider.discoveryProducts.isEmpty && !productProvider.isLoadingDiscovery) {
+                    if (homeProvider.hasMore)
+                      return const SliverToBoxAdapter(child: SizedBox());
+
+                    if (productProvider.discoveryProducts.isEmpty &&
+                        !productProvider.isLoadingDiscovery) {
                       return const SliverToBoxAdapter(child: SizedBox());
                     }
 
@@ -204,7 +228,10 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                         slivers: [
                           SliverToBoxAdapter(
                             child: Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0, top: 8.0),
+                              padding: const EdgeInsets.only(
+                                bottom: 16.0,
+                                top: 8.0,
+                              ),
                               child: Text(
                                 "home.discover_more".tr(),
                                 style: const TextStyle(
@@ -215,22 +242,26 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                             ),
                           ),
                           SliverGrid(
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: 0.45, // Matches category_products_screen for FreshgaProductCard
-                            ),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 16,
+                                  crossAxisSpacing: 16,
+                                  childAspectRatio:
+                                      0.45, // Matches category_products_screen for FreshgaProductCard
+                                ),
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
                                 return FadeSlideAnimation(
                                   index: index,
                                   child: FreshgaProductCard(
-                                    product: productProvider.discoveryProducts[index],
+                                    product: productProvider
+                                        .discoveryProducts[index],
                                   ),
                                 );
                               },
-                              childCount: productProvider.discoveryProducts.length,
+                              childCount:
+                                  productProvider.discoveryProducts.length,
                             ),
                           ),
                           if (productProvider.isPaginatingDiscovery)
@@ -238,16 +269,24 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                               child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 32.0),
                                 child: Center(
-                                  child: CircularProgressIndicator(color: AppColors.primaryGreen),
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primaryGreen,
+                                  ),
                                 ),
                               ),
                             ),
-                          if (!productProvider.hasMoreDiscovery && productProvider.discoveryProducts.isNotEmpty)
+                          if (!productProvider.hasMoreDiscovery &&
+                              productProvider.discoveryProducts.isNotEmpty)
                             const SliverToBoxAdapter(
                               child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 40.0),
                                 child: Center(
-                                  child: Text("You've reached the very end! 🎉", style: TextStyle(color: AppColors.textSecondary)),
+                                  child: Text(
+                                    "You've reached the very end! 🎉",
+                                    style: TextStyle(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -258,9 +297,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
                 ),
 
                 // Extra padding at the bottom for floating cart
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 80),
-                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 80)),
               ],
             ),
           ),
@@ -286,11 +323,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
       toolbarHeight: 110,
       title: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          HomeHeader(),
-          SizedBox(height: 12),
-          SearchBarWidget(),
-        ],
+        children: [HomeHeader(), SizedBox(height: 12), SearchBarWidget()],
       ),
     );
   }

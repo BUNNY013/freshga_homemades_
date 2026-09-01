@@ -40,14 +40,19 @@ class DiscoveryProductCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: product.imageUrl.isNotEmpty
                       ? CachedNetworkImage(
                           imageUrl: product.imageUrl,
                           height: 140,
                           width: double.infinity,
                           fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => Container(color: Colors.grey.shade200, height: 140),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey.shade200,
+                            height: 140,
+                          ),
                         )
                       : Container(
                           height: 140,
@@ -57,24 +62,33 @@ class DiscoveryProductCard extends StatelessWidget {
                 ),
                 if (product.isTrending)
                   Positioned(
-                    bottom: 0, left: 8,
+                    bottom: 0,
+                    left: 8,
                     child: Transform.translate(
                       offset: const Offset(0, 10),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.primaryGreen,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
                           "Bestseller",
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 Positioned(
-                  top: 8, right: 8,
+                  top: 8,
+                  right: 8,
                   child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
@@ -88,7 +102,11 @@ class DiscoveryProductCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.favorite_border, size: 16, color: AppColors.textSecondary),
+                    child: const Icon(
+                      Icons.favorite_border,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ),
               ],
@@ -115,24 +133,44 @@ class DiscoveryProductCard extends StatelessWidget {
                       if (product.weight.isNotEmpty) ...[
                         Text(
                           product.weight,
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                        const Text(" • ", style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                        const Text(
+                          " • ",
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                       ],
                       const Text(
                         "Homemade",
-                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.star_rounded, size: 14, color: AppColors.primaryGreen),
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 14,
+                        color: AppColors.primaryGreen,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         "${product.rating} (${product.reviewsCount})",
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),
@@ -152,20 +190,37 @@ class DiscoveryProductCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: InkWell(
-                onTap: () {
+                onTap: () async {
                   if (product.variants.isNotEmpty) {
-                    context.read<CartProvider>().addToCart(
+                    final error = await context.read<CartProvider>().addToCart(
                       product: product,
                       variant: product.variants.first,
                     );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("${product.name} added to cart", style: const TextStyle(color: Colors.white)),
-                        duration: const Duration(seconds: 2),
-                        backgroundColor: AppColors.primaryGreen,
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                    if (error != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            error,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: Colors.red,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            "${product.name} added to cart",
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          duration: const Duration(seconds: 2),
+                          backgroundColor: AppColors.primaryGreen,
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
                   }
                 },
                 child: Container(
@@ -178,9 +233,20 @@ class DiscoveryProductCard extends StatelessWidget {
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 16),
+                      Icon(
+                        Icons.shopping_cart_outlined,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                       SizedBox(width: 6),
-                      Text("Add to Cart", style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                      Text(
+                        "Add to Cart",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 ),

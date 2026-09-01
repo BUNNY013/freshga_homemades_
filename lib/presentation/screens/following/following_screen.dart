@@ -28,7 +28,8 @@ class _FollowingScreenState extends State<FollowingScreen> {
     });
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
         final provider = context.read<FollowingProvider>();
         if (!provider.isPaginating && provider.hasMore) {
           provider.fetchFeed(refresh: false);
@@ -64,7 +65,10 @@ class _FollowingScreenState extends State<FollowingScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search_rounded, color: AppColors.textPrimary),
+            icon: const Icon(
+              Icons.search_rounded,
+              color: AppColors.textPrimary,
+            ),
             onPressed: () {},
           ),
         ],
@@ -84,10 +88,7 @@ class _FollowingScreenState extends State<FollowingScreen> {
                 const SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      FollowingStoreList(),
-                      FollowingFilterChips(),
-                    ],
+                    children: [FollowingStoreList(), FollowingFilterChips()],
                   ),
                 ),
                 if (provider.isLoading || provider.isLoadingIds)
@@ -99,7 +100,12 @@ class _FollowingScreenState extends State<FollowingScreen> {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 100), // Bottom padding for cart
+                    padding: const EdgeInsets.fromLTRB(
+                      16,
+                      8,
+                      16,
+                      100,
+                    ), // Bottom padding for cart
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -121,7 +127,9 @@ class _FollowingScreenState extends State<FollowingScreen> {
                             child: FeedCard(update: update),
                           );
                         },
-                        childCount: provider.feed.length + (provider.isPaginating ? 1 : 0),
+                        childCount:
+                            provider.feed.length +
+                            (provider.isPaginating ? 1 : 0),
                       ),
                     ),
                   ),
@@ -143,7 +151,11 @@ class _FollowingScreenState extends State<FollowingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.inventory_2_outlined, size: 64, color: AppColors.textSecondary.withOpacity(0.5)),
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 64,
+            color: AppColors.textSecondary.withOpacity(0.5),
+          ),
           const SizedBox(height: 16),
           Text(
             message,

@@ -10,14 +10,14 @@ class TagModel {
   final List<String> subCategoryIds;
 
   final int priority;
-  
+
   final bool isTrending;
   final bool isFilterable;
   final bool isSearchable;
   final bool isActive;
 
   final List<String> searchKeywords;
-  
+
   final bool createdBySeeder;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -83,8 +83,12 @@ class TagModel {
       'isActive': isActive,
       'searchKeywords': searchKeywords,
       'createdBySeeder': createdBySeeder,
-      'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
-      'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : FieldValue.serverTimestamp(),
+      'createdAt': createdAt != null
+          ? Timestamp.fromDate(createdAt!)
+          : FieldValue.serverTimestamp(),
+      'updatedAt': updatedAt != null
+          ? Timestamp.fromDate(updatedAt!)
+          : FieldValue.serverTimestamp(),
     };
   }
 }

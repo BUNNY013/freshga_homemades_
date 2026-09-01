@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geocoding/geocoding.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../models/address_model.dart';
 import '../../../providers/customer_provider.dart';
+import '../../screens/profile/location_picker_screen.dart';
 
 class AddressBottomSheet extends StatefulWidget {
   final AddressModel? selectedAddress;
@@ -28,7 +31,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
   bool _isAddingNew = false;
   AddressModel? _addressToEdit;
   bool _isDefault = true;
-  
+
   // Form controllers
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
@@ -42,12 +45,14 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
   final _pincodeCtrl = TextEditingController();
   final _villageFallbackCtrl = TextEditingController(); // For fallback mode
   String _addressType = 'Home';
-  
+
   bool _isLoadingPincode = false;
   bool _isApiFallback = false; // True when API fails
   List<String> _villages = [];
   String? _selectedVillage;
-  
+  double? _latitude;
+  double? _longitude;
+
   @override
   void initState() {
     super.initState();
@@ -58,15 +63,44 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
       _isDefault = true;
     }
   }
-  
+
   final List<String> _indianStates = [
-    'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
-    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
-    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana',
-    'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 
-    'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 
-    'Delhi', 'Lakshadweep', 'Puducherry', 'Jammu and Kashmir', 'Ladakh'
+    'Andhra Pradesh',
+    'Arunachal Pradesh',
+    'Assam',
+    'Bihar',
+    'Chhattisgarh',
+    'Goa',
+    'Gujarat',
+    'Haryana',
+    'Himachal Pradesh',
+    'Jharkhand',
+    'Karnataka',
+    'Kerala',
+    'Madhya Pradesh',
+    'Maharashtra',
+    'Manipur',
+    'Meghalaya',
+    'Mizoram',
+    'Nagaland',
+    'Odisha',
+    'Punjab',
+    'Rajasthan',
+    'Sikkim',
+    'Tamil Nadu',
+    'Telangana',
+    'Tripura',
+    'Uttar Pradesh',
+    'Uttarakhand',
+    'West Bengal',
+    'Andaman and Nicobar Islands',
+    'Chandigarh',
+    'Dadra and Nagar Haveli and Daman and Diu',
+    'Delhi',
+    'Lakshadweep',
+    'Puducherry',
+    'Jammu and Kashmir',
+    'Ladakh',
   ];
 
   @override
@@ -84,7 +118,10 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
     super.dispose();
   }
 
-  Future<void> _fetchPincodeDetails(String pincode, {String? preserveVillage}) async {
+  Future<void> _fetchPincodeDetails(
+    String pincode, {
+    String? preserveVillage,
+  }) async {
     if (pincode.length != 6) return;
 
     setState(() {
@@ -96,7 +133,9 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
     });
 
     try {
-      final response = await http.get(Uri.parse('https://api.postalpincode.in/pincode/$pincode'));
+      final response = await http.get(
+        Uri.parse('https://api.postalpincode.in/pincode/$pincode'),
+      );
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         if (data.isNotEmpty && data[0]['Status'] == 'Success') {
@@ -105,22 +144,25 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
             final district = postOffices[0]['District']?.toString() ?? '';
             final state = postOffices[0]['State']?.toString() ?? '';
             final block = postOffices[0]['Block']?.toString() ?? district;
-            
+
             final villageNames = postOffices
                 .map((po) => po['Name']?.toString() ?? '')
                 .where((name) => name.isNotEmpty)
                 .toSet() // Remove duplicates
                 .toList();
-            
+
             setState(() {
               _districtCtrl.text = district;
               _cityCtrl.text = block == 'NA' ? district : block;
               _stateCtrl.text = state;
               _villages = villageNames;
-              if (preserveVillage != null && villageNames.contains(preserveVillage)) {
+              if (preserveVillage != null &&
+                  villageNames.contains(preserveVillage)) {
                 _selectedVillage = preserveVillage;
               } else {
-                _selectedVillage = villageNames.isNotEmpty ? villageNames[0] : null;
+                _selectedVillage = villageNames.isNotEmpty
+                    ? villageNames[0]
+                    : null;
               }
               _isApiFallback = false;
             });
@@ -132,7 +174,15 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
             _villages = [];
             _selectedVillage = null;
           });
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not fetch Area automatically. Please enter manually.'), backgroundColor: Colors.orange));
+          if (mounted)
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Could not fetch Area automatically. Please enter manually.',
+                ),
+                backgroundColor: Colors.orange,
+              ),
+            );
         }
       } else {
         // API failed
@@ -141,7 +191,13 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
           _villages = [];
           _selectedVillage = null;
         });
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Network error. Please enter area manually.'), backgroundColor: Colors.orange));
+        if (mounted)
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Network error. Please enter area manually.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
       }
     } catch (e) {
       debugPrint("Pincode fetch error: $e");
@@ -150,7 +206,13 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
         _villages = [];
         _selectedVillage = null;
       });
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error fetching area. Please enter manually.'), backgroundColor: Colors.orange));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error fetching area. Please enter manually.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
     } finally {
       if (mounted) setState(() => _isLoadingPincode = false);
     }
@@ -160,14 +222,14 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
     setState(() {
       _addressToEdit = address;
       _isAddingNew = true;
-      
+
       _nameCtrl.text = address.name;
       _phoneCtrl.text = address.phoneNumber;
       _houseCtrl.text = address.houseNumber;
       _streetCtrl.text = address.street;
       _landmarkCtrl.text = address.landmark;
       _pincodeCtrl.text = address.pincode;
-      
+
       final cityParts = address.city.split(',').map((e) => e.trim()).toList();
       String? villageToPreserve;
       if (cityParts.length >= 3) {
@@ -182,27 +244,48 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
         _villages = [];
         _selectedVillage = null;
       }
-      
+
       _stateCtrl.text = address.state;
       _addressType = address.addressType;
       _isDefault = address.isDefault;
-      
+      _latitude = address.latitude;
+      _longitude = address.longitude;
+
       if (_pincodeCtrl.text.length == 6) {
-        _fetchPincodeDetails(_pincodeCtrl.text, preserveVillage: villageToPreserve);
+        _fetchPincodeDetails(
+          _pincodeCtrl.text,
+          preserveVillage: villageToPreserve,
+        );
       }
     });
   }
 
   void _saveNewAddress() async {
     if (_formKey.currentState!.validate()) {
-      if (!_isApiFallback && _selectedVillage == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please select a Village/Area")));
+      if (_latitude == null || _longitude == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Please pin your exact delivery location on the map.",
+            ),
+          ),
+        );
         return;
       }
-      
-      String finalVillage = _isApiFallback ? _villageFallbackCtrl.text.trim() : _selectedVillage!;
 
-      final fullCity = "$finalVillage, ${_cityCtrl.text.trim()}, ${_districtCtrl.text.trim()}";
+      if (!_isApiFallback && _selectedVillage == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please select a Village/Area")),
+        );
+        return;
+      }
+
+      String finalVillage = _isApiFallback
+          ? _villageFallbackCtrl.text.trim()
+          : _selectedVillage!;
+
+      final fullCity =
+          "$finalVillage, ${_cityCtrl.text.trim()}, ${_districtCtrl.text.trim()}";
 
       final newAddress = AddressModel(
         id: _addressToEdit?.id,
@@ -211,11 +294,16 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
         houseNumber: _houseCtrl.text,
         street: _streetCtrl.text,
         landmark: _landmarkCtrl.text,
-        city: fullCity.replaceAll(RegExp(r',\s*,'), ','), // cleanup just in case
+        city: fullCity.replaceAll(
+          RegExp(r',\s*,'),
+          ',',
+        ), // cleanup just in case
         state: _stateCtrl.text,
         pincode: _pincodeCtrl.text,
         addressType: _addressType,
         isDefault: _isDefault,
+        latitude: _latitude,
+        longitude: _longitude,
       );
 
       final customerProvider = context.read<CustomerProvider>();
@@ -249,7 +337,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -257,14 +345,20 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
               children: [
                 Text(
                   _isAddingNew
-                      ? (_addressToEdit != null ? "Edit Address" : "Add New Address")
+                      ? (_addressToEdit != null
+                            ? "Edit Address"
+                            : "Add New Address")
                       : "Select Delivery Address",
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 if (_isAddingNew)
                   InkWell(
                     onTap: () {
-                      if (widget.startInAddMode || widget.addressToEdit != null) {
+                      if (widget.startInAddMode ||
+                          widget.addressToEdit != null) {
                         Navigator.pop(context);
                       } else {
                         setState(() {
@@ -286,10 +380,18 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
                           _isApiFallback = false;
                           _addressType = 'Home';
                           _isDefault = true;
+                          _latitude = null;
+                          _longitude = null;
                         });
                       }
                     },
-                    child: const Text("Cancel", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(
+                        color: AppColors.primaryGreen,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   )
                 else
                   IconButton(
@@ -300,7 +402,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
             ),
           ),
           const Divider(),
-          
+
           Expanded(
             child: _isAddingNew ? _buildNewAddressForm() : _buildAddressList(),
           ),
@@ -313,7 +415,7 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
     return Consumer<CustomerProvider>(
       builder: (context, provider, child) {
         final addresses = provider.currentCustomer?.savedAddresses ?? [];
-        
+
         return Column(
           children: [
             InkWell(
@@ -322,9 +424,19 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
                 padding: const EdgeInsets.all(16),
                 child: const Row(
                   children: [
-                    Icon(Icons.add_location_alt_outlined, color: AppColors.primaryGreen),
+                    Icon(
+                      Icons.add_location_alt_outlined,
+                      color: AppColors.primaryGreen,
+                    ),
                     SizedBox(width: 12),
-                    Text("Add a new address", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(
+                      "Add a new address",
+                      style: TextStyle(
+                        color: AppColors.primaryGreen,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     Spacer(),
                     Icon(Icons.chevron_right, color: Colors.grey),
                   ],
@@ -332,11 +444,14 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
               ),
             ),
             const Divider(thickness: 4, color: Color(0xFFF5F5F5)),
-            
+
             if (addresses.isEmpty)
               const Expanded(
                 child: Center(
-                  child: Text("No saved addresses.", style: TextStyle(color: Colors.grey)),
+                  child: Text(
+                    "No saved addresses.",
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
               )
             else
@@ -347,22 +462,29 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
                   itemBuilder: (context, index) {
                     final address = addresses[index];
                     final isSelected = widget.selectedAddress?.id == address.id;
-                    
+
                     return InkWell(
                       onTap: () {
                         widget.onAddressSelected?.call(address);
                         Navigator.pop(context);
                       },
                       child: Container(
-                        color: isSelected ? AppColors.primaryGreen.withOpacity(0.05) : Colors.white,
+                        color: isSelected
+                            ? AppColors.primaryGreen.withOpacity(0.05)
+                            : Colors.white,
                         padding: const EdgeInsets.all(20),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(
-                              address.addressType == 'Home' ? Icons.home_outlined : 
-                              address.addressType == 'Work' ? Icons.work_outline : Icons.location_on_outlined,
-                              color: isSelected ? AppColors.primaryGreen : Colors.grey.shade600,
+                              address.addressType == 'Home'
+                                  ? Icons.home_outlined
+                                  : address.addressType == 'Work'
+                                  ? Icons.work_outline
+                                  : Icons.location_on_outlined,
+                              color: isSelected
+                                  ? AppColors.primaryGreen
+                                  : Colors.grey.shade600,
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -371,29 +493,53 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
                                 children: [
                                   Row(
                                     children: [
-                                      Text(address.addressType, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                      Text(
+                                        address.addressType,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                      ),
                                       const SizedBox(width: 12),
-                                      Text(address.name, style: TextStyle(color: Colors.grey.shade700, fontSize: 14)),
+                                      Text(
+                                        address.name,
+                                        style: TextStyle(
+                                          color: Colors.grey.shade700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     address.formattedAddress,
-                                    style: TextStyle(color: Colors.grey.shade600, height: 1.4),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      height: 1.4,
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     address.phoneNumber,
-                                    style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                             if (isSelected)
-                              const Icon(Icons.check_circle, color: AppColors.primaryGreen),
+                              const Icon(
+                                Icons.check_circle,
+                                color: AppColors.primaryGreen,
+                              ),
                             PopupMenuButton<String>(
                               padding: EdgeInsets.zero,
-                              icon: const Icon(Icons.more_vert, color: Colors.grey),
+                              icon: const Icon(
+                                Icons.more_vert,
+                                color: Colors.grey,
+                              ),
                               onSelected: (value) {
                                 if (value == 'edit') {
                                   _editAddress(address);
@@ -402,8 +548,17 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
                                 }
                               },
                               itemBuilder: (context) => [
-                                const PopupMenuItem(value: 'edit', child: Text('Edit')),
-                                const PopupMenuItem(value: 'delete', child: Text('Delete', style: TextStyle(color: Colors.red))),
+                                const PopupMenuItem(
+                                  value: 'edit',
+                                  child: Text('Edit'),
+                                ),
+                                const PopupMenuItem(
+                                  value: 'delete',
+                                  child: Text(
+                                    'Delete',
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
                               ],
                             ),
                           ],
@@ -425,12 +580,143 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          InkWell(
+            onTap: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LocationPickerScreen(
+                    initialLat: _latitude,
+                    initialLng: _longitude,
+                  ),
+                ),
+              );
+
+              if (result != null && result is Map) {
+                final center = result['center'] as LatLng;
+                final placemark = result['placemark'] as Placemark?;
+
+                setState(() {
+                  _latitude = center.latitude;
+                  _longitude = center.longitude;
+
+                  if (placemark != null) {
+                    if (placemark.postalCode != null &&
+                        placemark.postalCode!.length == 6) {
+                      _pincodeCtrl.text = placemark.postalCode!;
+                      _fetchPincodeDetails(
+                        placemark.postalCode!,
+                        preserveVillage: placemark.subLocality,
+                      );
+                    }
+                    if (placemark.street != null && _streetCtrl.text.isEmpty) {
+                      _streetCtrl.text = placemark.street!;
+                    }
+                  }
+                });
+              }
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              decoration: BoxDecoration(
+                color: _latitude != null
+                    ? AppColors.primaryGreen.withOpacity(0.05)
+                    : Colors.white,
+                border: Border.all(
+                  color: _latitude != null
+                      ? AppColors.primaryGreen
+                      : AppColors.primaryGreen.withOpacity(0.3),
+                  width: 1.5,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    _latitude != null ? Icons.check_circle : Icons.pin_drop,
+                    color: AppColors.primaryGreen,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _latitude != null
+                            ? Text(
+                                'Location Pinned',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: AppColors.textPrimary,
+                                ),
+                              )
+                            : RichText(
+                                text: const TextSpan(
+                                  text: 'Pin Location on Map',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: ' *',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                        if (_latitude != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              '${_latitude!.toStringAsFixed(4)}, ${_longitude!.toStringAsFixed(4)}',
+                              style: const TextStyle(
+                                color: AppColors.primaryGreen,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        else
+                          const Padding(
+                            padding: EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              'Helps us deliver your order faster',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.grey),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
           _buildTextField(_nameCtrl, "Full Name"),
           const SizedBox(height: 16),
-          _buildTextField(_phoneCtrl, "Phone Number", keyboardType: TextInputType.phone),
+          _buildTextField(
+            _phoneCtrl,
+            "Phone Number",
+            keyboardType: TextInputType.phone,
+          ),
           const SizedBox(height: 16),
-          
-          const Text("Address Type", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
+
+          const Text(
+            "Address Type",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
@@ -441,11 +727,15 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
               Expanded(child: _buildTypeChip('Other')),
             ],
           ),
-          
+
           const SizedBox(height: 16),
           _buildTextField(_streetCtrl, "Address"),
           const SizedBox(height: 16),
-          _buildTextField(_landmarkCtrl, "Landmark (Optional)", isRequired: false),
+          _buildTextField(
+            _landmarkCtrl,
+            "Landmark (Optional)",
+            isRequired: false,
+          ),
           const SizedBox(height: 16),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,126 +744,217 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                      _buildTextField(
-                        _pincodeCtrl, 
-                        "Pincode", 
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        validator: (val) {
-                          if (val == null || val.isEmpty) return "Required";
-                          if (val.length != 6 || int.tryParse(val) == null) return "Invalid Pincode";
-                          if (_cityCtrl.text.isEmpty) return "Invalid Pincode"; // API fetch failed
-                          return null;
-                        },
-                        onChanged: (val) {
-                          if (val.length == 6) {
-                            _fetchPincodeDetails(val);
-                            FocusScope.of(context).unfocus();
-                          } else {
-                            // Clear fields if they delete a digit
-                            setState(() {
-                              _cityCtrl.text = '';
-                              _districtCtrl.text = '';
-                              _stateCtrl.text = '';
-                              _villages = [];
-                              _selectedVillage = null;
-                            });
-                          }
+                    _buildTextField(
+                      _pincodeCtrl,
+                      "Pincode",
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      validator: (val) {
+                        if (val == null || val.isEmpty) return "Required";
+                        if (val.length != 6 || int.tryParse(val) == null)
+                          return "Invalid Pincode";
+                        if (_cityCtrl.text.isEmpty)
+                          return "Invalid Pincode"; // API fetch failed
+                        return null;
+                      },
+                      onChanged: (val) {
+                        if (val.length == 6) {
+                          _fetchPincodeDetails(val);
+                          FocusScope.of(context).unfocus();
+                        } else {
+                          // Clear fields if they delete a digit
+                          setState(() {
+                            _cityCtrl.text = '';
+                            _districtCtrl.text = '';
+                            _stateCtrl.text = '';
+                            _villages = [];
+                            _selectedVillage = null;
+                          });
                         }
-                      ),
+                      },
+                    ),
                     if (_isLoadingPincode)
                       const Padding(
                         padding: EdgeInsets.only(top: 4.0),
-                        child: Text("Fetching...", style: TextStyle(color: AppColors.primaryGreen, fontSize: 10, fontStyle: FontStyle.italic)),
+                        child: Text(
+                          "Fetching...",
+                          style: TextStyle(
+                            color: AppColors.primaryGreen,
+                            fontSize: 10,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
                       ),
                   ],
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _isApiFallback 
-                  ? _buildTextField(_villageFallbackCtrl, "Village/Area")
-                  : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Village/Area", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
-                            const SizedBox(height: 8),
-                            Container(
-                              height: 48,
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              decoration: BoxDecoration(
-                                color: _villages.isEmpty ? Colors.grey.shade50 : Colors.white,
-                                border: Border.all(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(8),
+                child: _isApiFallback
+                    ? _buildTextField(_villageFallbackCtrl, "Village/Area")
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          RichText(
+                            text: const TextSpan(
+                              text: "Village/Area",
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
                               ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: _selectedVillage,
-                                  isExpanded: true,
-                                  menuMaxHeight: 300,
-                                  hint: const Text("Select Area", style: TextStyle(fontSize: 14)),
-                                  icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-                                  items: _villages.map((String village) {
-                                    return DropdownMenuItem<String>(
-                                      value: village,
-                                      child: Text(village, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
-                                    );
-                                  }).toList(),
-                                  onChanged: _villages.isEmpty ? null : (String? newValue) {
-                                    setState(() {
-                                      _selectedVillage = newValue;
-                                    });
-                                  },
+                              children: [
+                                TextSpan(
+                                  text: ' *',
+                                  style: TextStyle(color: Colors.red),
                                 ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
+                              color: _villages.isEmpty
+                                  ? Colors.grey.shade50
+                                  : Colors.white,
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedVillage,
+                                isExpanded: true,
+                                menuMaxHeight: 300,
+                                hint: const Text(
+                                  "Select Area",
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                icon: const Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: Colors.grey,
+                                ),
+                                items: _villages.map((String village) {
+                                  return DropdownMenuItem<String>(
+                                    value: village,
+                                    child: Text(
+                                      village,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: _villages.isEmpty
+                                    ? null
+                                    : (String? newValue) {
+                                        setState(() {
+                                          _selectedVillage = newValue;
+                                        });
+                                      },
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _buildTextField(_cityCtrl, "City/Taluka", readOnly: !_isApiFallback)),
+              Expanded(
+                child: _buildTextField(
+                  _cityCtrl,
+                  "City/Taluka",
+                  readOnly: !_isApiFallback,
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildTextField(_districtCtrl, "District", readOnly: !_isApiFallback)),
+              Expanded(
+                child: _buildTextField(
+                  _districtCtrl,
+                  "District",
+                  readOnly: !_isApiFallback,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
           _isApiFallback
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("State", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: _indianStates.contains(_stateCtrl.text) ? _stateCtrl.text : null,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade300)),
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: const TextSpan(
+                        text: "State",
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: ' *',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ],
+                      ),
                     ),
-                    items: _indianStates.map((state) {
-                      return DropdownMenuItem(value: state, child: Text(state, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)));
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setState(() {
-                          _stateCtrl.text = val;
-                        });
-                      }
-                    },
-                    validator: (val) => val == null || val.isEmpty ? "Required" : null,
-                  ),
-                ],
-              )
-            : _buildTextField(_stateCtrl, "State", readOnly: true),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: _indianStates.contains(_stateCtrl.text)
+                          ? _stateCtrl.text
+                          : null,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                      ),
+                      items: _indianStates.map((state) {
+                        return DropdownMenuItem(
+                          value: state,
+                          child: Text(
+                            state,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _stateCtrl.text = val;
+                          });
+                        }
+                      },
+                      validator: (val) =>
+                          val == null || val.isEmpty ? "Required" : null,
+                    ),
+                  ],
+                )
+              : _buildTextField(_stateCtrl, "State", readOnly: true),
           const SizedBox(height: 16),
           CheckboxListTile(
-            title: const Text("Make this my default address", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            title: const Text(
+              "Make this my default address",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
             value: _isDefault,
             activeColor: AppColors.primaryGreen,
             contentPadding: EdgeInsets.zero,
@@ -589,10 +970,19 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
               onPressed: _saveNewAddress,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreen,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
-              child: const Text("Save Address", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              child: const Text(
+                "Save Address",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ],
@@ -607,8 +997,14 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryGreen.withOpacity(0.1) : Colors.white,
-          border: Border.all(color: isSelected ? AppColors.primaryGreen.withOpacity(0.5) : Colors.grey.shade300),
+          color: isSelected
+              ? AppColors.primaryGreen.withOpacity(0.1)
+              : Colors.white,
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryGreen.withOpacity(0.5)
+                : Colors.grey.shade300,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         alignment: Alignment.center,
@@ -623,16 +1019,34 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {bool isRequired = true, TextInputType? keyboardType, bool readOnly = false, Function(String)? onChanged, String? Function(String?)? validator, int? maxLength}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label, {
+    bool isRequired = true,
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    Function(String)? onChanged,
+    String? Function(String?)? validator,
+    int? maxLength,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.grey,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+        RichText(
+          text: TextSpan(
+            text: label,
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+            children: [
+              if (isRequired)
+                const TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: Colors.red),
+                ),
+            ],
           ),
         ),
         const SizedBox(height: 8),
@@ -645,17 +1059,25 @@ class _AddressBottomSheetState extends State<AddressBottomSheet> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: readOnly ? Colors.grey.shade700 : Colors.black87
+            color: readOnly ? Colors.grey.shade700 : Colors.black87,
           ),
-          validator: validator ?? (isRequired ? (value) {
-            if (value == null || value.trim().isEmpty) return "Required";
-            return null;
-          } : null),
+          validator:
+              validator ??
+              (isRequired
+                  ? (value) {
+                      if (value == null || value.trim().isEmpty)
+                        return "Required";
+                      return null;
+                    }
+                  : null),
           decoration: InputDecoration(
             filled: true,
             counterText: "", // Hides the max length counter
             fillColor: readOnly ? Colors.grey.shade50 : Colors.white,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide(color: Colors.grey.shade300),

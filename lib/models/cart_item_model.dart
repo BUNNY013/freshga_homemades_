@@ -13,6 +13,8 @@ class CartItemModel {
   final DateTime addedAt;
   final bool isAvailable;
   final String dispatchTime;
+  final bool manageStock;
+  final int stock;
 
   CartItemModel({
     required this.cartItemId,
@@ -29,6 +31,8 @@ class CartItemModel {
     required this.addedAt,
     required this.isAvailable,
     required this.dispatchTime,
+    this.manageStock = false,
+    this.stock = 0,
   });
 
   CartItemModel copyWith({
@@ -46,6 +50,8 @@ class CartItemModel {
     DateTime? addedAt,
     bool? isAvailable,
     String? dispatchTime,
+    bool? manageStock,
+    int? stock,
   }) {
     return CartItemModel(
       cartItemId: cartItemId ?? this.cartItemId,
@@ -62,6 +68,8 @@ class CartItemModel {
       addedAt: addedAt ?? this.addedAt,
       isAvailable: isAvailable ?? this.isAvailable,
       dispatchTime: dispatchTime ?? this.dispatchTime,
+      manageStock: manageStock ?? this.manageStock,
+      stock: stock ?? this.stock,
     );
   }
 
@@ -78,11 +86,13 @@ class CartItemModel {
       price: (json['price'] ?? 0.0).toDouble(),
       originalPrice: (json['originalPrice'] ?? 0.0).toDouble(),
       quantity: json['quantity'] ?? 1,
-      addedAt: json['addedAt'] != null 
+      addedAt: json['addedAt'] != null
           ? DateTime.tryParse(json['addedAt']) ?? DateTime.now()
           : DateTime.now(),
       isAvailable: json['isAvailable'] ?? true,
       dispatchTime: json['dispatchTime'] ?? '2 Days',
+      manageStock: json['manageStock'] ?? false,
+      stock: json['stock'] ?? 0,
     );
   }
 
@@ -102,6 +112,8 @@ class CartItemModel {
       'addedAt': addedAt.toIso8601String(),
       'isAvailable': isAvailable,
       'dispatchTime': dispatchTime,
+      'manageStock': manageStock,
+      'stock': stock,
     };
   }
 }

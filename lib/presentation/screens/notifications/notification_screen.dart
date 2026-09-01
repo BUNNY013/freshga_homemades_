@@ -14,7 +14,8 @@ class NotificationScreen extends StatefulWidget {
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> with WidgetsBindingObserver {
+class _NotificationScreenState extends State<NotificationScreen>
+    with WidgetsBindingObserver {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isPermissionDenied = false;
@@ -53,7 +54,7 @@ class _NotificationScreenState extends State<NotificationScreen> with WidgetsBin
   String get _formatTime {
     return "Just now"; // A simple helper could be added for timeago, but we'll use a basic format for now
   }
-  
+
   String _timeAgo(DateTime d) {
     Duration diff = DateTime.now().difference(d);
     if (diff.inDays > 365) return "${(diff.inDays / 365).floor()}y";
@@ -122,7 +123,7 @@ class _NotificationScreenState extends State<NotificationScreen> with WidgetsBin
   @override
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
-    
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -143,23 +144,26 @@ class _NotificationScreenState extends State<NotificationScreen> with WidgetsBin
           StreamBuilder<QuerySnapshot>(
             stream: user != null
                 ? _firestore
-                    .collection('customers')
-                    .doc(user.uid)
-                    .collection('notifications')
-                    .where('isUnread', isEqualTo: true)
-                    .limit(1)
-                    .snapshots()
+                      .collection('customers')
+                      .doc(user.uid)
+                      .collection('notifications')
+                      .where('isUnread', isEqualTo: true)
+                      .limit(1)
+                      .snapshots()
                 : const Stream.empty(),
             builder: (context, snapshot) {
-              final hasUnread = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+              final hasUnread =
+                  snapshot.hasData && snapshot.data!.docs.isNotEmpty;
               return TextButton(
                 onPressed: hasUnread ? _markAllAsRead : null,
                 child: Text(
                   "Mark all read",
                   style: TextStyle(
-                    color: hasUnread ? AppColors.primaryGreen : Colors.grey.shade400, 
-                    fontWeight: FontWeight.bold, 
-                    fontSize: 14
+                    color: hasUnread
+                        ? AppColors.primaryGreen
+                        : Colors.grey.shade400,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
                 ),
               );
@@ -189,7 +193,10 @@ class _NotificationScreenState extends State<NotificationScreen> with WidgetsBin
                             color: Colors.orange.shade100,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.notifications_off_rounded, color: Colors.orange),
+                          child: const Icon(
+                            Icons.notifications_off_rounded,
+                            color: Colors.orange,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -198,12 +205,18 @@ class _NotificationScreenState extends State<NotificationScreen> with WidgetsBin
                             children: [
                               const Text(
                                 "Turn on notifications",
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 "Don't miss updates on your orders and favorite stores.",
-                                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade700,
+                                ),
                               ),
                             ],
                           ),
@@ -214,7 +227,9 @@ class _NotificationScreenState extends State<NotificationScreen> with WidgetsBin
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.orange,
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                           child: const Text("Enable"),
                         ),
@@ -229,168 +244,204 @@ class _NotificationScreenState extends State<NotificationScreen> with WidgetsBin
                         .collection('notifications')
                         .orderBy('createdAt', descending: true)
                         .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: AppColors.primaryGreen),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return _buildEmptyState();
-                }
-
-                final notifications = snapshot.data!.docs
-                    .map((doc) => NotificationModel.fromFirestore(doc))
-                    .toList();
-
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  itemCount: notifications.length,
-                  physics: const BouncingScrollPhysics(),
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final notification = notifications[index];
-                    return InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () {
-                        _markAsRead(notification.id);
-                        if (notification.type == 'order_update' && notification.orderId != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => OrderDetailsScreen(orderId: notification.orderId!),
-                            ),
-                          );
-                        } else if (notification.type == 'promo' && notification.productId != null) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailsScreen(
-                                productId: notification.productId!,
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: notification.isUnread 
-                              ? AppColors.primaryGreen.withOpacity(0.05) 
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: notification.isUnread 
-                                ? AppColors.primaryGreen.withOpacity(0.3)
-                                : Colors.grey.shade200,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primaryGreen,
                           ),
+                        );
+                      }
+
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return _buildEmptyState();
+                      }
+
+                      final notifications = snapshot.data!.docs
+                          .map((doc) => NotificationModel.fromFirestore(doc))
+                          .toList();
+
+                      return ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Larger Icon Container or Image
-                            if (notification.imageUrl != null && notification.imageUrl!.isNotEmpty)
-                              Container(
-                                height: 52,
-                                width: 52,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                    image: NetworkImage(notification.imageUrl!),
-                                    fit: BoxFit.cover,
+                        itemCount: notifications.length,
+                        physics: const BouncingScrollPhysics(),
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final notification = notifications[index];
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              _markAsRead(notification.id);
+                              if (notification.type == 'order_update' &&
+                                  notification.orderId != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => OrderDetailsScreen(
+                                      orderId: notification.orderId!,
+                                    ),
                                   ),
-                                ),
-                              )
-                            else
-                              Container(
-                                height: 52,
-                                width: 52,
-                                decoration: BoxDecoration(
-                                  color: _getColorForType(notification.type).withOpacity(0.1),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  _getIconForType(notification.type),
-                                  color: _getColorForType(notification.type),
-                                  size: 26,
+                                );
+                              } else if (notification.type == 'promo' &&
+                                  notification.productId != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ProductDetailsScreen(
+                                      productId: notification.productId!,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                color: notification.isUnread
+                                    ? AppColors.primaryGreen.withOpacity(0.05)
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: notification.isUnread
+                                      ? AppColors.primaryGreen.withOpacity(0.3)
+                                      : Colors.grey.shade200,
                                 ),
                               ),
-                            const SizedBox(width: 16),
-                            
-                            // Separated Content
-                            Expanded(
-                              child: Column(
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          notification.title,
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: notification.isUnread ? FontWeight.bold : FontWeight.w600,
-                                            color: AppColors.textPrimary,
+                                  // Larger Icon Container or Image
+                                  if (notification.imageUrl != null &&
+                                      notification.imageUrl!.isNotEmpty)
+                                    Container(
+                                      height: 52,
+                                      width: 52,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                            notification.imageUrl!,
                                           ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            _timeAgo(notification.createdAt),
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: notification.isUnread ? FontWeight.w600 : FontWeight.w500,
-                                              color: notification.isUnread ? AppColors.primaryGreen : Colors.grey.shade500,
-                                            ),
-                                          ),
-                                          if (notification.isUnread) ...[
-                                            const SizedBox(width: 6),
-                                            Container(
-                                              width: 8,
-                                              height: 8,
-                                              decoration: const BoxDecoration(
-                                                color: AppColors.primaryGreen,
-                                                shape: BoxShape.circle,
+                                    )
+                                  else
+                                    Container(
+                                      height: 52,
+                                      width: 52,
+                                      decoration: BoxDecoration(
+                                        color: _getColorForType(
+                                          notification.type,
+                                        ).withOpacity(0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        _getIconForType(notification.type),
+                                        color: _getColorForType(
+                                          notification.type,
+                                        ),
+                                        size: 26,
+                                      ),
+                                    ),
+                                  const SizedBox(width: 16),
+
+                                  // Separated Content
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                notification.title,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight:
+                                                      notification.isUnread
+                                                      ? FontWeight.bold
+                                                      : FontWeight.w600,
+                                                  color: AppColors.textPrimary,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                          ]
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    notification.message,
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: notification.isUnread ? AppColors.textPrimary.withOpacity(0.9) : AppColors.textSecondary,
-                                      height: 1.4,
+                                            const SizedBox(width: 8),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  _timeAgo(
+                                                    notification.createdAt,
+                                                  ),
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight:
+                                                        notification.isUnread
+                                                        ? FontWeight.w600
+                                                        : FontWeight.w500,
+                                                    color: notification.isUnread
+                                                        ? AppColors.primaryGreen
+                                                        : Colors.grey.shade500,
+                                                  ),
+                                                ),
+                                                if (notification.isUnread) ...[
+                                                  const SizedBox(width: 6),
+                                                  Container(
+                                                    width: 8,
+                                                    height: 8,
+                                                    decoration:
+                                                        const BoxDecoration(
+                                                          color: AppColors
+                                                              .primaryGreen,
+                                                          shape:
+                                                              BoxShape.circle,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          notification.message,
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: notification.isUnread
+                                                ? AppColors.textPrimary
+                                                      .withOpacity(0.9)
+                                                : AppColors.textSecondary,
+                                            height: 1.4,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
                                     ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 

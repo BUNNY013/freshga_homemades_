@@ -29,7 +29,9 @@ class _SeederScreenState extends State<SeederScreen> {
     _setStatus('Seeding new categories & tags...');
     try {
       await new_seeders.runSeeders();
-      _setStatus('✅ Successfully seeded new Categories, SubCategories, and Tags!');
+      _setStatus(
+        '✅ Successfully seeded new Categories, SubCategories, and Tags!',
+      );
     } catch (e) {
       _setStatus('❌ Error: \$e');
     } finally {
@@ -55,7 +57,9 @@ class _SeederScreenState extends State<SeederScreen> {
     _setStatus('Clearing seeded data (createdBySeeder == true)...');
     try {
       await _seeder.clearSeededData();
-      _setStatus('✅ Successfully cleared all seeded data. Production data untouched.');
+      _setStatus(
+        '✅ Successfully cleared all seeded data. Production data untouched.',
+      );
     } catch (e) {
       _setStatus('❌ Error clearing database: $e');
     } finally {
@@ -82,13 +86,20 @@ class _SeederScreenState extends State<SeederScreen> {
     setState(() => _isLoading = true);
     _setStatus('Mocking follow for first 5 stores...');
     try {
-      final snapshot = await FirebaseFirestore.instance.collection('stores').limit(5).get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('stores')
+          .limit(5)
+          .get();
       final storeIds = snapshot.docs.map((d) => d.id).toList();
       if (storeIds.isNotEmpty) {
         if (mounted) {
-          await context.read<FollowingProvider>().mockFollowStoresForTesting(storeIds);
+          await context.read<FollowingProvider>().mockFollowStoresForTesting(
+            storeIds,
+          );
         }
-        _setStatus('✅ Now following ${storeIds.length} stores. Go to Following tab!');
+        _setStatus(
+          '✅ Now following ${storeIds.length} stores. Go to Following tab!',
+        );
       } else {
         _setStatus('❌ No stores found to follow.');
       }
@@ -124,7 +135,7 @@ class _SeederScreenState extends State<SeederScreen> {
               style: TextStyle(color: Colors.grey),
             ),
             const SizedBox(height: 32),
-            
+
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -136,12 +147,14 @@ class _SeederScreenState extends State<SeederScreen> {
                 _statusMessage,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: _statusMessage.startsWith('❌') ? Colors.red : Colors.blue.shade800,
+                  color: _statusMessage.startsWith('❌')
+                      ? Colors.red
+                      : Colors.blue.shade800,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 40),
 
             if (_isLoading)

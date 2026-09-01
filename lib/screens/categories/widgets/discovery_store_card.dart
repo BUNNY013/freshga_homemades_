@@ -23,7 +23,9 @@ class DiscoveryStoreCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => StoreScreen(storeId: store.id)),
+          MaterialPageRoute(
+            builder: (context) => StoreScreen(storeId: store.id),
+          ),
         );
       },
       child: Container(
@@ -73,7 +75,6 @@ class DiscoveryStoreCard extends StatelessWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-
                             // ── Logo avatar ────────────────────────────
                             Stack(
                               clipBehavior: Clip.none,
@@ -85,31 +86,43 @@ class DiscoveryStoreCard extends StatelessWidget {
                                     shape: BoxShape.circle,
                                     gradient: store.logoUrl.isEmpty
                                         ? const LinearGradient(
-                                            colors: [AppColors.primaryLight, AppColors.primaryGreen],
+                                            colors: [
+                                              AppColors.primaryLight,
+                                              AppColors.primaryGreen,
+                                            ],
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                           )
                                         : null,
                                     border: Border.all(
-                                      color: AppColors.primaryGreen.withOpacity(0.25),
+                                      color: AppColors.primaryGreen.withOpacity(
+                                        0.25,
+                                      ),
                                       width: 2.5,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.primaryGreen.withOpacity(0.15),
+                                        color: AppColors.primaryGreen
+                                            .withOpacity(0.15),
                                         blurRadius: 10,
                                         offset: const Offset(0, 3),
                                       ),
                                     ],
                                     image: store.logoUrl.isNotEmpty
                                         ? DecorationImage(
-                                            image: CachedNetworkImageProvider(store.logoUrl),
+                                            image: CachedNetworkImageProvider(
+                                              store.logoUrl,
+                                            ),
                                             fit: BoxFit.cover,
                                           )
                                         : null,
                                   ),
                                   child: store.logoUrl.isEmpty
-                                      ? const Icon(Icons.storefront_rounded, color: Colors.white, size: 26)
+                                      ? const Icon(
+                                          Icons.storefront_rounded,
+                                          color: Colors.white,
+                                          size: 26,
+                                        )
                                       : null,
                                 ),
                               ],
@@ -137,47 +150,70 @@ class DiscoveryStoreCard extends StatelessWidget {
                                   const SizedBox(height: 6),
                                   Row(
                                     children: [
+                                      if (store.reviewsCount > 0) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 7,
+                                            vertical: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.goldenYellow
+                                                .withOpacity(0.12),
+                                            borderRadius: BorderRadius.circular(
+                                              20,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                Icons.star_rounded,
+                                                size: 12,
+                                                color: AppColors.goldenYellow,
+                                              ),
+                                              const SizedBox(width: 3),
+                                              Text(
+                                                "${store.rating}",
+                                                style: const TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: AppColors.textPrimary,
+                                                ),
+                                              ),
+                                              Text(
+                                                " (${store.reviewsCount})",
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.w500,
+                                                  color: AppColors.textSecondary
+                                                      .withOpacity(0.8),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                      ],
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 7,
+                                          vertical: 3,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.goldenYellow.withOpacity(0.12),
-                                          borderRadius: BorderRadius.circular(20),
+                                          color: AppColors.primaryGreen
+                                              .withOpacity(0.08),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            const Icon(Icons.star_rounded, size: 12, color: AppColors.goldenYellow),
-                                            const SizedBox(width: 3),
-                                            Text(
-                                              "${store.rating}",
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: AppColors.textPrimary,
-                                              ),
+                                            const Icon(
+                                              Icons.people_alt_rounded,
+                                              size: 11,
+                                              color: AppColors.primaryGreen,
                                             ),
-                                            Text(
-                                              " (${store.reviewsCount})",
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w500,
-                                                color: AppColors.textSecondary.withOpacity(0.8),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryGreen.withOpacity(0.08),
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Icon(Icons.people_alt_rounded, size: 11, color: AppColors.primaryGreen),
                                             const SizedBox(width: 3),
                                             Text(
                                               _formatFollowers(store.followers),

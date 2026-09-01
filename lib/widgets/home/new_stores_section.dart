@@ -42,7 +42,7 @@ class _NewStoresSectionState extends State<NewStoresSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SectionTitle(
-              title: widget.title, 
+              title: widget.title,
               onSeeAll: () {
                 Navigator.push(
                   context,
@@ -53,11 +53,11 @@ class _NewStoresSectionState extends State<NewStoresSection> {
                     ),
                   ),
                 );
-              }
+              },
             ),
             const SizedBox(height: 12),
             SizedBox(
-              height: 250, 
+              height: 250,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),

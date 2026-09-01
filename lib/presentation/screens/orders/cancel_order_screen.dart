@@ -20,7 +20,7 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
     'Want to change the delivery address',
     'Delivery is taking too long',
     'Found a better price',
-    'Other reason'
+    'Other reason',
   ];
 
   String _selectedReason = 'Ordered by mistake';
@@ -50,7 +50,11 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
                     color: Colors.red.shade50,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.shopping_bag_outlined, color: Colors.red, size: 32),
+                  child: const Icon(
+                    Icons.shopping_bag_outlined,
+                    color: Colors.red,
+                    size: 32,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -75,9 +79,18 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: const Text("Yes, Cancel Order", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: const Text(
+                      "Yes, Cancel Order",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -86,9 +99,16 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
                   height: 50,
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text("No, Go Back", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: const Text(
+                      "No, Go Back",
+                      style: TextStyle(
+                        color: AppColors.primaryGreen,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -103,36 +123,102 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
     try {
       final now = DateTime.now().toIso8601String();
       final timeline = List<Map<String, dynamic>>.from(widget.order.timeline);
-      
+
       String note = _selectedReason;
       if (_noteController.text.trim().isNotEmpty) {
         note += " - ${_noteController.text.trim()}";
       }
 
-      timeline.add({
-        'status': 'Cancelled',
-        'time': now,
-        'note': note,
-      });
+      timeline.add({'status': 'Cancelled', 'time': now, 'note': note});
 
-      await FirebaseFirestore.instance.collection('orders').doc(widget.order.orderId).update({
-        'orderStatus': 'Cancelled',
-        'timeline': timeline,
-        'updatedAt': now,
+      final db = FirebaseFirestore.instance;
+
+      await db.runTransaction((transaction) async {
+        final orderRef = db.collection('orders').doc(widget.order.orderId);
+
+        // Prepare to restore stock
+        Map<String, DocumentReference> productRefs = {};
+        Map<String, DocumentSnapshot> productDocs = {};
+
+        for (var item in widget.order.items) {
+          productRefs[item.productId] = db
+              .collection('products')
+              .doc(item.productId);
+        }
+
+        for (var productId in productRefs.keys) {
+          productDocs[productId] = await transaction.get(
+            productRefs[productId]!,
+          );
+        }
+
+        // Apply stock restoration to the products
+        for (var productId in productDocs.keys) {
+          final doc = productDocs[productId]!;
+          if (doc.exists) {
+            final data = doc.data() as Map<String, dynamic>;
+            List<dynamic> variants = data['variants'] ?? [];
+            bool updated = false;
+
+            // Find items belonging to this product
+            final productItems = widget.order.items.where(
+              (i) => i.productId == productId,
+            );
+
+            for (var item in productItems) {
+              for (int i = 0; i < variants.length; i++) {
+                if (variants[i]['label'] == item.variantLabel) {
+                  // Only restore if stock tracking is enabled
+                  if (variants[i]['manageStock'] == true) {
+                    variants[i]['stock'] =
+                        (variants[i]['stock'] ?? 0) + item.quantity;
+
+                    // Auto set inStock back to true if it went above 0
+                    if (variants[i]['stock'] > 0) {
+                      variants[i]['inStock'] = true;
+                      variants[i]['isAvailable'] = true;
+                    }
+                    updated = true;
+                  }
+                  break;
+                }
+              }
+            }
+
+            if (updated) {
+              transaction.update(productRefs[productId]!, {
+                'variants': variants,
+              });
+            }
+          }
+        }
+
+        // Update the order itself
+        transaction.update(orderRef, {
+          'orderStatus': 'Cancelled',
+          'timeline': timeline,
+          'updatedAt': now,
+        });
       });
 
       if (!mounted) return;
 
       // Navigate to Refund Screen if a payment was made, else pop to My Orders
       // Assuming 'Success' or 'Paid' means payment was collected by platform.
-      if (widget.order.paymentStatus != 'Pending' && widget.order.paymentStatus != 'Failed') {
+      if (widget.order.paymentStatus != 'Pending' &&
+          widget.order.paymentStatus != 'Failed') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => RefundStatusScreen(order: widget.order)),
+          MaterialPageRoute(
+            builder: (_) => RefundStatusScreen(order: widget.order),
+          ),
         );
       } else {
         // Pop back to My Orders screen (pop twice: details screen and this screen)
-        Navigator.popUntil(context, (route) => route.isFirst || route.settings.name == '/orders');
+        Navigator.popUntil(
+          context,
+          (route) => route.isFirst || route.settings.name == '/orders',
+        );
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Order Cancelled Successfully')),
         );
@@ -140,7 +226,10 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to cancel: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Failed to cancel: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -161,7 +250,11 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
         ),
         title: const Text(
           "Cancel Order",
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
       ),
       body: Stack(
@@ -179,9 +272,22 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Order ID: ${order.orderId}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text(
+                            "Order ID: ${order.orderId}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
                           const SizedBox(height: 8),
-                          Text("${order.items.length} items • ₹${order.totalAmount.toInt()}", style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
+                          Text(
+                            "${order.items.length} items • ₹${order.totalAmount.toInt()}",
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -193,45 +299,71 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
                           width: 48,
                           height: 48,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(color: Colors.grey.shade100, width: 48, height: 48),
-                          errorWidget: (context, url, error) => Container(color: Colors.grey.shade100, width: 48, height: 48, child: const Icon(Icons.image, color: Colors.grey)),
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey.shade100,
+                            width: 48,
+                            height: 48,
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey.shade100,
+                            width: 48,
+                            height: 48,
+                            child: const Icon(Icons.image, color: Colors.grey),
+                          ),
                         ),
                       ),
                   ],
                 ),
-                
+
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 24),
                   child: Divider(height: 1),
                 ),
-                
+
                 // Reasons
-                const Text("Select Reason", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text(
+                  "Select Reason",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
                 const SizedBox(height: 12),
-                
-                ..._reasons.map((reason) => InkWell(
-                  onTap: () {
-                    setState(() {
-                      _selectedReason = reason;
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _selectedReason == reason ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                          color: _selectedReason == reason ? AppColors.primaryGreen : Colors.grey.shade400,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(reason, style: TextStyle(fontSize: 14, color: _selectedReason == reason ? Colors.black87 : Colors.grey.shade700)),
-                      ],
+
+                ..._reasons.map(
+                  (reason) => InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedReason = reason;
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _selectedReason == reason
+                                ? Icons.radio_button_checked
+                                : Icons.radio_button_unchecked,
+                            color: _selectedReason == reason
+                                ? AppColors.primaryGreen
+                                : Colors.grey.shade400,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            reason,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: _selectedReason == reason
+                                  ? Colors.black87
+                                  : Colors.grey.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                )),
-                
+                ),
+
                 const SizedBox(height: 24),
-                
+
                 // Note textfield
                 TextField(
                   controller: _noteController,
@@ -239,7 +371,10 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
                   maxLength: 150,
                   decoration: InputDecoration(
                     hintText: "Add a note (optional)\nTell us more...",
-                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 14,
+                    ),
                     filled: true,
                     fillColor: Colors.grey.shade50,
                     border: OutlineInputBorder(
@@ -248,16 +383,18 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primaryGreen),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryGreen,
+                      ),
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 100), // padding for bottom button
               ],
             ),
           ),
-          
+
           // Bottom Action Button
           Positioned(
             left: 0,
@@ -268,7 +405,11 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
                 ],
               ),
               child: SafeArea(
@@ -280,16 +421,32 @@ class _CancelOrderScreenState extends State<CancelOrderScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                    child: _isLoading 
-                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : const Text("Cancel Order", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            "Cancel Order",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

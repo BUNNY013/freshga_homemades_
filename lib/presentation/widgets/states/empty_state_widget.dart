@@ -19,7 +19,8 @@ class EmptyStateWidget extends StatelessWidget {
 
   factory EmptyStateWidget.noSearchResults({
     String title = 'No results found',
-    String message = 'Try adjusting your search or filters to find what you are looking for.',
+    String message =
+        'Try adjusting your search or filters to find what you are looking for.',
     VoidCallback? onClearFilters,
   }) {
     return EmptyStateWidget(
@@ -73,12 +74,17 @@ class EmptyStateWidget extends StatelessWidget {
                   backgroundColor: AppColors.primaryGreen,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   elevation: 0,
                 ),
                 child: Text(
                   buttonText!,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),

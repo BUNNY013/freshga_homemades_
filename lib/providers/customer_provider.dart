@@ -23,7 +23,7 @@ class CustomerProvider with ChangeNotifier {
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
         _listenToCustomer(user.uid, user.phoneNumber ?? '');
-        
+
         // Initialize push notifications exactly once per login session
         NotificationService.initialize();
       } else {
@@ -44,18 +44,20 @@ class CustomerProvider with ChangeNotifier {
       await _customerService.getOrCreateCustomer(uid, phoneNumber);
 
       _customerSubscription?.cancel();
-      _customerSubscription = _customerService.streamCustomer(uid).listen(
-        (customer) {
-          _currentCustomer = customer;
-          _isLoading = false;
-          notifyListeners();
-        },
-        onError: (error) {
-          print("Customer stream error: $error");
-          _isLoading = false;
-          notifyListeners();
-        },
-      );
+      _customerSubscription = _customerService
+          .streamCustomer(uid)
+          .listen(
+            (customer) {
+              _currentCustomer = customer;
+              _isLoading = false;
+              notifyListeners();
+            },
+            onError: (error) {
+              print("Customer stream error: $error");
+              _isLoading = false;
+              notifyListeners();
+            },
+          );
     } catch (e) {
       print("Error getting/creating customer: $e");
       _isLoading = false;
@@ -82,14 +84,19 @@ class CustomerProvider with ChangeNotifier {
       // Maintain up to 5 recent locations, without duplicates
       List<Map<String, dynamic>> updatedRecents = [];
       if (_currentCustomer?.recentLocations != null) {
-        updatedRecents = List<Map<String, dynamic>>.from(_currentCustomer!.recentLocations!);
+        updatedRecents = List<Map<String, dynamic>>.from(
+          _currentCustomer!.recentLocations!,
+        );
       }
-      
+
       // Remove if it already exists to move it to the top
-      updatedRecents.removeWhere((loc) => 
-        loc['city'] == city && loc['state'] == state && loc['pincode'] == pincode
+      updatedRecents.removeWhere(
+        (loc) =>
+            loc['city'] == city &&
+            loc['state'] == state &&
+            loc['pincode'] == pincode,
       );
-      
+
       updatedRecents.insert(0, newLoc);
       if (updatedRecents.length > 5) {
         updatedRecents = updatedRecents.sublist(0, 5);
@@ -151,7 +158,9 @@ class CustomerProvider with ChangeNotifier {
     }
   }
 
-  Future<void> updateNotificationPreferences(Map<String, bool> preferences) async {
+  Future<void> updateNotificationPreferences(
+    Map<String, bool> preferences,
+  ) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       await _customerService.updateNotificationPreferences(

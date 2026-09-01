@@ -22,23 +22,23 @@ class ReportIssueScreen extends StatefulWidget {
 class _ReportIssueScreenState extends State<ReportIssueScreen> {
   final OrderService _orderService = OrderService();
   final TextEditingController _descriptionController = TextEditingController();
-  
+
   final List<String> _reasons = [
     'Item Damaged / Spoiled',
     'Missing Item',
     'Wrong Item Received',
     'Quality Issue',
-    'Other'
+    'Other',
   ];
   String? _selectedReason;
-  
+
   // Track selected items by index
   final Set<int> _selectedItemIndices = {};
-  
+
   // Images
   final List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
-  
+
   bool _isSubmitting = false;
 
   Future<void> _pickImages() async {
@@ -46,7 +46,9 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
     if (images.isNotEmpty) {
       setState(() {
         if (_selectedImages.length + images.length > 3) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Maximum 3 images allowed')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Maximum 3 images allowed')),
+          );
           return;
         }
         _selectedImages.addAll(images.map((img) => File(img.path)));
@@ -59,22 +61,34 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
       _selectedImages.removeAt(index);
     });
   }
-  
+
   Future<void> _submitRequest() async {
     if (_selectedItemIndices.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select at least one item')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one item')),
+      );
       return;
     }
     if (_selectedReason == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a reason')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a reason')));
       return;
     }
     if (_descriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please provide a description')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please provide a description')),
+      );
       return;
     }
-    if ((_selectedReason == 'Item Damaged / Spoiled' || _selectedReason == 'Quality Issue') && _selectedImages.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please upload at least 1 photo for this issue type')));
+    if ((_selectedReason == 'Item Damaged / Spoiled' ||
+            _selectedReason == 'Quality Issue') &&
+        _selectedImages.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please upload at least 1 photo for this issue type'),
+        ),
+      );
       return;
     }
 
@@ -87,7 +101,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
           itemsWithIssues.add(widget.order.items[i]);
         }
       }
-      
+
       await _orderService.submitRefundRequest(
         order: widget.order,
         items: List.from(itemsWithIssues),
@@ -105,7 +119,9 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
           reportId: docRef.id,
           type: 'product_after_order',
           targetId: widget.order.orderId,
-          targetName: targetNames.isNotEmpty ? targetNames : 'Order #${widget.order.orderId}',
+          targetName: targetNames.isNotEmpty
+              ? targetNames
+              : 'Order #${widget.order.orderId}',
           storeId: widget.order.storeId,
           reporterUserId: user?.uid ?? 'anonymous',
           reporterName: user?.displayName ?? user?.phoneNumber ?? 'Customer',
@@ -123,12 +139,18 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
       if (mounted) {
         Navigator.pop(context, true); // Return true to refresh order details
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Issue reported successfully. The vendor will review it shortly.')),
+          const SnackBar(
+            content: Text(
+              'Issue reported successfully. The vendor will review it shortly.',
+            ),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     } finally {
       if (mounted) {
@@ -159,7 +181,11 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
         ),
         title: const Text(
           "Report Issue / Refund",
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -176,12 +202,19 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.orange.shade800, size: 20),
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.orange.shade800,
+                    size: 20,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       "Please provide accurate details. False claims may lead to account suspension.",
-                      style: TextStyle(color: Colors.orange.shade900, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.orange.shade900,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -189,7 +222,10 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
             ),
             const SizedBox(height: 24),
 
-            const Text("1. Select items with issues", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              "1. Select items with issues",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 12),
             ...allItems.asMap().entries.map((entry) {
               final index = entry.key;
@@ -211,11 +247,20 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isSelected ? AppColors.primaryGreen : Colors.grey.shade200, width: isSelected ? 2 : 1),
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.primaryGreen
+                          : Colors.grey.shade200,
+                      width: isSelected ? 2 : 1,
+                    ),
                     boxShadow: [
                       if (isSelected)
-                        BoxShadow(color: AppColors.primaryGreen.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4))
-                    ]
+                        BoxShadow(
+                          color: AppColors.primaryGreen.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -223,11 +268,23 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primaryGreen : Colors.transparent,
-                          border: Border.all(color: isSelected ? AppColors.primaryGreen : Colors.grey.shade300),
+                          color: isSelected
+                              ? AppColors.primaryGreen
+                              : Colors.transparent,
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primaryGreen
+                                : Colors.grey.shade300,
+                          ),
                           shape: BoxShape.circle,
                         ),
-                        child: isSelected ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+                        child: isSelected
+                            ? const Icon(
+                                Icons.check,
+                                size: 16,
+                                color: Colors.white,
+                              )
+                            : null,
                       ),
                       const SizedBox(width: 12),
                       ClipRRect(
@@ -237,7 +294,10 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                           width: 48,
                           height: 48,
                           fit: BoxFit.cover,
-                          errorWidget: (context, url, error) => Container(color: Colors.grey.shade200, child: const Icon(Icons.image)),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey.shade200,
+                            child: const Icon(Icons.image),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -245,19 +305,33 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("${item.productName} (${item.variantLabel})", style: const TextStyle(fontWeight: FontWeight.bold)),
-                            Text("₹${item.price.toInt()} x ${item.quantity}", style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                            Text(
+                              "${item.productName} (${item.variantLabel})",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "₹${item.price.toInt()} x ${item.quantity}",
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 12,
+                              ),
+                            ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
               );
             }),
-            
+
             const SizedBox(height: 24),
-            const Text("2. Select reason", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              "2. Select reason",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -271,20 +345,26 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                   isExpanded: true,
                   hint: const Text("Select a reason"),
                   value: _selectedReason,
-                  items: _reasons.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+                  items: _reasons
+                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                      .toList(),
                   onChanged: (val) => setState(() => _selectedReason = val),
                 ),
               ),
             ),
 
             const SizedBox(height: 24),
-            const Text("3. Describe the issue", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              "3. Describe the issue",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 12),
             TextField(
               controller: _descriptionController,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: "Please provide detailed information about the issue...",
+                hintText:
+                    "Please provide detailed information about the issue...",
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
@@ -297,15 +377,24 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primaryGreen, width: 2),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryGreen,
+                    width: 2,
+                  ),
                 ),
               ),
             ),
 
             const SizedBox(height: 24),
-            const Text("4. Upload Proof (Max 3)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              "4. Upload Proof (Max 3)",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 4),
-            Text("Clear photos help vendors resolve issues faster.", style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+            Text(
+              "Clear photos help vendors resolve issues faster.",
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -318,14 +407,20 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          style: BorderStyle.solid,
+                        ),
                       ),
                       child: const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.add_a_photo, color: Colors.grey),
                           SizedBox(height: 4),
-                          Text("Add", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          Text(
+                            "Add",
+                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
                         ],
                       ),
                     ),
@@ -341,7 +436,10 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                         height: 80,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
-                          image: DecorationImage(image: FileImage(entry.value), fit: BoxFit.cover),
+                          image: DecorationImage(
+                            image: FileImage(entry.value),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       Positioned(
@@ -351,11 +449,18 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
                           onTap: () => _removeImage(entry.key),
                           child: Container(
                             padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                            child: const Icon(Icons.close, color: Colors.white, size: 12),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 12,
+                            ),
                           ),
                         ),
-                      )
+                      ),
                     ],
                   );
                 }),
@@ -370,8 +475,12 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))
-          ]
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
+            ),
+          ],
         ),
         child: SizedBox(
           width: double.infinity,
@@ -380,11 +489,27 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
             onPressed: _isSubmitting ? null : _submitRequest,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryGreen,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            child: _isSubmitting 
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : const Text("Submit Request", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text(
+                    "Submit Request",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),

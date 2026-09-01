@@ -12,14 +12,20 @@ class ForceUpdateScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<UpdateProvider>(
       builder: (context, updateProvider, _) {
-        final features = updateProvider.updateFeatures.split('\n').where((s) => s.trim().isNotEmpty).toList();
+        final features = updateProvider.updateFeatures
+            .split('\n')
+            .where((s) => s.trim().isNotEmpty)
+            .toList();
 
         return Scaffold(
           backgroundColor: Colors.white,
           body: SafeArea(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 40.0,
+                ),
                 child: Column(
                   children: [
                     // Illustration
@@ -28,10 +34,14 @@ class ForceUpdateScreen extends StatelessWidget {
                       width: 250,
                       height: 250,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.system_update, size: 100, color: AppColors.primaryGreen),
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.system_update,
+                        size: 100,
+                        color: AppColors.primaryGreen,
+                      ),
                     ),
                     const SizedBox(height: 32),
-                    
+
                     // Title
                     const Text(
                       'Update Available',
@@ -43,7 +53,7 @@ class ForceUpdateScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Subtitle
                     const Text(
                       'A new version of FreshGa HomeMades is available with improvements and bug fixes.',
@@ -55,7 +65,7 @@ class ForceUpdateScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 32),
-                    
+
                     // What's New Container
                     if (features.isNotEmpty)
                       Container(
@@ -77,35 +87,42 @@ class ForceUpdateScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            ...features.map((feature) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 12.0),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(
-                                        Icons.check_circle_rounded,
-                                        color: AppColors.primaryGreen,
-                                        size: 20,
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          feature,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            color: AppColors.textPrimary,
+                            ...features
+                                .map(
+                                  (feature) => Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 12.0,
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(
+                                          Icons.check_circle_rounded,
+                                          color: AppColors.primaryGreen,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            feature,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: AppColors.textPrimary,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                )).toList(),
+                                )
+                                .toList(),
                           ],
                         ),
                       ),
-                    
+
                     const SizedBox(height: 40),
-                    
+
                     // Update Now Button
                     SizedBox(
                       width: double.infinity,
@@ -114,11 +131,16 @@ class ForceUpdateScreen extends StatelessWidget {
                         onPressed: () async {
                           final url = Uri.parse(updateProvider.storeUrl);
                           if (await canLaunchUrl(url)) {
-                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                            await launchUrl(
+                              url,
+                              mode: LaunchMode.externalApplication,
+                            );
                           } else {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Could not open store link.')),
+                                const SnackBar(
+                                  content: Text('Could not open store link.'),
+                                ),
                               );
                             }
                           }
@@ -133,12 +155,15 @@ class ForceUpdateScreen extends StatelessWidget {
                         ),
                         child: const Text(
                           'Update Now',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Exit App Button
                     TextButton(
                       onPressed: () {

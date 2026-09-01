@@ -30,52 +30,52 @@ import 'dart:async';
 import 'package:app_links/app_links.dart';
 import 'presentation/screens/store/store_screen.dart';
 import 'presentation/screens/product/product_details_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-    runApp(
-      EasyLocalization(
-        supportedLocales: const [
-          Locale('en'),
-          Locale('hi'),
-          Locale('te')
-        ],
-        path: 'assets/translations',
-        fallbackLocale: const Locale('en'),
-        child: MultiProvider(
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('hi'), Locale('te')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => NetworkProvider()),
           ChangeNotifierProvider(create: (_) => MaintenanceProvider()),
           ChangeNotifierProvider(create: (_) => UpdateProvider()),
           Provider<AuthService>(create: (_) => AuthService()),
           ChangeNotifierProvider(create: (_) => CustomerProvider()),
-        ChangeNotifierProvider(create: (_) => HomeProvider()),
-        ChangeNotifierProvider(create: (_) => BannerProvider()),
-        ChangeNotifierProvider(create: (_) => CategoryProvider()),
-        ChangeNotifierProxyProvider<CustomerProvider, StoreProvider>(
-          create: (_) => StoreProvider(),
-          update: (_, customer, store) => store!..updateCustomerState(customer.currentCustomer?.state),
-        ),
-        ChangeNotifierProxyProvider<CustomerProvider, ProductProvider>(
-          create: (_) => ProductProvider(),
-          update: (_, customer, product) => product!..updateCustomerState(customer.currentCustomer?.state),
-        ),
-        ChangeNotifierProvider(create: (_) => CollectionProvider()),
-        ChangeNotifierProvider(create: (_) => SearchProvider()),
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => FollowingProvider()),
-        ChangeNotifierProvider(create: (_) => WishlistProvider()),
-      ],
-      child: const MyApp(),
-    ),
+          ChangeNotifierProvider(create: (_) => HomeProvider()),
+          ChangeNotifierProvider(create: (_) => BannerProvider()),
+          ChangeNotifierProvider(create: (_) => CategoryProvider()),
+          ChangeNotifierProxyProvider<CustomerProvider, StoreProvider>(
+            create: (_) => StoreProvider(),
+            update: (_, customer, store) =>
+                store!..updateCustomerState(customer.currentCustomer?.state),
+          ),
+          ChangeNotifierProxyProvider<CustomerProvider, ProductProvider>(
+            create: (_) => ProductProvider(),
+            update: (_, customer, product) =>
+                product!..updateCustomerState(customer.currentCustomer?.state),
+          ),
+          ChangeNotifierProvider(create: (_) => CollectionProvider()),
+          ChangeNotifierProvider(create: (_) => SearchProvider()),
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+          ChangeNotifierProvider(create: (_) => FollowingProvider()),
+          ChangeNotifierProvider(create: (_) => WishlistProvider()),
+        ],
+        child: const MyApp(),
       ),
+    ),
   );
 }
 
-final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> globalNavigatorKey =
+    GlobalKey<NavigatorState>();
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -96,7 +96,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _initDeepLinks() async {
     _appLinks = AppLinks();
-    
+
     // Check initial link if app was closed
     try {
       final initialUri = await _appLinks.getInitialLink();
@@ -111,11 +111,14 @@ class _MyAppState extends State<MyApp> {
     }
 
     // Listen to incoming links when app is running
-    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
-      _handleDeepLink(uri);
-    }, onError: (err) {
-      debugPrint("Deep link stream error: $err");
-    });
+    _linkSubscription = _appLinks.uriLinkStream.listen(
+      (uri) {
+        _handleDeepLink(uri);
+      },
+      onError: (err) {
+        debugPrint("Deep link stream error: $err");
+      },
+    );
   }
 
   void _handleDeepLink(Uri uri) {
@@ -123,14 +126,16 @@ class _MyAppState extends State<MyApp> {
       final String type = uri.pathSegments[0];
       if (uri.pathSegments.length > 1) {
         final String id = uri.pathSegments[1];
-        
+
         if (type == 'store') {
           globalNavigatorKey.currentState?.push(
-            MaterialPageRoute(builder: (_) => StoreScreen(storeId: id))
+            MaterialPageRoute(builder: (_) => StoreScreen(storeId: id)),
           );
         } else if (type == 'product') {
           globalNavigatorKey.currentState?.push(
-            MaterialPageRoute(builder: (_) => ProductDetailsScreen(productId: id))
+            MaterialPageRoute(
+              builder: (_) => ProductDetailsScreen(productId: id),
+            ),
           );
         }
       }
@@ -173,7 +178,7 @@ class _MyAppState extends State<MyApp> {
                     ),
                   );
                 }
-                
+
                 if (update.isForceUpdate) {
                   return Positioned.fill(
                     child: Directionality(
@@ -188,7 +193,7 @@ class _MyAppState extends State<MyApp> {
                     ),
                   );
                 }
-                
+
                 if (maintenance.isMaintenanceMode) {
                   return Positioned.fill(
                     child: Directionality(
@@ -229,15 +234,26 @@ class _MyAppState extends State<MyApp> {
                         color: Colors.transparent,
                         child: Container(
                           color: Colors.orange.shade800,
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 16,
+                          ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.wifi_tethering_error_rounded, color: Colors.white, size: 16),
+                              Icon(
+                                Icons.wifi_tethering_error_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
                               SizedBox(width: 8),
                               Text(
                                 'Slow internet connection',
-                                style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
@@ -246,7 +262,7 @@ class _MyAppState extends State<MyApp> {
                     ),
                   );
                 }
-                
+
                 return const SizedBox.shrink();
               },
             ),

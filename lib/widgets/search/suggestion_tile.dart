@@ -44,24 +44,29 @@ class SuggestionTile extends StatelessWidget {
                       fit: BoxFit.cover,
                       placeholder: (context, url) => const Center(
                         child: SizedBox(
-                          width: 20, height: 20, 
-                          child: CircularProgressIndicator(strokeWidth: 2)
-                        )
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
                       ),
                       errorWidget: (context, url, error) => Icon(
-                        isStore ? Icons.storefront_outlined : Icons.image_outlined,
+                        isStore
+                            ? Icons.storefront_outlined
+                            : Icons.image_outlined,
                         color: Colors.grey.shade400,
                         size: 20,
                       ),
                     )
                   : Icon(
-                      isStore ? Icons.storefront_outlined : Icons.search_rounded,
+                      isStore
+                          ? Icons.storefront_outlined
+                          : Icons.search_rounded,
                       color: Colors.grey.shade400,
                       size: 20,
                     ),
             ),
             const SizedBox(width: 16),
-            
+
             // Text Column
             Expanded(
               child: Column(
@@ -83,7 +88,9 @@ class SuggestionTile extends StatelessWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: isStore ? AppColors.primaryGreen : AppColors.textSecondary,
+                      color: isStore
+                          ? AppColors.primaryGreen
+                          : AppColors.textSecondary,
                       fontWeight: isStore ? FontWeight.w600 : FontWeight.normal,
                     ),
                     maxLines: 1,

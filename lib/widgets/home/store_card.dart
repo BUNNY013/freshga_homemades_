@@ -25,12 +25,17 @@ class StoreCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => StoreScreen(storeId: store.id)),
+          MaterialPageRoute(
+            builder: (context) => StoreScreen(storeId: store.id),
+          ),
         );
       },
       child: Container(
         width: isFullWidth ? double.infinity : 250, // Expand if full width
-        margin: EdgeInsets.symmetric(horizontal: isFullWidth ? 16 : 8, vertical: isFullWidth ? 8 : 4),
+        margin: EdgeInsets.symmetric(
+          horizontal: isFullWidth ? 16 : 8,
+          vertical: isFullWidth ? 8 : 4,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -48,20 +53,30 @@ class StoreCard extends StatelessWidget {
           children: [
             // Banner + Logo Stack
             SizedBox(
-              height: isFullWidth ? 150 : 110, // Taller stack to accommodate larger logo
+              height: isFullWidth
+                  ? 150
+                  : 110, // Taller stack to accommodate larger logo
               child: Stack(
                 children: [
                   // Banner Image
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
                     child: store.bannerUrl.isNotEmpty
                         ? CachedNetworkImage(
                             imageUrl: store.bannerUrl,
                             height: isFullWidth ? 110 : 85,
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => ShimmerLoading(width: double.infinity, height: isFullWidth ? 110 : 85),
-                            errorWidget: (context, url, error) => Container(height: isFullWidth ? 110 : 85, color: Colors.grey.shade200),
+                            placeholder: (context, url) => ShimmerLoading(
+                              width: double.infinity,
+                              height: isFullWidth ? 110 : 85,
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              height: isFullWidth ? 110 : 85,
+                              color: Colors.grey.shade200,
+                            ),
                           )
                         : Container(
                             height: isFullWidth ? 110 : 85,
@@ -69,12 +84,14 @@ class StoreCard extends StatelessWidget {
                             color: Colors.grey.shade200,
                           ),
                   ),
-                  
+
                   // Gradient Overlay
                   Container(
                     height: isFullWidth ? 110 : 85,
                     decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -86,8 +103,6 @@ class StoreCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  
-
 
                   // Overlapping Logo
                   Positioned(
@@ -103,24 +118,37 @@ class StoreCard extends StatelessWidget {
                             color: Colors.black.withOpacity(0.08),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
-                          )
-                        ]
+                          ),
+                        ],
                       ),
                       child: CircleAvatar(
                         radius: isFullWidth ? 38 : 26,
                         backgroundColor: Colors.grey.shade100,
-                        backgroundImage: store.logoUrl.isNotEmpty ? CachedNetworkImageProvider(store.logoUrl) : null,
-                        child: store.logoUrl.isEmpty ? Icon(Icons.store, color: Colors.grey, size: isFullWidth ? 32 : 20) : null,
+                        backgroundImage: store.logoUrl.isNotEmpty
+                            ? CachedNetworkImageProvider(store.logoUrl)
+                            : null,
+                        child: store.logoUrl.isEmpty
+                            ? Icon(
+                                Icons.store,
+                                color: Colors.grey,
+                                size: isFullWidth ? 32 : 20,
+                              )
+                            : null,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             // Store Details
             Padding(
-              padding: EdgeInsets.fromLTRB(isFullWidth ? 20 : 12, isFullWidth ? 12 : 10, isFullWidth ? 20 : 12, isFullWidth ? 20 : 12),
+              padding: EdgeInsets.fromLTRB(
+                isFullWidth ? 20 : 12,
+                isFullWidth ? 12 : 10,
+                isFullWidth ? 20 : 12,
+                isFullWidth ? 20 : 12,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -135,23 +163,33 @@ class StoreCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
-                  const SizedBox(height: 4),
-                  
-                  // Rating Row
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded, size: 14, color: Colors.orange),
-                      const SizedBox(width: 2),
-                      Text(
-                        store.rating.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                  
+
+                  if (store.reviewsCount > 0) ...[
+                    const SizedBox(height: 4),
+
+                    // Rating Row
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.star_rounded,
+                          size: 14,
+                          color: Colors.orange,
+                        ),
+                        const SizedBox(width: 2),
+                        Text(
+                          store.rating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
                   const SizedBox(height: 12),
-                  
+
                   // Followers & Follow Button Row
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -159,12 +197,20 @@ class StoreCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           "${_formatFollowers(store.followers)} Followers",
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      FollowButton.fromStore(store, isCompact: false, showNotificationBell: false),
+                      FollowButton.fromStore(
+                        store,
+                        isCompact: false,
+                        showNotificationBell: false,
+                      ),
                     ],
                   ),
                 ],

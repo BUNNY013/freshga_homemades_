@@ -46,7 +46,10 @@ class FeedCard extends StatelessWidget {
 
   String? _extractDiscountCode() {
     if (update.type == 'offer') {
-      final match = RegExp(r'code\s+([A-Z0-9]+)', caseSensitive: false).firstMatch(update.description);
+      final match = RegExp(
+        r'code\s+([A-Z0-9]+)',
+        caseSensitive: false,
+      ).firstMatch(update.description);
       if (match != null) {
         return match.group(1)?.toUpperCase();
       }
@@ -59,7 +62,8 @@ class FeedCard extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ProductDetailsScreen(productId: update.productId!),
+          builder: (context) =>
+              ProductDetailsScreen(productId: update.productId!),
         ),
       );
     } else {
@@ -78,14 +82,19 @@ class FeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final badgeColor = _getBadgeColor();
-    final isProductPost = update.type != 'community_update'; // new_launch, restock, offer
-    
+    final isProductPost =
+        update.type != 'community_update'; // new_launch, restock, offer
+
     // Look up the latest store logo from the provider just in case the stored one is stale
-    final followingStores = context.read<FollowingProvider>().followingStoresData;
+    final followingStores = context
+        .read<FollowingProvider>()
+        .followingStoresData;
     String displayLogo = update.storeLogo;
     if (displayLogo.isEmpty) {
       try {
-        final storeMatch = followingStores.firstWhere((s) => s['storeId'] == update.storeId);
+        final storeMatch = followingStores.firstWhere(
+          (s) => s['storeId'] == update.storeId,
+        );
         displayLogo = storeMatch['storeLogo'] ?? '';
       } catch (e) {
         // Store not found in the list, use default
@@ -132,16 +141,23 @@ class FeedCard extends StatelessWidget {
                             height: 36,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey.shade200, width: 1),
+                              border: Border.all(
+                                color: Colors.grey.shade200,
+                                width: 1,
+                              ),
                               color: Colors.white,
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: CachedNetworkImage(
-                              imageUrl: displayLogo.isNotEmpty 
-                                  ? displayLogo 
+                              imageUrl: displayLogo.isNotEmpty
+                                  ? displayLogo
                                   : 'https://images.unsplash.com/photo-1556910103-1c02745a872f?w=100&h=100&fit=crop',
                               fit: BoxFit.cover,
-                              errorWidget: (context, url, error) => const Icon(Icons.storefront_rounded, color: Colors.grey, size: 20),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.storefront_rounded,
+                                color: Colors.grey,
+                                size: 20,
+                              ),
                             ),
                           ),
                         ),
@@ -155,7 +171,8 @@ class FeedCard extends StatelessWidget {
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.textPrimary,
-                                fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                                fontFamily:
+                                    GoogleFonts.plusJakartaSans().fontFamily,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -172,7 +189,10 @@ class FeedCard extends StatelessWidget {
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: badgeColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -189,7 +209,7 @@ class FeedCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 20),
 
                 // --- CONTENT AREA ---
@@ -211,7 +231,8 @@ class FeedCard extends StatelessWidget {
                                 fontWeight: FontWeight.w800,
                                 color: AppColors.textPrimary,
                                 height: 1.3,
-                                fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                                fontFamily:
+                                    GoogleFonts.plusJakartaSans().fontFamily,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -228,15 +249,20 @@ class FeedCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 12),
-                            
+
                             // Discount Code Pill (If Offer)
                             if (update.type == 'offer' && discountCode != null)
                               Container(
                                 margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: badgeColor.withOpacity(0.05),
-                                  border: Border.all(color: badgeColor.withOpacity(0.3)),
+                                  border: Border.all(
+                                    color: badgeColor.withOpacity(0.3),
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -256,14 +282,19 @@ class FeedCard extends StatelessWidget {
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: Row(
                                   children: [
-                                    if (update.type == 'offer' && update.discountPrice > 0 && update.price > update.discountPrice) ...[
+                                    if (update.type == 'offer' &&
+                                        update.discountPrice > 0 &&
+                                        update.price >
+                                            update.discountPrice) ...[
                                       Text(
                                         '₹${update.discountPrice.toStringAsFixed(0)}',
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.primaryGreen,
-                                          fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                                          fontFamily:
+                                              GoogleFonts.plusJakartaSans()
+                                                  .fontFamily,
                                         ),
                                       ),
                                       const SizedBox(width: 8),
@@ -273,15 +304,22 @@ class FeedCard extends StatelessWidget {
                                           fontSize: 13,
                                           fontWeight: FontWeight.w500,
                                           color: AppColors.textSecondary,
-                                          decoration: TextDecoration.lineThrough,
+                                          decoration:
+                                              TextDecoration.lineThrough,
                                         ),
                                       ),
                                       const SizedBox(width: 8),
                                       Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.primaryGreen.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(4),
+                                          color: AppColors.primaryGreen
+                                              .withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
                                         ),
                                         child: Text(
                                           '${(((update.price - update.discountPrice) / update.price) * 100).round()}% OFF',
@@ -299,35 +337,49 @@ class FeedCard extends StatelessWidget {
                                           fontSize: 18,
                                           fontWeight: FontWeight.w800,
                                           color: AppColors.primaryGreen,
-                                          fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                                          fontFamily:
+                                              GoogleFonts.plusJakartaSans()
+                                                  .fontFamily,
                                         ),
                                       ),
                                     ],
                                   ],
                                 ),
                               ),
-                            
+
                             // CTA Button
                             ElevatedButton(
                               onPressed: () => _onCardTap(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: update.type == 'offer' ? badgeColor : AppColors.primaryGreen,
+                                backgroundColor: update.type == 'offer'
+                                    ? badgeColor
+                                    : AppColors.primaryGreen,
                                 foregroundColor: Colors.white,
                                 elevation: 0,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 0,
+                                ),
                                 minimumSize: const Size(0, 36),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                               child: Text(
                                 update.ctaText,
-                                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, fontFamily: GoogleFonts.plusJakartaSans().fontFamily),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                  fontFamily:
+                                      GoogleFonts.plusJakartaSans().fontFamily,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 16),
-                      
+
                       // Right Column: Product Image
                       Expanded(
                         flex: 4,
@@ -343,8 +395,16 @@ class FeedCard extends StatelessWidget {
                               imageUrl: update.imageUrl,
                               fit: BoxFit.cover,
                               width: double.infinity,
-                              placeholder: (context, url) => const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                              errorWidget: (context, url, error) => const Icon(Icons.fastfood_rounded, color: Colors.grey, size: 40),
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.fastfood_rounded,
+                                color: Colors.grey,
+                                size: 40,
+                              ),
                             ),
                           ),
                         ),
@@ -364,7 +424,8 @@ class FeedCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
                             height: 1.3,
-                            fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                            fontFamily:
+                                GoogleFonts.plusJakartaSans().fontFamily,
                           ),
                         ),
                       if (update.description.isNotEmpty) ...[
@@ -388,11 +449,17 @@ class FeedCard extends StatelessWidget {
                             width: double.infinity,
                             height: 200,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(height: 200, color: Colors.grey.shade50),
-                            errorWidget: (context, url, error) => Container(
-                              height: 200, 
+                            placeholder: (context, url) => Container(
+                              height: 200,
                               color: Colors.grey.shade50,
-                              child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              height: 200,
+                              color: Colors.grey.shade50,
+                              child: const Icon(
+                                Icons.image_not_supported,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
                         ),
@@ -405,14 +472,26 @@ class FeedCard extends StatelessWidget {
                             onPressed: () => _onCardTap(context),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primaryGreen,
-                              side: BorderSide(color: AppColors.primaryGreen.withOpacity(0.5)),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                              side: BorderSide(
+                                color: AppColors.primaryGreen.withOpacity(0.5),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 0,
+                              ),
                               minimumSize: const Size(0, 36),
                             ),
                             child: Text(
                               update.ctaText,
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, fontFamily: GoogleFonts.plusJakartaSans().fontFamily),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                                fontFamily:
+                                    GoogleFonts.plusJakartaSans().fontFamily,
+                              ),
                             ),
                           ),
                         ),

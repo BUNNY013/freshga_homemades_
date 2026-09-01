@@ -6,7 +6,7 @@ import '../../screens/cart/cart_screen.dart';
 
 class FloatingCartBar extends StatefulWidget {
   final double bottomOffset;
-  
+
   const FloatingCartBar({super.key, this.bottomOffset = 0});
 
   @override
@@ -27,7 +27,7 @@ class _FloatingCartBarState extends State<FloatingCartBar> {
         }
 
         final itemCount = cartProvider.totalItems;
-        
+
         // Auto-expand if new items are added to the cart
         if (itemCount > _lastItemCount) {
           _isMinimized = false;
@@ -36,14 +36,15 @@ class _FloatingCartBarState extends State<FloatingCartBar> {
         final storeCount = cartProvider.totalStores;
         final totalPrice = cartProvider.totalPrice;
 
-        String storeText = storeCount == 1 
-            ? cartProvider.items.values.first.storeName 
+        String storeText = storeCount == 1
+            ? cartProvider.items.values.first.storeName
             : '$storeCount stores';
 
         return AnimatedPositioned(
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOutCubic,
-          bottom: 16 + MediaQuery.of(context).padding.bottom + widget.bottomOffset,
+          bottom:
+              16 + MediaQuery.of(context).padding.bottom + widget.bottomOffset,
           right: 16,
           // When minimized, width is 60. When expanded, width is screen - 32.
           child: AnimatedContainer(
@@ -94,126 +95,178 @@ class _FloatingCartBarState extends State<FloatingCartBar> {
                             child: SizedBox(
                               width: MediaQuery.of(context).size.width - 32,
                               height: 72,
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryGreen,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Stack(
-                                          clipBehavior: Clip.none,
-                                          children: [
-                                            const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 24),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            AnimatedSwitcher(
-                                              duration: const Duration(milliseconds: 300),
-                                              transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
-                                              child: Text(
-                                                '$itemCount items • $storeText',
-                                                key: ValueKey<int>(itemCount),
-                                                style: const TextStyle(
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: AppColors.textPrimary,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primaryGreen,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
                                             ),
-                                            const SizedBox(height: 2),
-                                            AnimatedSwitcher(
-                                              duration: const Duration(milliseconds: 300),
-                                              transitionBuilder: (child, animation) => SlideTransition(
-                                                position: Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(animation),
-                                                child: FadeTransition(opacity: animation, child: child),
-                                              ),
-                                              child: Text(
-                                                '₹${totalPrice.toInt()}',
-                                                key: ValueKey<double>(totalPrice),
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                  color: AppColors.textSecondary,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 24),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.primaryGreen,
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: const Row(
-                                          children: [
-                                            Text(
-                                              'View Cart',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                            SizedBox(width: 4),
-                                            Icon(Icons.arrow_forward, color: Colors.white, size: 16),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Positioned(
-                                  top: -8,
-                                  right: -8,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        _isMinimized = true;
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(0.15),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
                                           ),
-                                        ],
-                                      ),
-                                      child: const Icon(Icons.close, size: 14, color: AppColors.textSecondary),
+                                          child: Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              const Icon(
+                                                Icons.shopping_cart_outlined,
+                                                color: Colors.white,
+                                                size: 24,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              AnimatedSwitcher(
+                                                duration: const Duration(
+                                                  milliseconds: 300,
+                                                ),
+                                                transitionBuilder:
+                                                    (child, animation) =>
+                                                        ScaleTransition(
+                                                          scale: animation,
+                                                          child: child,
+                                                        ),
+                                                child: Text(
+                                                  '$itemCount items • $storeText',
+                                                  key: ValueKey<int>(itemCount),
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color:
+                                                        AppColors.textPrimary,
+                                                  ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              AnimatedSwitcher(
+                                                duration: const Duration(
+                                                  milliseconds: 300,
+                                                ),
+                                                transitionBuilder:
+                                                    (
+                                                      child,
+                                                      animation,
+                                                    ) => SlideTransition(
+                                                      position: Tween<Offset>(
+                                                        begin: const Offset(
+                                                          0,
+                                                          0.5,
+                                                        ),
+                                                        end: Offset.zero,
+                                                      ).animate(animation),
+                                                      child: FadeTransition(
+                                                        opacity: animation,
+                                                        child: child,
+                                                      ),
+                                                    ),
+                                                child: Text(
+                                                  '₹${totalPrice.toInt()}',
+                                                  key: ValueKey<double>(
+                                                    totalPrice,
+                                                  ),
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    color:
+                                                        AppColors.textSecondary,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 24),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primaryGreen,
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          child: const Row(
+                                            children: [
+                                              Text(
+                                                'View Cart',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              SizedBox(width: 4),
+                                              Icon(
+                                                Icons.arrow_forward,
+                                                color: Colors.white,
+                                                size: 16,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                              ],
+                                  Positioned(
+                                    top: -8,
+                                    right: -8,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _isMinimized = true;
+                                        });
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(
+                                                0.15,
+                                              ),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Icon(
+                                          Icons.close,
+                                          size: 14,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                    
+
                     // --- MINIMIZED CONTENT (Fades in/out) ---
                     AnimatedOpacity(
                       duration: const Duration(milliseconds: 300),
@@ -227,7 +280,11 @@ class _FloatingCartBarState extends State<FloatingCartBar> {
                             child: Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                const Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 28),
+                                const Icon(
+                                  Icons.shopping_cart_outlined,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
                                 if (itemCount > 0)
                                   Positioned(
                                     top: -8,

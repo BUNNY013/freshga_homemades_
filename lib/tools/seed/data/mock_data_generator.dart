@@ -6,13 +6,89 @@ import '../../../core/utils/search_utils.dart';
 class MockDataGenerator {
   static final Random _random = Random();
 
-  static const List<String> storePrefixes = ['The Heritage', 'Organic', 'Grandma\'s', 'Amma\'s', 'NatureNest', 'Village Spice', 'Traditional', 'Pure Harvest', 'Rustic', 'Golden Harvest', 'Royal Andhra', 'Native', 'Green Earth', 'Millet', 'Spice'];
-  static const List<String> storeSuffixes = ['Kitchen', 'Roots', 'Secrets', 'Pickles', 'Foods', 'House', 'Bowl', 'Recipes', 'Farm', 'Pantry', 'Tastes', 'Organics', 'Kingdom', 'Trails'];
+  static const List<String> storePrefixes = [
+    'The Heritage',
+    'Organic',
+    'Grandma\'s',
+    'Amma\'s',
+    'NatureNest',
+    'Village Spice',
+    'Traditional',
+    'Pure Harvest',
+    'Rustic',
+    'Golden Harvest',
+    'Royal Andhra',
+    'Native',
+    'Green Earth',
+    'Millet',
+    'Spice',
+  ];
+  static const List<String> storeSuffixes = [
+    'Kitchen',
+    'Roots',
+    'Secrets',
+    'Pickles',
+    'Foods',
+    'House',
+    'Bowl',
+    'Recipes',
+    'Farm',
+    'Pantry',
+    'Tastes',
+    'Organics',
+    'Kingdom',
+    'Trails',
+  ];
 
-  static const List<String> productPrefixes = ['Spicy', 'Wild Forest', 'Garlic', 'Millet', 'Traditional Ghee', 'Homemade', 'Dry Fruit', 'Masala', 'Premium', 'Authentic', 'Andhra', 'Nattu', 'Organic', 'Herbal', 'Traditional'];
-  static const List<String> productBases = ['Mango Pickle', 'Honey', 'Chutney Powder', 'Laddu', 'Cookies', 'Amla Pickle', 'Murukku', 'Gongura Pickle', 'Peanuts', 'Mixture', 'Karivepaku Powder', 'Ragi Cookies', 'Jaggery', 'Avakaya', 'Mysore Pak', 'Sweets', 'Tea Mix'];
+  static const List<String> productPrefixes = [
+    'Spicy',
+    'Wild Forest',
+    'Garlic',
+    'Millet',
+    'Traditional Ghee',
+    'Homemade',
+    'Dry Fruit',
+    'Masala',
+    'Premium',
+    'Authentic',
+    'Andhra',
+    'Nattu',
+    'Organic',
+    'Herbal',
+    'Traditional',
+  ];
+  static const List<String> productBases = [
+    'Mango Pickle',
+    'Honey',
+    'Chutney Powder',
+    'Laddu',
+    'Cookies',
+    'Amla Pickle',
+    'Murukku',
+    'Gongura Pickle',
+    'Peanuts',
+    'Mixture',
+    'Karivepaku Powder',
+    'Ragi Cookies',
+    'Jaggery',
+    'Avakaya',
+    'Mysore Pak',
+    'Sweets',
+    'Tea Mix',
+  ];
 
-  static const List<String> tags = ['spicy', 'traditional', 'homemade', 'organic', 'fresh', 'healthy', 'sweet', 'savory', 'authentic', 'premium'];
+  static const List<String> tags = [
+    'spicy',
+    'traditional',
+    'homemade',
+    'organic',
+    'fresh',
+    'healthy',
+    'sweet',
+    'savory',
+    'authentic',
+    'premium',
+  ];
 
   static String generateStoreName() {
     return '${storePrefixes[_random.nextInt(storePrefixes.length)]} ${storeSuffixes[_random.nextInt(storeSuffixes.length)]}';
@@ -25,39 +101,88 @@ class MockDataGenerator {
   }
 
   static String generateSlug(String name) {
-    return name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '-').replaceAll(RegExp(r'-+'), '-');
+    return name
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]'), '-')
+        .replaceAll(RegExp(r'-+'), '-');
   }
 
   // Mock Locations
   static const List<Map<String, String>> mockLocations = [
-    {'businessAddress': 'Plot No 12, Jubilee Hills', 'village': 'Madhapur', 'district': 'Hyderabad', 'city': 'Hyderabad', 'state': 'Telangana', 'country': 'India', 'pincode': '500081'},
-    {'businessAddress': 'D.No 4-5-6, Main Road', 'village': 'Gudlavalleru', 'district': 'Krishna', 'city': 'Gudlavalleru', 'state': 'Andhra Pradesh', 'country': 'India', 'pincode': '521356'},
-    {'businessAddress': 'Beside RTC Bus Stand', 'village': 'Patamata', 'district': 'NTR', 'city': 'Vijayawada', 'state': 'Andhra Pradesh', 'country': 'India', 'pincode': '520001'},
-    {'businessAddress': '1st Cross, Indiranagar', 'village': 'Indiranagar', 'district': 'Bengaluru Urban', 'city': 'Bangalore', 'state': 'Karnataka', 'country': 'India', 'pincode': '560001'},
-    {'businessAddress': 'No 5, Anna Salai', 'village': 'T Nagar', 'district': 'Chennai', 'city': 'Chennai', 'state': 'Tamil Nadu', 'country': 'India', 'pincode': '600001'},
+    {
+      'businessAddress': 'Plot No 12, Jubilee Hills',
+      'village': 'Madhapur',
+      'district': 'Hyderabad',
+      'city': 'Hyderabad',
+      'state': 'Telangana',
+      'country': 'India',
+      'pincode': '500081',
+    },
+    {
+      'businessAddress': 'D.No 4-5-6, Main Road',
+      'village': 'Gudlavalleru',
+      'district': 'Krishna',
+      'city': 'Gudlavalleru',
+      'state': 'Andhra Pradesh',
+      'country': 'India',
+      'pincode': '521356',
+    },
+    {
+      'businessAddress': 'Beside RTC Bus Stand',
+      'village': 'Patamata',
+      'district': 'NTR',
+      'city': 'Vijayawada',
+      'state': 'Andhra Pradesh',
+      'country': 'India',
+      'pincode': '520001',
+    },
+    {
+      'businessAddress': '1st Cross, Indiranagar',
+      'village': 'Indiranagar',
+      'district': 'Bengaluru Urban',
+      'city': 'Bangalore',
+      'state': 'Karnataka',
+      'country': 'India',
+      'pincode': '560001',
+    },
+    {
+      'businessAddress': 'No 5, Anna Salai',
+      'village': 'T Nagar',
+      'district': 'Chennai',
+      'city': 'Chennai',
+      'state': 'Tamil Nadu',
+      'country': 'India',
+      'pincode': '600001',
+    },
   ];
 
-  static Map<String, dynamic> generateStoreData(String storeId, String ownerId) {
+  static Map<String, dynamic> generateStoreData(
+    String storeId,
+    String ownerId,
+  ) {
     final name = generateStoreName();
     final categories = ['Pickles', 'Snacks'];
     final storeSlug = generateStoreHandle(name);
     final searchableText = "$name $storeSlug ${categories.join(' ')}";
     final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
     final loc = mockLocations[_random.nextInt(mockLocations.length)];
-    
+
     // Simulate GST vs Enrolment ID
     final bool isPanIndia = _random.nextDouble() > 0.5;
     final String taxRegType = isPanIndia ? 'GSTIN' : 'EnrolmentNumber';
     final String taxNumber = isPanIndia ? '27AAPFU0939F1Z5' : 'ENR1234567890';
-    
+
     return {
       'storeId': storeId,
       'ownerId': ownerId,
       'storeName': name,
       'storeSlug': storeSlug,
-      'description': 'Handcrafted with love. Traditional recipes passed down through generations.',
-      'logo': ImageConstants.storeLogos[_random.nextInt(ImageConstants.storeLogos.length)],
-      'banner': ImageConstants.storeBanners[_random.nextInt(ImageConstants.storeBanners.length)],
+      'description':
+          'Handcrafted with love. Traditional recipes passed down through generations.',
+      'logo': ImageConstants
+          .storeLogos[_random.nextInt(ImageConstants.storeLogos.length)],
+      'banner': ImageConstants
+          .storeBanners[_random.nextInt(ImageConstants.storeBanners.length)],
       'instagramLink': 'https://instagram.com/mock',
       'youtubeLink': '',
       'facebookLink': '',
@@ -65,13 +190,16 @@ class MockDataGenerator {
       'followers': _random.nextInt(5000),
       'likesCount': _random.nextInt(10000),
       'productsCount': _random.nextInt(50) + 5,
-      'rating': double.parse((3.5 + _random.nextDouble() * 1.5).toStringAsFixed(1)),
+      'rating': double.parse(
+        (3.5 + _random.nextDouble() * 1.5).toStringAsFixed(1),
+      ),
       'totalReviews': _random.nextInt(500),
       'totalOrders': _random.nextInt(2000),
       'verified': true,
       'isFeatured': _random.nextDouble() > 0.5,
       'isActive': true,
-      'dispatchTime': '${_random.nextInt(2) + 1}-${_random.nextInt(3) + 3} Days',
+      'dispatchTime':
+          '${_random.nextInt(2) + 1}-${_random.nextInt(3) + 3} Days',
       'searchKeywords': searchKeywords,
       'canSellPanIndia': isPanIndia,
       'taxRegistrationType': taxRegType,
@@ -100,17 +228,22 @@ class MockDataGenerator {
     bool canSellPanIndia = false,
     String state = '',
   }) {
-    final name = '${productPrefixes[_random.nextInt(productPrefixes.length)]} ${productBases[_random.nextInt(productBases.length)]}';
+    final name =
+        '${productPrefixes[_random.nextInt(productPrefixes.length)]} ${productBases[_random.nextInt(productBases.length)]}';
     final basePrice = 150 + _random.nextInt(400);
-    
+
     final storeSlug = generateStoreHandle(storeName);
-    
-    final selectedTags = [tags[_random.nextInt(tags.length)], tags[_random.nextInt(tags.length)]];
-    final searchableText = "$name $storeName $storeSlug $categoryName $categoryId ${subCategoryIds.join(' ')} ${selectedTags.join(' ')}";
+
+    final selectedTags = [
+      tags[_random.nextInt(tags.length)],
+      tags[_random.nextInt(tags.length)],
+    ];
+    final searchableText =
+        "$name $storeName $storeSlug $categoryName $categoryId ${subCategoryIds.join(' ')} ${selectedTags.join(' ')}";
     final searchKeywords = SearchUtils.generateSearchKeywords(searchableText);
 
     final totalReviews = _random.nextInt(200) + 10;
-    
+
     int count5 = (totalReviews * (0.5 + _random.nextDouble() * 0.3)).toInt();
     int count4 = (totalReviews * (0.1 + _random.nextDouble() * 0.2)).toInt();
     int count3 = (totalReviews * (0.05 + _random.nextDouble() * 0.1)).toInt();
@@ -123,12 +256,22 @@ class MockDataGenerator {
       "4": count4,
       "3": count3,
       "2": count2,
-      "1": count1
+      "1": count1,
     };
 
-    double calculatedRating = totalReviews > 0 ? (count5 * 5 + count4 * 4 + count3 * 3 + count2 * 2 + count1 * 1) / totalReviews : 0.0;
+    double calculatedRating = totalReviews > 0
+        ? (count5 * 5 + count4 * 4 + count3 * 3 + count2 * 2 + count1 * 1) /
+              totalReviews
+        : 0.0;
 
-    final allHighlights = ["Pure & Natural", "Great Taste", "Good Packaging", "Value for Money", "Authentic Recipe", "Fresh Ingredients"];
+    final allHighlights = [
+      "Pure & Natural",
+      "Great Taste",
+      "Good Packaging",
+      "Value for Money",
+      "Authentic Recipe",
+      "Fresh Ingredients",
+    ];
     allHighlights.shuffle();
     final numHighlights = _random.nextInt(3) + 2;
     final ratingHighlights = <String, int>{};
@@ -142,14 +285,19 @@ class MockDataGenerator {
       'storeName': storeName,
       'name': name,
       'slug': generateSlug(name) + '-$productId',
-      'description': 'Authentic homemade $name made with premium ingredients and no preservatives. A perfect addition to your daily meals.',
+      'description':
+          'Authentic homemade $name made with premium ingredients and no preservatives. A perfect addition to your daily meals.',
       'shortDescription': 'Traditional homemade $name',
       'categoryId': categoryId,
       'categoryName': categoryName,
       'subCategoryIds': subCategoryIds,
       'images': [
-        ImageConstants.productImages[_random.nextInt(ImageConstants.productImages.length)],
-        ImageConstants.productImages[_random.nextInt(ImageConstants.productImages.length)]
+        ImageConstants.productImages[_random.nextInt(
+          ImageConstants.productImages.length,
+        )],
+        ImageConstants.productImages[_random.nextInt(
+          ImageConstants.productImages.length,
+        )],
       ],
       'variants': [
         {
@@ -158,7 +306,7 @@ class MockDataGenerator {
           'price': (basePrice * 0.5).toInt(),
           'discountPrice': (basePrice * 0.5).toInt() - 10,
           'stock': 100,
-          'isAvailable': true
+          'isAvailable': true,
         },
         {
           'variantId': '250g',
@@ -166,7 +314,7 @@ class MockDataGenerator {
           'price': basePrice,
           'discountPrice': basePrice - 20,
           'stock': 50,
-          'isAvailable': true
+          'isAvailable': true,
         },
         {
           'variantId': '500g',
@@ -174,7 +322,7 @@ class MockDataGenerator {
           'price': (basePrice * 1.8).toInt(),
           'discountPrice': (basePrice * 1.8).toInt() - 40,
           'stock': 30,
-          'isAvailable': true
+          'isAvailable': true,
         },
         {
           'variantId': '1kg',
@@ -182,8 +330,8 @@ class MockDataGenerator {
           'price': (basePrice * 3.2).toInt(),
           'discountPrice': (basePrice * 3.2).toInt() - 100,
           'stock': 15,
-          'isAvailable': true
-        }
+          'isAvailable': true,
+        },
       ],
       'ingredients': ['Ingredient 1', 'Ingredient 2', 'Traditional Spices'],
       'tags': selectedTags,
@@ -210,11 +358,19 @@ class MockDataGenerator {
   }
 
   // --- BANNER HELPERS ---
-  static Map<String, dynamic> generateBannerData(int order, String title, String subtitle, String badge) {
+  static Map<String, dynamic> generateBannerData(
+    int order,
+    String title,
+    String subtitle,
+    String badge,
+  ) {
     return {
       'badgeText': badge,
       'buttonText': 'Shop Now',
-      'imageUrl': ImageConstants.collectionBanners[_random.nextInt(ImageConstants.collectionBanners.length)],
+      'imageUrl':
+          ImageConstants.collectionBanners[_random.nextInt(
+            ImageConstants.collectionBanners.length,
+          )],
       'isActive': true,
       'linkUrl': '',
       'order': order,
@@ -229,7 +385,7 @@ class MockDataGenerator {
   static Map<String, dynamic> generateVendorSubscriptionData(String storeId) {
     final scenarios = ['trialing', 'active', 'grace_period', 'expired'];
     final status = scenarios[_random.nextInt(scenarios.length)];
-    
+
     DateTime now = DateTime.now();
     DateTime trialEndsAt;
     DateTime? currentPeriodEnd;
@@ -249,7 +405,9 @@ class MockDataGenerator {
         break;
       case 'expired':
         trialEndsAt = now.subtract(Duration(days: _random.nextInt(90) + 60));
-        currentPeriodEnd = now.subtract(Duration(days: _random.nextInt(30) + 4));
+        currentPeriodEnd = now.subtract(
+          Duration(days: _random.nextInt(30) + 4),
+        );
         break;
       default:
         trialEndsAt = now.add(const Duration(days: 90));

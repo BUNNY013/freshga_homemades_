@@ -8,12 +8,16 @@ class CollectionsSection extends StatelessWidget {
   final List<CollectionModel> collections;
   final String title;
 
-  const CollectionsSection({super.key, required this.collections, required this.title});
+  const CollectionsSection({
+    super.key,
+    required this.collections,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (collections.isEmpty) return const SizedBox();
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -51,7 +55,11 @@ class CollectionsSection extends StatelessWidget {
           children: [
             Text(
               collection.title,
-              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
             Text(

@@ -50,7 +50,6 @@ class FollowingEmptyState extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
-
           ],
         ),
       ),

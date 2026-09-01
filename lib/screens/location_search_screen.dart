@@ -19,7 +19,7 @@ class LocationSearchScreen extends StatefulWidget {
 
 class _LocationSearchScreenState extends State<LocationSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  
+
   List<Map<String, String>> _searchResults = [];
   bool _isSearching = false;
   bool _isSaving = false;
@@ -46,30 +46,31 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
         "https://maps.googleapis.com/maps/api/place/autocomplete/json"
         "?input=${Uri.encodeComponent(query)}"
         "&types=(cities)"
-        "&key=$_googlePlacesApiKey"
+        "&key=$_googlePlacesApiKey",
       );
-      
+
       final response = await http.get(url);
-      
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        
+
         if (data['status'] == 'OK' && mounted) {
           final predictions = data['predictions'] as List;
-          
+
           setState(() {
             _searchResults = predictions.map((p) {
               final description = p['description'] as String;
               final terms = p['terms'] as List;
-              
+
               // Extract City and State roughly from terms
               String city = terms.isNotEmpty ? terms[0]['value'] : description;
               String state = terms.length > 1 ? terms[1]['value'] : '';
-              
+
               return {
                 'city': city,
                 'state': state,
-                'full_description': description, // We'll use this for the final geocoding
+                'full_description':
+                    description, // We'll use this for the final geocoding
               };
             }).toList();
             _isSearching = false;
@@ -91,13 +92,17 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
 
   void _selectLocation(Map<String, String> location) async {
     setState(() => _isSaving = true);
-    
+
     try {
       // 2. Use Native Geocoding (Free) on the selected Google Place Description
       // This saves you from having to pay for the Google Places Details API!
-      final query = location['full_description'] ?? "${location['city']}, ${location['state']}";
-      List<Location> locations = await locationFromAddress(query).timeout(const Duration(seconds: 5));
-      
+      final query =
+          location['full_description'] ??
+          "${location['city']}, ${location['state']}";
+      List<Location> locations = await locationFromAddress(
+        query,
+      ).timeout(const Duration(seconds: 5));
+
       if (locations.isNotEmpty) {
         List<Placemark> placemarks = await placemarkFromCoordinates(
           locations.first.latitude,
@@ -107,7 +112,11 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
         if (placemarks.isNotEmpty) {
           final place = placemarks.first;
           _saveAndNavigate(
-            city: place.locality ?? place.subAdministrativeArea ?? location['city'] ?? '',
+            city:
+                place.locality ??
+                place.subAdministrativeArea ??
+                location['city'] ??
+                '',
             state: place.administrativeArea ?? location['state'] ?? '',
             country: place.country ?? '',
             pincode: place.postalCode ?? '',
@@ -121,7 +130,10 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       if (mounted) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to get location details."), backgroundColor: AppColors.error)
+          const SnackBar(
+            content: Text("Failed to get location details."),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -137,7 +149,8 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) throw 'Location permissions are denied';
+        if (permission == LocationPermission.denied)
+          throw 'Location permissions are denied';
       }
       if (permission == LocationPermission.deniedForever) {
         throw 'Location permissions are permanently denied.';
@@ -155,7 +168,10 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
 
       if (position == null) throw 'Could not get current location.';
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
 
       if (placemarks.isNotEmpty) {
         final place = placemarks.first;
@@ -170,7 +186,12 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLocating = false);
@@ -199,7 +220,12 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     }
   }
@@ -231,10 +257,18 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
               shape: BoxShape.circle,
               border: Border.all(color: Colors.grey.shade200),
               boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 4, offset: const Offset(0, 2)),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
               ],
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black, size: 16),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: Colors.black,
+              size: 16,
+            ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -242,12 +276,22 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
           children: [
             Text(
               "Delivery Location",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
               currentCity,
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16, fontFamily: GoogleFonts.plusJakartaSans().fontFamily),
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+              ),
             ),
           ],
         ),
@@ -266,21 +310,38 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                   child: TextField(
                     controller: _searchController,
                     onChanged: _onSearchChanged,
-                    style: TextStyle(fontFamily: GoogleFonts.plusJakartaSans().fontFamily, fontSize: 15, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
                     decoration: InputDecoration(
                       hintText: "Search for your city...",
-                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontWeight: FontWeight.w500, fontFamily: GoogleFonts.plusJakartaSans().fontFamily),
-                      prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primaryGreen, size: 22),
-                      suffixIcon: _searchController.text.isNotEmpty 
-                        ? IconButton(
-                            icon: const Icon(Icons.cancel, size: 18, color: Colors.grey), 
-                            onPressed: () { 
-                              _searchController.clear(); 
-                              _onSearchChanged(''); 
-                              FocusScope.of(context).unfocus();
-                            }
-                          )
-                        : null,
+                      hintStyle: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.search_rounded,
+                        color: AppColors.primaryGreen,
+                        size: 22,
+                      ),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(
+                                Icons.cancel,
+                                size: 18,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                _searchController.clear();
+                                _onSearchChanged('');
+                                FocusScope.of(context).unfocus();
+                              },
+                            )
+                          : null,
                       filled: true,
                       fillColor: Colors.white,
                       contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -294,15 +355,18 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: AppColors.primaryGreen.withOpacity(0.5), width: 1.5),
+                        borderSide: BorderSide(
+                          color: AppColors.primaryGreen.withOpacity(0.5),
+                          width: 1.5,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Auto Detect
               if (_searchController.text.isEmpty)
                 Padding(
@@ -316,10 +380,15 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.primaryGreen.withOpacity(0.15)),
+                          border: Border.all(
+                            color: AppColors.primaryGreen.withOpacity(0.15),
+                          ),
                           borderRadius: BorderRadius.circular(16),
                           gradient: LinearGradient(
-                            colors: [AppColors.primaryGreen.withOpacity(0.02), AppColors.primaryGreen.withOpacity(0.08)],
+                            colors: [
+                              AppColors.primaryGreen.withOpacity(0.02),
+                              AppColors.primaryGreen.withOpacity(0.08),
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -332,12 +401,29 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                                 color: Colors.white,
                                 shape: BoxShape.circle,
                                 boxShadow: [
-                                  BoxShadow(color: AppColors.primaryGreen.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 4)),
+                                  BoxShadow(
+                                    color: AppColors.primaryGreen.withOpacity(
+                                      0.1,
+                                    ),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
                                 ],
                               ),
-                              child: _isLocating 
-                                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen))
-                                  : const Icon(Icons.my_location_rounded, color: AppColors.primaryGreen, size: 20),
+                              child: _isLocating
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.primaryGreen,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.my_location_rounded,
+                                      color: AppColors.primaryGreen,
+                                      size: 20,
+                                    ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -346,17 +432,31 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                                 children: [
                                   Text(
                                     "Auto Detect Location",
-                                    style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold, fontSize: 15, fontFamily: GoogleFonts.plusJakartaSans().fontFamily),
+                                    style: TextStyle(
+                                      color: AppColors.primaryGreen,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      fontFamily: GoogleFonts.plusJakartaSans()
+                                          .fontFamily,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     "Using GPS",
-                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.w500),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                            const Icon(Icons.chevron_right_rounded, color: AppColors.primaryGreen, size: 20),
+                            const Icon(
+                              Icons.chevron_right_rounded,
+                              color: AppColors.primaryGreen,
+                              size: 20,
+                            ),
                           ],
                         ),
                       ),
@@ -367,49 +467,100 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
               Expanded(
                 child: _searchController.text.isNotEmpty
                     // SEARCH RESULTS VIEW
-                    ? (_isSearching 
-                        ? const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen))
-                        : _searchResults.isEmpty
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.location_off_rounded, size: 48, color: Colors.grey.shade300),
-                                    const SizedBox(height: 16),
-                                    Text("No cities found", style: TextStyle(color: Colors.grey.shade500, fontSize: 16, fontWeight: FontWeight.w500)),
-                                  ],
-                                ),
-                              )
-                            : ListView.separated(
-                                padding: const EdgeInsets.only(top: 16, bottom: 40),
-                                itemCount: _searchResults.length,
-                                separatorBuilder: (_, __) => Divider(height: 1, indent: 64, color: Colors.grey.shade200),
-                                itemBuilder: (context, index) {
-                                  final place = _searchResults[index];
-                                  return ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                                    leading: Container(
-                                      padding: const EdgeInsets.all(10),
-                                      decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
-                                      child: const Icon(Icons.location_on_rounded, color: Colors.grey, size: 20),
+                    ? (_isSearching
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryGreen,
+                              ),
+                            )
+                          : _searchResults.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.location_off_rounded,
+                                    size: 48,
+                                    color: Colors.grey.shade300,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    "No cities found",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                    title: Text(
-                                      "${place['city']}${place['state'] != null && place['state']!.isNotEmpty ? ', ${place['state']}' : ''}",
-                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, fontFamily: GoogleFonts.plusJakartaSans().fontFamily),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.separated(
+                              padding: const EdgeInsets.only(
+                                top: 16,
+                                bottom: 40,
+                              ),
+                              itemCount: _searchResults.length,
+                              separatorBuilder: (_, __) => Divider(
+                                height: 1,
+                                indent: 64,
+                                color: Colors.grey.shade200,
+                              ),
+                              itemBuilder: (context, index) {
+                                final place = _searchResults[index];
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 8,
+                                  ),
+                                  leading: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      shape: BoxShape.circle,
                                     ),
-                                    subtitle: Padding(
-                                      padding: const EdgeInsets.only(top: 4.0),
-                                      child: place['full_description'] != null 
-                                          ? Text(place['full_description']!, style: TextStyle(color: Colors.grey.shade500, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis)
-                                          : (place['pincode'] != null && place['pincode']!.isNotEmpty 
-                                              ? Text(place['pincode']!, style: TextStyle(color: Colors.grey.shade500, fontSize: 13)) 
+                                    child: const Icon(
+                                      Icons.location_on_rounded,
+                                      color: Colors.grey,
+                                      size: 20,
+                                    ),
+                                  ),
+                                  title: Text(
+                                    "${place['city']}${place['state'] != null && place['state']!.isNotEmpty ? ', ${place['state']}' : ''}",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                      fontFamily: GoogleFonts.plusJakartaSans()
+                                          .fontFamily,
+                                    ),
+                                  ),
+                                  subtitle: Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: place['full_description'] != null
+                                        ? Text(
+                                            place['full_description']!,
+                                            style: TextStyle(
+                                              color: Colors.grey.shade500,
+                                              fontSize: 13,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          )
+                                        : (place['pincode'] != null &&
+                                                  place['pincode']!.isNotEmpty
+                                              ? Text(
+                                                  place['pincode']!,
+                                                  style: TextStyle(
+                                                    color: Colors.grey.shade500,
+                                                    fontSize: 13,
+                                                  ),
+                                                )
                                               : null),
-                                    ),
-                                    onTap: () => _selectLocation(place),
-                                  );
-                                },
-                              ))
-                    
+                                  ),
+                                  onTap: () => _selectLocation(place),
+                                );
+                              },
+                            ))
                     // DEFAULT VIEW (Recents)
                     : ListView(
                         padding: const EdgeInsets.only(bottom: 40),
@@ -417,40 +568,95 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
                           // Recent Locations
                           if (recents.isNotEmpty) ...[
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(24.0, 32.0, 24.0, 12.0),
+                              padding: const EdgeInsets.fromLTRB(
+                                24.0,
+                                32.0,
+                                24.0,
+                                12.0,
+                              ),
                               child: Text(
                                 "RECENT LOCATIONS",
-                                style: TextStyle(color: Colors.grey.shade400, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.2, fontFamily: GoogleFonts.plusJakartaSans().fontFamily),
+                                style: TextStyle(
+                                  color: Colors.grey.shade400,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1.2,
+                                  fontFamily:
+                                      GoogleFonts.plusJakartaSans().fontFamily,
+                                ),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20.0,
+                              ),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: Colors.grey.shade100),
+                                  border: Border.all(
+                                    color: Colors.grey.shade100,
+                                  ),
                                   boxShadow: [
-                                    BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.02),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
                                   ],
                                 ),
                                 child: ListView.separated(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   itemCount: recents.length,
-                                  separatorBuilder: (_, __) => Divider(height: 1, indent: 56, color: Colors.grey.shade100),
+                                  separatorBuilder: (_, __) => Divider(
+                                    height: 1,
+                                    indent: 56,
+                                    color: Colors.grey.shade100,
+                                  ),
                                   itemBuilder: (context, index) {
                                     final loc = recents[index];
                                     return ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 6,
+                                          ),
                                       leading: Container(
                                         padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle),
-                                        child: const Icon(Icons.history_rounded, size: 18, color: Colors.grey),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade50,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.history_rounded,
+                                          size: 18,
+                                          color: Colors.grey,
+                                        ),
                                       ),
-                                      title: Text(loc['city'] ?? '', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, fontFamily: GoogleFonts.plusJakartaSans().fontFamily, color: Colors.black87)),
-                                      subtitle: Text(loc['state'] ?? '', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
-                                      trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: Colors.grey),
+                                      title: Text(
+                                        loc['city'] ?? '',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          fontFamily:
+                                              GoogleFonts.plusJakartaSans()
+                                                  .fontFamily,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        loc['state'] ?? '',
+                                        style: TextStyle(
+                                          color: Colors.grey.shade500,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      trailing: const Icon(
+                                        Icons.chevron_right_rounded,
+                                        size: 18,
+                                        color: Colors.grey,
+                                      ),
                                       onTap: () {
                                         _saveAndNavigate(
                                           city: loc['city']!,
@@ -471,7 +677,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
               ),
             ],
           ),
-          
+
           if (_isSaving)
             Container(
               color: Colors.white.withOpacity(0.7),

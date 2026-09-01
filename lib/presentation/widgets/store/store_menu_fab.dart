@@ -7,14 +7,19 @@ import '../../../providers/store_provider.dart';
 class StoreMenuFab extends StatefulWidget {
   final Map<String, int> sectionCounts;
   final Function(String, String) onSubcategorySelected;
-  
-  const StoreMenuFab({super.key, required this.sectionCounts, required this.onSubcategorySelected});
+
+  const StoreMenuFab({
+    super.key,
+    required this.sectionCounts,
+    required this.onSubcategorySelected,
+  });
 
   @override
   State<StoreMenuFab> createState() => _StoreMenuFabState();
 }
 
-class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderStateMixin {
+class _StoreMenuFabState extends State<StoreMenuFab>
+    with SingleTickerProviderStateMixin {
   late AnimationController _floatController;
   late Animation<double> _floatAnimation;
 
@@ -57,16 +62,19 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
       totalCount++;
 
       if (product.subCategoryIds.isEmpty) {
-        final subs = group['subcategories'] as Map<String, Map<String, dynamic>>;
+        final subs =
+            group['subcategories'] as Map<String, Map<String, dynamic>>;
         subs['Other'] = {
           'name': 'Other',
           'count': (subs['Other']?['count'] ?? 0) + 1,
         };
       } else {
         for (var subId in product.subCategoryIds) {
-          final subs = group['subcategories'] as Map<String, Map<String, dynamic>>;
-          final subName = provider.availableSubcategories[subId]?['name'] ?? "Other";
-          
+          final subs =
+              group['subcategories'] as Map<String, Map<String, dynamic>>;
+          final subName =
+              provider.availableSubcategories[subId]?['name'] ?? "Other";
+
           if (!subs.containsKey(subId)) {
             subs[subId] = {'name': subName, 'count': 0};
           }
@@ -77,14 +85,10 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
 
     final list = grouped.values.toList();
     list.sort((a, b) => (a['name'] as String).compareTo(b['name'] as String));
-    
+
     return [
-      {
-        'isAll': true,
-        'name': 'All Items',
-        'count': totalCount,
-      },
-      ...list
+      {'isAll': true, 'name': 'All Items', 'count': totalCount},
+      ...list,
     ];
   }
 
@@ -110,7 +114,8 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: 320, // Wider for premium feel
-                  maxHeight: MediaQuery.of(context).size.height * 0.65, // Taller
+                  maxHeight:
+                      MediaQuery.of(context).size.height * 0.65, // Taller
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(28),
@@ -124,7 +129,7 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
                       itemCount: menuData.length,
                       itemBuilder: (context, index) {
                         final item = menuData[index];
-                        
+
                         if (item['isAll'] == true) {
                           return InkWell(
                             onTap: () {
@@ -132,7 +137,10 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
                               widget.onSubcategorySelected("All", "All");
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 28,
+                                vertical: 18,
+                              ),
                               child: Row(
                                 children: [
                                   Expanded(
@@ -162,29 +170,42 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
 
                         // Category Section
                         final String catName = item['name'];
-                        final Map<String, Map<String, dynamic>> subcategories = item['subcategories'];
+                        final Map<String, Map<String, dynamic>> subcategories =
+                            item['subcategories'];
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // Subtle Divider between categories
-                            if (index > 1) 
-                              Divider(height: 1, color: Colors.grey.shade100, indent: 28, endIndent: 28),
-                            
+                            if (index > 1)
+                              Divider(
+                                height: 1,
+                                color: Colors.grey.shade100,
+                                indent: 28,
+                                endIndent: 28,
+                              ),
+
                             // Category Title Header
                             Padding(
-                              padding: const EdgeInsets.fromLTRB(28, 24, 28, 10),
+                              padding: const EdgeInsets.fromLTRB(
+                                28,
+                                24,
+                                28,
+                                10,
+                              ),
                               child: Text(
                                 catName.toUpperCase(),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
-                                  color: Color(0xFFB4A596), // Soft golden/tan for a premium touch
+                                  color: Color(
+                                    0xFFB4A596,
+                                  ), // Soft golden/tan for a premium touch
                                 ),
                               ),
                             ),
-                            
+
                             // Subcategories
                             ...subcategories.entries.map((entry) {
                               final subData = entry.value;
@@ -197,7 +218,10 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
                                   widget.onSubcategorySelected(catId, subName);
                                 },
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 28,
+                                    vertical: 14,
+                                  ),
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -241,10 +265,7 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
             begin: const Offset(0, 0.05),
             end: Offset.zero,
           ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
+          child: FadeTransition(opacity: animation, child: child),
         );
       },
     );
@@ -253,7 +274,7 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     if (widget.sectionCounts.isEmpty) return const SizedBox.shrink();
-    
+
     return Consumer<StoreProvider>(
       builder: (context, provider, child) {
         return Positioned(
@@ -278,7 +299,10 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
                       color: Colors.black.withOpacity(0.25),
                       blurRadius: 20,
                       spreadRadius: 2,
-                      offset: const Offset(0, 10), // Deep shadow for floating effect
+                      offset: const Offset(
+                        0,
+                        10,
+                      ), // Deep shadow for floating effect
                     ),
                     BoxShadow(
                       color: Colors.black.withOpacity(0.15),
@@ -294,11 +318,18 @@ class _StoreMenuFabState extends State<StoreMenuFab> with SingleTickerProviderSt
                     borderRadius: BorderRadius.circular(30),
                     onTap: () => _showMenuDialog(context, provider),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.restaurant_menu_rounded, color: Colors.white, size: 20),
+                          const Icon(
+                            Icons.restaurant_menu_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             "store.menu".tr(),

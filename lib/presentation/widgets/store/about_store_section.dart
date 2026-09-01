@@ -9,7 +9,9 @@ class AboutStoreSection extends StatelessWidget {
   const AboutStoreSection({super.key, required this.store});
 
   // Colors based on the UI
-  static const Color bgColor = Color(0xFFFFF8F4); // User requested warm cream background
+  static const Color bgColor = Color(
+    0xFFFFF8F4,
+  ); // User requested warm cream background
   static const Color cardColor = Colors.white;
   static const Color primaryText = Color(0xFF1E2922);
   static const Color secondaryText = Color(0xFF6B7280);
@@ -36,26 +38,31 @@ class AboutStoreSection extends StatelessWidget {
           );
         },
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 24.0, left: 16.0, right: 16.0, bottom: 100.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 24),
-            _buildOurStoryCard(),
-            const SizedBox(height: 16),
-            _buildStoreHighlights(),
-            const SizedBox(height: 16),
-            _buildLocationAndCategories(),
-            const SizedBox(height: 16),
-            _buildTrustVerification(),
-            const SizedBox(height: 16),
-            _buildSocialLinks(),
-            const SizedBox(height: 24),
-            _buildFooterBanner(),
-          ],
+          padding: const EdgeInsets.only(
+            top: 24.0,
+            left: 16.0,
+            right: 16.0,
+            bottom: 100.0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 24),
+              _buildOurStoryCard(),
+              const SizedBox(height: 16),
+              _buildStoreHighlights(),
+              const SizedBox(height: 16),
+              _buildLocationAndCategories(),
+              const SizedBox(height: 16),
+              _buildTrustVerification(),
+              const SizedBox(height: 16),
+              _buildSocialLinks(),
+              const SizedBox(height: 24),
+              _buildFooterBanner(),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -72,20 +79,21 @@ class AboutStoreSection extends StatelessWidget {
                 fontSize: 26,
                 fontWeight: FontWeight.w600,
                 color: primaryText,
-                fontFamily: GoogleFonts.playfairDisplay().fontFamily, // Serif-like fallback
+                fontFamily: GoogleFonts.playfairDisplay()
+                    .fontFamily, // Serif-like fallback
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.eco_rounded, color: iconColor.withOpacity(0.5), size: 28),
+            Icon(
+              Icons.eco_rounded,
+              color: iconColor.withOpacity(0.5),
+              size: 28,
+            ),
           ],
         ),
         const SizedBox(height: 4),
-        Container(
-          height: 2,
-          width: 80,
-          color: iconColor.withOpacity(0.6),
-        ),
+        Container(height: 2, width: 80, color: iconColor.withOpacity(0.6)),
       ],
     );
   }
@@ -154,8 +162,8 @@ class AboutStoreSection extends StatelessWidget {
               _buildSectionTitle(Icons.eco_outlined, "Our Story"),
               const SizedBox(height: 16),
               Text(
-                store.description.isNotEmpty 
-                    ? store.description 
+                store.description.isNotEmpty
+                    ? store.description
                     : "Traditional homemade treats crafted using family recipes passed down through generations. Made in small batches using premium ingredients and no artificial preservatives.",
                 style: const TextStyle(
                   fontSize: 14,
@@ -188,15 +196,42 @@ class AboutStoreSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildHighlightCol(Icons.shopping_bag_outlined, store.productsCount.toString(), "Products", iconColor),
+              _buildHighlightCol(
+                Icons.shopping_bag_outlined,
+                store.productsCount.toString(),
+                "Products",
+                iconColor,
+              ),
               _buildDivider(),
-              _buildHighlightCol(Icons.people_alt_outlined, _formatCount(store.followers), "Followers", const Color(0xFFD77D43)),
+              _buildHighlightCol(
+                Icons.people_alt_outlined,
+                _formatCount(store.followers),
+                "Followers",
+                const Color(0xFFD77D43),
+              ),
               _buildDivider(),
-              _buildHighlightCol(Icons.star_border_rounded, store.rating > 0 ? "${store.rating.toStringAsFixed(1)} ★" : "New", "Rating", iconColor),
+              _buildHighlightCol(
+                Icons.star_border_rounded,
+                store.rating > 0
+                    ? "${store.rating.toStringAsFixed(1)} ★"
+                    : "New",
+                "Rating",
+                iconColor,
+              ),
               _buildDivider(),
               store.totalOrders > 25
-                  ? _buildHighlightCol(Icons.local_shipping_outlined, _formatCount(store.totalOrders), "Orders", const Color(0xFFC75D3C))
-                  : _buildHighlightCol(Icons.flare_rounded, "New", "Arrival", const Color(0xFFC75D3C)),
+                  ? _buildHighlightCol(
+                      Icons.local_shipping_outlined,
+                      _formatCount(store.totalOrders),
+                      "Orders",
+                      const Color(0xFFC75D3C),
+                    )
+                  : _buildHighlightCol(
+                      Icons.flare_rounded,
+                      "New",
+                      "Arrival",
+                      const Color(0xFFC75D3C),
+                    ),
             ],
           ),
         ],
@@ -205,14 +240,15 @@ class AboutStoreSection extends StatelessWidget {
   }
 
   Widget _buildDivider() {
-    return Container(
-      height: 40,
-      width: 1,
-      color: dividerColor,
-    );
+    return Container(height: 40, width: 1, color: dividerColor);
   }
 
-  Widget _buildHighlightCol(IconData icon, String value, String label, Color valueColor) {
+  Widget _buildHighlightCol(
+    IconData icon,
+    String value,
+    String label,
+    Color valueColor,
+  ) {
     return Column(
       children: [
         Container(
@@ -256,7 +292,11 @@ class AboutStoreSection extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Icon(Icons.location_on_outlined, color: iconColor, size: 28),
+                const Icon(
+                  Icons.location_on_outlined,
+                  color: iconColor,
+                  size: 28,
+                ),
                 const SizedBox(height: 6),
                 const Text(
                   "Origin",
@@ -268,9 +308,11 @@ class AboutStoreSection extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  store.city.isNotEmpty && store.state.isNotEmpty 
-                      ? "${store.city}, ${store.state}" 
-                      : (store.city.isNotEmpty ? store.city : "Location hidden"),
+                  store.city.isNotEmpty && store.state.isNotEmpty
+                      ? "${store.city}, ${store.state}"
+                      : (store.city.isNotEmpty
+                            ? store.city
+                            : "Location hidden"),
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -317,7 +359,14 @@ class AboutStoreSection extends StatelessWidget {
                 runSpacing: 10,
                 children: store.categories.isNotEmpty
                     ? store.categories.map((c) => _buildMiniChip(c)).toList()
-                    : [_buildMiniChip("Raw Mango"), _buildMiniChip("Mustard Oil"), _buildMiniChip("Fenugreek"), _buildMiniChip("Fennel"), _buildMiniChip("Turmeric"), _buildMiniChip("Red Chili")],
+                    : [
+                        _buildMiniChip("Raw Mango"),
+                        _buildMiniChip("Mustard Oil"),
+                        _buildMiniChip("Fenugreek"),
+                        _buildMiniChip("Fennel"),
+                        _buildMiniChip("Turmeric"),
+                        _buildMiniChip("Red Chili"),
+                      ],
               ),
             ],
           ),
@@ -346,12 +395,15 @@ class AboutStoreSection extends StatelessWidget {
 
   Widget _buildTrustVerification() {
     if (!store.isVerified) return const SizedBox.shrink();
-    
+
     return _buildCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle(Icons.verified_user_outlined, "Trust & Verification"),
+          _buildSectionTitle(
+            Icons.verified_user_outlined,
+            "Trust & Verification",
+          ),
           const SizedBox(height: 20),
           Column(
             children: [
@@ -365,19 +417,45 @@ class AboutStoreSection extends StatelessWidget {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.grey.shade200),
                     ),
-                    child: Image.asset('assets/fssai.png', width: 32, height: 32, fit: BoxFit.contain),
+                    child: Image.asset(
+                      'assets/fssai.png',
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("FSSAI Verified", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: primaryText)),
+                        const Text(
+                          "FSSAI Verified",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: primaryText,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        const Text("Food safety and quality standards verified.", style: TextStyle(fontSize: 13, color: secondaryText, height: 1.3)),
+                        const Text(
+                          "Food safety and quality standards verified.",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: secondaryText,
+                            height: 1.3,
+                          ),
+                        ),
                         if (store.fssaiNumber.isNotEmpty) ...[
                           const SizedBox(height: 8),
-                          Text("Registration No: ${store.fssaiNumber}", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32))),
+                          Text(
+                            "Registration No: ${store.fssaiNumber}",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2E7D32),
+                            ),
+                          ),
                         ],
                       ],
                     ),
@@ -392,7 +470,9 @@ class AboutStoreSection extends StatelessWidget {
   }
 
   Widget _buildSocialLinks() {
-    if (store.instagramLink.isEmpty && store.facebookLink.isEmpty && store.youtubeLink.isEmpty) {
+    if (store.instagramLink.isEmpty &&
+        store.facebookLink.isEmpty &&
+        store.youtubeLink.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -414,12 +494,24 @@ class AboutStoreSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              if (store.instagramLink.isNotEmpty) 
-                _buildSocialImageIcon('assets/instagram.png', "Instagram", store.instagramLink),
-              if (store.facebookLink.isNotEmpty) 
-                _buildSocialIcon(Icons.facebook_outlined, "Facebook", store.facebookLink),
-              if (store.youtubeLink.isNotEmpty) 
-                _buildSocialIcon(Icons.play_circle_outline_rounded, "YouTube", store.youtubeLink),
+              if (store.instagramLink.isNotEmpty)
+                _buildSocialImageIcon(
+                  'assets/instagram.png',
+                  "Instagram",
+                  store.instagramLink,
+                ),
+              if (store.facebookLink.isNotEmpty)
+                _buildSocialIcon(
+                  Icons.facebook_outlined,
+                  "Facebook",
+                  store.facebookLink,
+                ),
+              if (store.youtubeLink.isNotEmpty)
+                _buildSocialIcon(
+                  Icons.play_circle_outline_rounded,
+                  "YouTube",
+                  store.youtubeLink,
+                ),
             ],
           ),
         ],
@@ -485,7 +577,12 @@ class AboutStoreSection extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Image.asset(assetPath, width: 36, height: 36, fit: BoxFit.contain),
+              child: Image.asset(
+                assetPath,
+                width: 36,
+                height: 36,
+                fit: BoxFit.contain,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
@@ -518,7 +615,11 @@ class AboutStoreSection extends StatelessWidget {
               color: Color(0xFFF0D5BE),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.favorite_rounded, color: Color(0xFFC75D3C), size: 16),
+            child: const Icon(
+              Icons.favorite_rounded,
+              color: Color(0xFFC75D3C),
+              size: 16,
+            ),
           ),
           const SizedBox(width: 16),
           const Expanded(
@@ -536,10 +637,7 @@ class AboutStoreSection extends StatelessWidget {
                 SizedBox(height: 2),
                 Text(
                   "Every order helps a home grow.",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF5C5C5C),
-                  ),
+                  style: TextStyle(fontSize: 12, color: Color(0xFF5C5C5C)),
                 ),
               ],
             ),

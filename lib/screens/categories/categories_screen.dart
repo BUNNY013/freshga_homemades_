@@ -23,7 +23,9 @@ class CategoriesScreen extends StatelessWidget {
       body: Consumer<CategoryProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.categories.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen));
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            );
           }
 
           final categories = provider.categories;
@@ -53,20 +55,30 @@ class CategoriesScreen extends StatelessWidget {
                 ),
                 actions: [
                   IconButton(
-                    icon: const Icon(Icons.search, color: AppColors.textPrimary),
+                    icon: const Icon(
+                      Icons.search,
+                      color: AppColors.textPrimary,
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const SearchScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const SearchScreen(),
+                        ),
                       );
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
+                    icon: const Icon(
+                      Icons.favorite_border_rounded,
+                      color: AppColors.textPrimary,
+                    ),
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const LikedProductsScreen(),
+                        ),
                       );
                     },
                   ),
@@ -75,11 +87,16 @@ class CategoriesScreen extends StatelessWidget {
                       return Stack(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
+                            icon: const Icon(
+                              Icons.shopping_cart_outlined,
+                              color: AppColors.textPrimary,
+                            ),
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (_) => const CartScreen()),
+                                MaterialPageRoute(
+                                  builder: (_) => const CartScreen(),
+                                ),
                               );
                             },
                           ),
@@ -145,7 +162,10 @@ class CategoriesScreen extends StatelessWidget {
                   child: Center(
                     child: Text(
                       "No categories available right now",
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 )
@@ -153,45 +173,41 @@ class CategoriesScreen extends StatelessWidget {
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.68, // Fixed RenderFlex overflow
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final category = categories[index];
-                        return TweenAnimationBuilder<double>(
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          duration: Duration(milliseconds: 400 + (index * 50).clamp(0, 500)),
-                          curve: Curves.easeOutCubic,
-                          builder: (context, value, child) {
-                            return Transform.translate(
-                              offset: Offset(0, 20 * (1 - value)),
-                              child: Opacity(
-                                opacity: value,
-                                child: child,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 0.68, // Fixed RenderFlex overflow
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final category = categories[index];
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        duration: Duration(
+                          milliseconds: 400 + (index * 50).clamp(0, 500),
+                        ),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, 20 * (1 - value)),
+                            child: Opacity(opacity: value, child: child),
+                          );
+                        },
+                        child: _AnimatedCategoryCard(
+                          category: category,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CategoryDiscoveryScreen(category: category),
                               ),
                             );
                           },
-                          child: _AnimatedCategoryCard(
-                            category: category,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CategoryDiscoveryScreen(
-                                    category: category,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                      childCount: categories.length,
-                    ),
+                        ),
+                      );
+                    }, childCount: categories.length),
                   ),
                 ),
 
@@ -202,7 +218,9 @@ class CategoriesScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF3EFE6), // Matches the exact cream color from image
+                        color: const Color(
+                          0xFFF3EFE6,
+                        ), // Matches the exact cream color from image
                         borderRadius: BorderRadius.circular(16),
                       ),
                       padding: const EdgeInsets.all(20),
@@ -214,7 +232,8 @@ class CategoriesScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  provider.bannerData!['title'] ?? "Can't find what you're looking for?",
+                                  provider.bannerData!['title'] ??
+                                      "Can't find what you're looking for?",
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -223,7 +242,8 @@ class CategoriesScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  provider.bannerData!['subtitle'] ?? "Request a product from your favourite stores.",
+                                  provider.bannerData!['subtitle'] ??
+                                      "Request a product from your favourite stores.",
                                   style: const TextStyle(
                                     fontSize: 12,
                                     color: AppColors.textSecondary,
@@ -241,12 +261,18 @@ class CategoriesScreen extends StatelessWidget {
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(provider.bannerData!['buttonText'] ?? "Request Now"),
+                                      Text(
+                                        provider.bannerData!['buttonText'] ??
+                                            "Request Now",
+                                      ),
                                       const SizedBox(width: 8),
                                       const Icon(Icons.arrow_forward, size: 16),
                                     ],
@@ -255,7 +281,10 @@ class CategoriesScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          if (provider.bannerData!['imageUrl'] != null && provider.bannerData!['imageUrl'].toString().isNotEmpty)
+                          if (provider.bannerData!['imageUrl'] != null &&
+                              provider.bannerData!['imageUrl']
+                                  .toString()
+                                  .isNotEmpty)
                             Expanded(
                               flex: 2,
                               child: CachedNetworkImage(
@@ -269,9 +298,9 @@ class CategoriesScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                
-                // Extra padding for floating cart
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+
+              // Extra padding for floating cart
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           );
         },
@@ -290,17 +319,22 @@ class _AnimatedCategoryCard extends StatefulWidget {
   State<_AnimatedCategoryCard> createState() => _AnimatedCategoryCardState();
 }
 
-class _AnimatedCategoryCardState extends State<_AnimatedCategoryCard> with SingleTickerProviderStateMixin {
+class _AnimatedCategoryCardState extends State<_AnimatedCategoryCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
     );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -321,10 +355,7 @@ class _AnimatedCategoryCardState extends State<_AnimatedCategoryCard> with Singl
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: child,
-          );
+          return Transform.scale(scale: _scaleAnimation.value, child: child);
         },
         child: Container(
           clipBehavior: Clip.antiAlias,
@@ -359,14 +390,25 @@ class _AnimatedCategoryCardState extends State<_AnimatedCategoryCard> with Singl
                             memCacheWidth: 300,
                             placeholder: (context, url) => const Center(
                               child: SizedBox(
-                                width: 24, height: 24,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primaryGreen),
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColors.primaryGreen,
+                                ),
                               ),
                             ),
-                            errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: Colors.grey),
+                            errorWidget: (context, url, error) => const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.grey,
+                            ),
                           ),
                         )
-                      : const Icon(Icons.category, color: Colors.grey, size: 40),
+                      : const Icon(
+                          Icons.category,
+                          color: Colors.grey,
+                          size: 40,
+                        ),
                 ),
               ),
               const SizedBox(height: 12),

@@ -36,35 +36,37 @@ class UpdateProvider extends ChangeNotifier {
         .doc('settings')
         .snapshots()
         .listen((doc) {
-      if (doc.exists) {
-        final data = doc.data()!;
-        final minVersion = data['customer_app_minimum_version'] ?? '1.0.0';
-        final latestVersion = data['customer_app_latest_version'] ?? '1.0.0';
-        _updateFeatures = data['update_features'] ?? '';
-        
-        if (Platform.isIOS) {
-          _storeUrl = data['ios_store_url'] ?? '';
-        } else {
-          _storeUrl = data['android_store_url'] ?? '';
-        }
+          if (doc.exists) {
+            final data = doc.data()!;
+            final minVersion = data['customer_app_minimum_version'] ?? '1.0.0';
+            final latestVersion =
+                data['customer_app_latest_version'] ?? '1.0.0';
+            _updateFeatures = data['update_features'] ?? '';
 
-        final isForce = _compareVersions(currentVersion, minVersion) < 0;
-        final isSoft = !isForce && _compareVersions(currentVersion, latestVersion) < 0;
+            if (Platform.isIOS) {
+              _storeUrl = data['ios_store_url'] ?? '';
+            } else {
+              _storeUrl = data['android_store_url'] ?? '';
+            }
 
-        if (_isForceUpdate != isForce || _isSoftUpdate != isSoft) {
-          _isForceUpdate = isForce;
-          _isSoftUpdate = isSoft;
-          notifyListeners();
-        }
-      }
-    });
+            final isForce = _compareVersions(currentVersion, minVersion) < 0;
+            final isSoft =
+                !isForce && _compareVersions(currentVersion, latestVersion) < 0;
+
+            if (_isForceUpdate != isForce || _isSoftUpdate != isSoft) {
+              _isForceUpdate = isForce;
+              _isSoftUpdate = isSoft;
+              notifyListeners();
+            }
+          }
+        });
   }
 
   // Returns -1 if v1 < v2, 0 if v1 == v2, 1 if v1 > v2
   int _compareVersions(String v1, String v2) {
     List<int> v1Parts = v1.split('.').map((e) => int.tryParse(e) ?? 0).toList();
     List<int> v2Parts = v2.split('.').map((e) => int.tryParse(e) ?? 0).toList();
-    
+
     for (int i = 0; i < 3; i++) {
       int p1 = i < v1Parts.length ? v1Parts[i] : 0;
       int p2 = i < v2Parts.length ? v2Parts[i] : 0;

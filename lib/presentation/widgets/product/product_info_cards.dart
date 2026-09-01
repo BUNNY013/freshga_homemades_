@@ -22,14 +22,20 @@ class ProductInfoCards extends StatelessWidget {
           child: _buildCard(
             icon: Icons.eco_outlined,
             title: "Dispatch Time",
-            value: product.dispatchTime.isNotEmpty ? product.dispatchTime : "N/A",
+            value: product.dispatchTime.isNotEmpty
+                ? product.dispatchTime
+                : "N/A",
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCard({required IconData icon, required String title, required String value}) {
+  Widget _buildCard({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(

@@ -6,7 +6,12 @@ class ShimmerLoading extends StatelessWidget {
   final double height;
   final double borderRadius;
 
-  const ShimmerLoading({super.key, required this.width, required this.height, this.borderRadius = 8.0});
+  const ShimmerLoading({
+    super.key,
+    required this.width,
+    required this.height,
+    this.borderRadius = 8.0,
+  });
 
   @override
   Widget build(BuildContext context) {

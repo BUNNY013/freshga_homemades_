@@ -10,21 +10,23 @@ class ProductImagesFullscreenScreen extends StatefulWidget {
   const ProductImagesFullscreenScreen({super.key, required this.product});
 
   @override
-  State<ProductImagesFullscreenScreen> createState() => _ProductImagesFullscreenScreenState();
+  State<ProductImagesFullscreenScreen> createState() =>
+      _ProductImagesFullscreenScreenState();
 }
 
-class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenScreen> {
+class _ProductImagesFullscreenScreenState
+    extends State<ProductImagesFullscreenScreen> {
   late PageController _pageController;
   int _currentIndex = 0;
-  
+
   late List<String> _images;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
-    _images = widget.product.images.isNotEmpty 
-        ? widget.product.images 
+    _images = widget.product.images.isNotEmpty
+        ? widget.product.images
         : [widget.product.imageUrl];
   }
 
@@ -55,23 +57,30 @@ class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenS
                 maxScale: 4.0,
                 child: Center(
                   child: Hero(
-                    tag: index == 0 ? 'product_image_${widget.product.id}' : 'product_image_none',
+                    tag: index == 0
+                        ? 'product_image_${widget.product.id}'
+                        : 'product_image_none',
                     child: CachedNetworkImage(
                       imageUrl: _images[index],
                       fit: BoxFit.contain,
                       width: double.infinity,
-                      placeholder: (context, url) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
               );
             },
           ),
-          
+
           // Top Actions
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 8.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -82,14 +91,16 @@ class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenS
                   _buildGlassButton(
                     icon: Icons.share_outlined,
                     onTap: () {
-                      Share.share('Check out ${widget.product.name} on FreshGa Homemades!\nhttps://freshga-homemades.web.app/product/${widget.product.id}');
+                      Share.share(
+                        'Check out ${widget.product.name} on FreshGa Homemades!\nhttps://freshga-homemades.web.app/product/${widget.product.id}',
+                      );
                     },
                   ),
                 ],
               ),
             ),
           ),
-          
+
           // Image Indicator
           SafeArea(
             child: Align(
@@ -97,20 +108,27 @@ class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenS
               child: Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     '${_currentIndex + 1} / ${_images.length}',
-                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-          
+
           // Thumbnail Strip
           Positioned(
             bottom: 40,
@@ -139,7 +157,9 @@ class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenS
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isSelected ? AppColors.primaryGreen : Colors.transparent,
+                          color: isSelected
+                              ? AppColors.primaryGreen
+                              : Colors.transparent,
                           width: 2,
                         ),
                         boxShadow: [
@@ -148,15 +168,17 @@ class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenS
                               color: AppColors.primaryGreen.withOpacity(0.5),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
-                            )
-                        ]
+                            ),
+                        ],
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: CachedNetworkImage(
                           imageUrl: _images[index],
                           fit: BoxFit.cover,
-                          color: isSelected ? null : Colors.black.withOpacity(0.4),
+                          color: isSelected
+                              ? null
+                              : Colors.black.withOpacity(0.4),
                           colorBlendMode: BlendMode.darken,
                         ),
                       ),
@@ -171,7 +193,10 @@ class _ProductImagesFullscreenScreenState extends State<ProductImagesFullscreenS
     );
   }
 
-  Widget _buildGlassButton({required IconData icon, required VoidCallback onTap}) {
+  Widget _buildGlassButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

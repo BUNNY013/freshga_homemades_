@@ -7,7 +7,11 @@ class TrendingProductsSection extends StatelessWidget {
   final List<ProductModel> products;
   final String title;
 
-  const TrendingProductsSection({super.key, required this.products, required this.title});
+  const TrendingProductsSection({
+    super.key,
+    required this.products,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {

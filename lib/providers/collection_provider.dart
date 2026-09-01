@@ -4,7 +4,7 @@ import '../services/collection_service.dart';
 
 class CollectionProvider with ChangeNotifier {
   final CollectionService _service = CollectionService();
-  
+
   List<CollectionModel> _collections = [];
   bool _isLoading = false;
 

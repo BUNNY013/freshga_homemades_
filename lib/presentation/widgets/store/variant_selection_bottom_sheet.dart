@@ -10,10 +10,12 @@ class VariantSelectionBottomSheet extends StatefulWidget {
   const VariantSelectionBottomSheet({super.key, required this.product});
 
   @override
-  State<VariantSelectionBottomSheet> createState() => _VariantSelectionBottomSheetState();
+  State<VariantSelectionBottomSheet> createState() =>
+      _VariantSelectionBottomSheetState();
 }
 
-class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomSheet> {
+class _VariantSelectionBottomSheetState
+    extends State<VariantSelectionBottomSheet> {
   late ProductVariantModel _selectedVariant;
   bool _isAdding = false;
   int _quantity = 1;
@@ -23,38 +25,49 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
     super.initState();
     // Default to the first in-stock variant, or the first variant if all are out of stock
     _selectedVariant = widget.product.variants.firstWhere(
-      (v) => v.inStock,
+      (v) => !v.isOutOfStock,
       orElse: () => widget.product.variants.first,
     );
   }
 
   void _addToCart() async {
-    if (!_selectedVariant.inStock) return;
-    
+    if (_selectedVariant.isOutOfStock) return;
+
     setState(() => _isAdding = true);
     try {
       await Future.delayed(const Duration(milliseconds: 300));
       if (!mounted) return;
-      
-      context.read<CartProvider>().addToCart(
+
+      final error = await context.read<CartProvider>().addToCart(
         product: widget.product,
         variant: _selectedVariant,
         quantity: _quantity,
       );
-      
+
       Navigator.pop(context); // Close the sheet
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "${widget.product.name} (${_selectedVariant.label}) x$_quantity added to cart",
-            style: const TextStyle(color: Colors.white),
+
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error, style: const TextStyle(color: Colors.white)),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
           ),
-          backgroundColor: AppColors.primaryGreen,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "${widget.product.name} (${_selectedVariant.label}) x$_quantity added to cart",
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: AppColors.primaryGreen,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isAdding = false);
     }
@@ -83,12 +96,21 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
                     children: [
                       Text(
                         "Customize",
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.2),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade600,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         widget.product.name,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ],
                   ),
@@ -101,7 +123,7 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
             ),
           ),
           const Divider(height: 1),
-          
+
           // Variants List
           Flexible(
             child: ListView.separated(
@@ -112,18 +134,31 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
               itemBuilder: (context, index) {
                 final variant = widget.product.variants[index];
                 final bool isSelected = _selectedVariant.id == variant.id;
-                final bool hasDiscount = variant.discountPrice > 0 && variant.discountPrice < variant.price;
-                final double displayPrice = hasDiscount ? variant.discountPrice : variant.price;
-                final int discountPercent = hasDiscount ? (((variant.price - variant.discountPrice) / variant.price) * 100).round() : 0;
+                final bool hasDiscount =
+                    variant.discountPrice > 0 &&
+                    variant.discountPrice < variant.price;
+                final double displayPrice = hasDiscount
+                    ? variant.discountPrice
+                    : variant.price;
+                final int discountPercent = hasDiscount
+                    ? (((variant.price - variant.discountPrice) /
+                                  variant.price) *
+                              100)
+                          .round()
+                    : 0;
 
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeOut,
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryGreen.withOpacity(0.04) : Colors.white,
+                    color: isSelected
+                        ? AppColors.primaryGreen.withOpacity(0.04)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isSelected ? AppColors.primaryGreen : Colors.grey.shade200,
+                      color: isSelected
+                          ? AppColors.primaryGreen
+                          : Colors.grey.shade200,
                       width: isSelected ? 2 : 1.5,
                     ),
                     boxShadow: [
@@ -132,19 +167,22 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
                           color: AppColors.primaryGreen.withOpacity(0.08),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
-                        )
+                        ),
                     ],
                   ),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
-                      onTap: variant.inStock ? () {
-                        setState(() {
-                          _selectedVariant = variant;
-                          _quantity = 1; // Reset quantity when changing variant
-                        });
-                      } : null,
+                      onTap: !variant.isOutOfStock
+                          ? () {
+                              setState(() {
+                                _selectedVariant = variant;
+                                _quantity =
+                                    1; // Reset quantity when changing variant
+                              });
+                            }
+                          : null,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
@@ -156,18 +194,26 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
                               height: 24,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isSelected ? AppColors.primaryGreen : Colors.transparent,
+                                color: isSelected
+                                    ? AppColors.primaryGreen
+                                    : Colors.transparent,
                                 border: Border.all(
-                                  color: isSelected ? AppColors.primaryGreen : Colors.grey.shade300,
+                                  color: isSelected
+                                      ? AppColors.primaryGreen
+                                      : Colors.grey.shade300,
                                   width: 2,
                                 ),
                               ),
                               child: isSelected
-                                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                                  ? const Icon(
+                                      Icons.check,
+                                      size: 16,
+                                      color: Colors.white,
+                                    )
                                   : null,
                             ),
                             const SizedBox(width: 16),
-                            
+
                             // Label & Discount Tag
                             Expanded(
                               child: Column(
@@ -179,36 +225,58 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
                                         variant.label,
                                         style: TextStyle(
                                           fontSize: 16,
-                                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                          color: variant.inStock ? AppColors.textPrimary : Colors.grey,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w800
+                                              : FontWeight.w600,
+                                          color: !variant.isOutOfStock
+                                              ? AppColors.textPrimary
+                                              : Colors.grey,
                                           letterSpacing: 0.2,
                                         ),
                                       ),
                                       if (hasDiscount) ...[
                                         const SizedBox(width: 8),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 6,
+                                            vertical: 2,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: Colors.red.shade50,
-                                            borderRadius: BorderRadius.circular(4),
-                                            border: Border.all(color: Colors.red.shade100),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.red.shade100,
+                                            ),
                                           ),
                                           child: Text(
                                             "SAVE $discountPercent%",
-                                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.red.shade700),
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.red.shade700,
+                                            ),
                                           ),
                                         ),
-                                      ]
+                                      ],
                                     ],
                                   ),
-                                  if (!variant.inStock) ...[
+                                  if (variant.isOutOfStock) ...[
                                     const SizedBox(height: 4),
-                                    const Text("Currently Out of Stock", style: TextStyle(fontSize: 12, color: Colors.red, fontWeight: FontWeight.w500)),
+                                    const Text(
+                                      "Currently Out of Stock",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
                                   ],
                                 ],
                               ),
                             ),
-                            
+
                             // Price
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -218,7 +286,9 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w800,
-                                    color: variant.inStock ? AppColors.primaryGreen : Colors.grey,
+                                    color: !variant.isOutOfStock
+                                        ? AppColors.primaryGreen
+                                        : Colors.grey,
                                   ),
                                 ),
                                 if (hasDiscount)
@@ -242,9 +312,9 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
               },
             ),
           ),
-          
+
           const Divider(height: 1),
-          
+
           // Quantity Selector
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -253,7 +323,11 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
               children: [
                 const Text(
                   "Quantity",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
                 Container(
                   decoration: BoxDecoration(
@@ -265,16 +339,23 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
                         color: Colors.black.withOpacity(0.02),
                         blurRadius: 4,
                         offset: const Offset(0, 2),
-                      )
-                    ]
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
                       IconButton(
-                        onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                        onPressed: _quantity > 1
+                            ? () => setState(() => _quantity--)
+                            : null,
                         icon: const Icon(Icons.remove, size: 18),
-                        color: _quantity > 1 ? AppColors.primaryGreen : Colors.grey,
-                        constraints: const BoxConstraints(minWidth: 40, minHeight: 36),
+                        color: _quantity > 1
+                            ? AppColors.primaryGreen
+                            : Colors.grey,
+                        constraints: const BoxConstraints(
+                          minWidth: 40,
+                          minHeight: 36,
+                        ),
                         padding: EdgeInsets.zero,
                       ),
                       Container(
@@ -282,14 +363,20 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
                         alignment: Alignment.center,
                         child: Text(
                           _quantity.toString(),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       IconButton(
                         onPressed: () => setState(() => _quantity++),
                         icon: const Icon(Icons.add, size: 18),
                         color: AppColors.primaryGreen,
-                        constraints: const BoxConstraints(minWidth: 40, minHeight: 36),
+                        constraints: const BoxConstraints(
+                          minWidth: 40,
+                          minHeight: 36,
+                        ),
                         padding: EdgeInsets.zero,
                       ),
                     ],
@@ -298,10 +385,15 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
               ],
             ),
           ),
-          
+
           // Bottom Add Button
           Container(
-            padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 16),
+            padding: EdgeInsets.fromLTRB(
+              24,
+              16,
+              24,
+              MediaQuery.of(context).padding.bottom + 16,
+            ),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
@@ -309,29 +401,39 @@ class _VariantSelectionBottomSheetState extends State<VariantSelectionBottomShee
                   color: Colors.black.withOpacity(0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -4),
-                )
+                ),
               ],
             ),
             child: SizedBox(
               width: double.infinity,
               height: 54,
               child: ElevatedButton(
-                onPressed: _selectedVariant.inStock && !_isAdding ? _addToCart : null,
+                onPressed: !_selectedVariant.isOutOfStock && !_isAdding
+                    ? _addToCart
+                    : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryGreen,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 0,
                 ),
                 child: _isAdding
                     ? const SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
                       )
                     : Text(
                         "Add item • ₹${((_selectedVariant.discountPrice > 0 && _selectedVariant.discountPrice < _selectedVariant.price ? _selectedVariant.discountPrice : _selectedVariant.price) * _quantity).toStringAsFixed(0)}",
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
               ),
             ),

@@ -9,12 +9,12 @@ enum StoreSortType { bestSelling, newest, priceLowHigh, priceHighLow }
 
 class StoreProvider with ChangeNotifier {
   final StoreService _service = StoreService();
-  
+
   String? _customerState;
   void updateCustomerState(String? state) {
     _customerState = state;
   }
-  
+
   // Individual Store State
   StoreModel? _currentStore;
   bool _isLoadingStore = false;
@@ -30,7 +30,7 @@ class StoreProvider with ChangeNotifier {
   // Store Products
   List<ProductModel> _allStoreProducts = [];
   bool _isLoadingProducts = false;
-  
+
   List<ProductModel> get allStoreProducts => _allStoreProducts;
   bool get isLoadingProducts => _isLoadingProducts;
 
@@ -38,7 +38,7 @@ class StoreProvider with ChangeNotifier {
   List<StoreModel> _stores = [];
   bool _isLoadingFeatured = false;
   StreamSubscription<QuerySnapshot>? _featuredStoresSubscription;
-  
+
   List<StoreModel> get stores => _stores;
   bool get isLoading => _isLoadingFeatured;
 
@@ -48,7 +48,7 @@ class StoreProvider with ChangeNotifier {
   bool _isLocalExpandedToState = false;
   String _localCity = '';
   String _localState = '';
-  
+
   List<StoreModel> get localStores => _localStores;
   bool get isLoadingLocal => _isLoadingLocal;
   bool get isLocalExpandedToState => _isLocalExpandedToState;
@@ -58,19 +58,20 @@ class StoreProvider with ChangeNotifier {
   // New Stores State
   List<StoreModel> _newStores = [];
   bool _isLoadingNew = false;
-  
+
   List<StoreModel> get newStores => _newStores;
   bool get isLoadingNew => _isLoadingNew;
 
   // Dynamic Categories extracted from products
   // Format: categoryId -> categoryName
   final Map<String, String> _availableCategories = {};
-  
+
   // Format: subCategoryId -> { 'id': subCategoryId, 'name': name, 'categoryId': parentId }
   final Map<String, Map<String, dynamic>> _availableSubcategories = {};
 
   Map<String, String> get availableCategories => _availableCategories;
-  Map<String, Map<String, dynamic>> get availableSubcategories => _availableSubcategories;
+  Map<String, Map<String, dynamic>> get availableSubcategories =>
+      _availableSubcategories;
 
   // Filter States
   String _searchQuery = "";
@@ -95,8 +96,8 @@ class StoreProvider with ChangeNotifier {
     if (_searchQuery.trim().isNotEmpty) {
       final query = _searchQuery.trim().toLowerCase();
       result = result.where((p) {
-        return p.name.toLowerCase().contains(query) || 
-               p.searchKeywords.any((k) => k.contains(query));
+        return p.name.toLowerCase().contains(query) ||
+            p.searchKeywords.any((k) => k.contains(query));
       }).toList();
     }
 
@@ -110,14 +111,18 @@ class StoreProvider with ChangeNotifier {
       if (_selectedSubcategory == "Other") {
         result = result.where((p) => p.subCategoryIds.isEmpty).toList();
       } else {
-        result = result.where((p) => p.subCategoryIds.contains(_selectedSubcategory)).toList();
+        result = result
+            .where((p) => p.subCategoryIds.contains(_selectedSubcategory))
+            .toList();
       }
     }
 
     // 4. Sorting
     switch (_sortType) {
       case StoreSortType.bestSelling:
-        result.sort((a, b) => b.reviewsCount.compareTo(a.reviewsCount)); // proxy for orders
+        result.sort(
+          (a, b) => b.reviewsCount.compareTo(a.reviewsCount),
+        ); // proxy for orders
         break;
       case StoreSortType.newest:
         // We don't have createdAt in ProductModel currently, fallback to ID sorting or add createdAt to model
@@ -153,15 +158,22 @@ class StoreProvider with ChangeNotifier {
       } else {
         _isStoreActive = await _service.isStoreActive(storeId);
         await loadAllStoreProducts(storeId);
-        
+
         // Listen for realtime updates (like followers count)
         _storeSubscription?.cancel();
-        _storeSubscription = FirebaseFirestore.instance.collection('stores').doc(storeId).snapshots().listen((snapshot) {
-          if (snapshot.exists) {
-            _currentStore = StoreModel.fromJson(snapshot.data() as Map<String, dynamic>, snapshot.id);
-            notifyListeners();
-          }
-        });
+        _storeSubscription = FirebaseFirestore.instance
+            .collection('stores')
+            .doc(storeId)
+            .snapshots()
+            .listen((snapshot) {
+              if (snapshot.exists) {
+                _currentStore = StoreModel.fromJson(
+                  snapshot.data() as Map<String, dynamic>,
+                  snapshot.id,
+                );
+                notifyListeners();
+              }
+            });
       }
     } catch (e) {
       _storeError = e.toString();
@@ -194,22 +206,32 @@ class StoreProvider with ChangeNotifier {
 
     try {
       // Setup realtime listener for featured stores
-      Query query = FirebaseFirestore.instance.collection('stores')
+      Query query = FirebaseFirestore.instance
+          .collection('stores')
           .where('isActive', isEqualTo: true)
           .where('isFeatured', isEqualTo: true);
-          
+
       if (_customerState != null && _customerState!.isNotEmpty) {
-        query = query.where(Filter.or(
-          Filter('canSellPanIndia', isEqualTo: true),
-          Filter('state', isEqualTo: _customerState)
-        ));
+        query = query.where(
+          Filter.or(
+            Filter('canSellPanIndia', isEqualTo: true),
+            Filter('state', isEqualTo: _customerState),
+          ),
+        );
       }
 
       _featuredStoresSubscription?.cancel();
-      _featuredStoresSubscription = query
-          .limit(10)
-          .snapshots().listen((snapshot) {
-        final list = snapshot.docs.map((doc) => StoreModel.fromJson(doc.data() as Map<String, dynamic>, doc.id)).toList();
+      _featuredStoresSubscription = query.limit(10).snapshots().listen((
+        snapshot,
+      ) {
+        final list = snapshot.docs
+            .map(
+              (doc) => StoreModel.fromJson(
+                doc.data() as Map<String, dynamic>,
+                doc.id,
+              ),
+            )
+            .toList();
         list.shuffle();
         _stores = list;
         _isLoadingFeatured = false;
@@ -224,7 +246,7 @@ class StoreProvider with ChangeNotifier {
 
   Future<void> loadLocalStores(String city, String state) async {
     if (city.isEmpty && state.isEmpty) return;
-    
+
     _isLoadingLocal = true;
     _localCity = city;
     _localState = state;
@@ -236,7 +258,9 @@ class StoreProvider with ChangeNotifier {
       _localStores.shuffle();
       // Check if we fell back to state-wide by verifying if any returned store is outside the requested city
       if (_localStores.isNotEmpty) {
-        _isLocalExpandedToState = _localStores.any((s) => s.city.toLowerCase() != city.toLowerCase());
+        _isLocalExpandedToState = _localStores.any(
+          (s) => s.city.toLowerCase() != city.toLowerCase(),
+        );
       }
     } catch (e) {
       debugPrint("Error loading local stores: $e");
@@ -278,13 +302,17 @@ class StoreProvider with ChangeNotifier {
 
     // Fetch names for all collected subcategories
     if (subcatIdsToFetch.isNotEmpty) {
-      var subcats = await _service.getSubcategoriesByIds(subcatIdsToFetch.toList());
+      var subcats = await _service.getSubcategoriesByIds(
+        subcatIdsToFetch.toList(),
+      );
       for (var subData in subcats) {
-        if (subData.containsKey('subCategoryId') && subData.containsKey('name') && subData.containsKey('categoryId')) {
+        if (subData.containsKey('subCategoryId') &&
+            subData.containsKey('name') &&
+            subData.containsKey('categoryId')) {
           _availableSubcategories[subData['subCategoryId']] = {
             'id': subData['subCategoryId'],
             'name': subData['name'],
-            'categoryId': subData['categoryId']
+            'categoryId': subData['categoryId'],
           };
         }
       }

@@ -9,14 +9,16 @@ import 'data/categories_data.dart';
 class SubCategorySeeder {
   static Future<void> seedSubCategories() async {
     print('📂 Seeding sub-categories from Dart constant...');
-    
+
     final lines = categoriesRawData.split('\n');
     final firestore = FirebaseFirestore.instance;
     // Create batches
     var batch = firestore.batch();
     final subCategoriesCol = firestore.collection('sub_categories');
 
-    final categoryRegex = RegExp(r'(?:[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])?\s*\d+\.\s+(.*)');
+    final categoryRegex = RegExp(
+      r'(?:[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])?\s*\d+\.\s+(.*)',
+    );
     final subCategoryRegex = RegExp(r'^\s*•\s+(.*)');
 
     String currentCategoryId = '';
@@ -36,13 +38,15 @@ class SubCategorySeeder {
       final subMatch = subCategoryRegex.firstMatch(line);
       if (subMatch != null && currentCategoryId.isNotEmpty) {
         final rawName = subMatch.group(1)!.trim();
-        final slug = SlugGenerator.generate('$currentCategoryName $rawName'); // Global unique slug
-        
+        final slug = SlugGenerator.generate(
+          '$currentCategoryName $rawName',
+        ); // Global unique slug
+
         final docRef = subCategoriesCol.doc(slug);
-        
+
         final aliases = AliasGenerator.getAliases(rawName);
         final tags = TagMapper.autoMapTagsForCategory(currentCategoryName);
-        
+
         final keywords = KeywordGenerator.generateForEntity(
           name: rawName,
           categoryName: currentCategoryName,
@@ -57,7 +61,8 @@ class SubCategorySeeder {
           slug: slug,
           description: 'Authentic homemade $rawName',
           image: {
-            'url': 'https://placehold.co/400x400/81C784/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
+            'url':
+                'https://placehold.co/400x400/81C784/FFFFFF/png?text=${Uri.encodeComponent(rawName)}',
             'storagePath': '',
           },
           isPopular: sortOrder <= 3, // mark first 3 as popular
@@ -80,10 +85,10 @@ class SubCategorySeeder {
 
         // Firestore batch limit is 500 operations. We use 250 to be safe.
         if (count >= 250) {
-           await batch.commit();
-           batch = firestore.batch();
-           print('   Batch commit at $count...');
-           count = 0;
+          await batch.commit();
+          batch = firestore.batch();
+          print('   Batch commit at $count...');
+          count = 0;
         }
       }
     }

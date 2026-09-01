@@ -12,7 +12,10 @@ class CustomerTicketsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    );
     final String customerId = customerProvider.currentCustomer?.uid ?? '';
 
     return Scaffold(
@@ -26,7 +29,11 @@ class CustomerTicketsScreen extends StatelessWidget {
         ),
         title: const Text(
           "My Support Tickets",
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 18),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.w800,
+            fontSize: 18,
+          ),
         ),
       ),
       body: customerId.isEmpty
@@ -39,7 +46,11 @@ class CustomerTicketsScreen extends StatelessWidget {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen));
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryGreen,
+                    ),
+                  );
                 }
 
                 if (snapshot.hasError) {
@@ -51,11 +62,19 @@ class CustomerTicketsScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade300),
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 64,
+                          color: Colors.grey.shade300,
+                        ),
                         const SizedBox(height: 16),
                         Text(
                           "No support tickets yet",
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -78,10 +97,13 @@ class CustomerTicketsScreen extends StatelessWidget {
                     final String message = data['message'] ?? '';
                     final String status = data['status'] ?? 'Open';
                     final String orderId = data['orderId'] ?? '';
-                    final Timestamp? createdAt = data['createdAt'] as Timestamp?;
-                    
+                    final Timestamp? createdAt =
+                        data['createdAt'] as Timestamp?;
+
                     final bool isResolved = status == 'Resolved';
-                    final Color statusColor = isResolved ? AppColors.primaryGreen : Colors.orange;
+                    final Color statusColor = isResolved
+                        ? AppColors.primaryGreen
+                        : Colors.orange;
 
                     return BouncingButton(
                       onTap: () {
@@ -101,7 +123,11 @@ class CustomerTicketsScreen extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
                           ],
                           border: Border.all(color: Colors.grey.shade100),
                         ),
@@ -113,36 +139,61 @@ class CustomerTicketsScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 4,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: statusColor.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
                                     status.toUpperCase(),
-                                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11),
+                                    style: TextStyle(
+                                      color: statusColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                    ),
                                   ),
                                 ),
                                 if (createdAt != null)
                                   Text(
-                                    DateFormat('dd MMM yyyy, hh:mm a').format(createdAt.toDate()),
-                                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                                    DateFormat(
+                                      'dd MMM yyyy, hh:mm a',
+                                    ).format(createdAt.toDate()),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 12,
+                                    ),
                                   ),
                               ],
                             ),
                             const SizedBox(height: 12),
                             Text(
                               topic,
-                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textPrimary),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
                             if (orderId.isNotEmpty) ...[
                               const SizedBox(height: 4),
-                              Text("Order ID: $orderId", style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                              Text(
+                                "Order ID: $orderId",
+                                style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ],
                             const SizedBox(height: 12),
                             Text(
                               message,
-                              style: const TextStyle(color: Colors.black87, fontSize: 14),
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 14,
+                              ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),

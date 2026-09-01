@@ -38,18 +38,27 @@ class FollowingFilterChips extends StatelessWidget {
                 onTap: () => provider.setFilter(filter['id']!),
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primaryGreen : Colors.grey.shade100,
+                    color: isSelected
+                        ? AppColors.primaryGreen
+                        : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
                     child: Text(
                       filter['label']!,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textPrimary,
                         fontSize: 13,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w500,
                       ),
                     ),
                   ),

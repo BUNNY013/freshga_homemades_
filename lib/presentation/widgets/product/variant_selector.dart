@@ -15,25 +15,33 @@ class VariantSelector extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             Wrap(
               spacing: 12,
               runSpacing: 12,
               children: List.generate(provider.variants.length, (index) {
                 final variant = provider.variants[index];
                 final isSelected = provider.selectedVariantIndex == index;
-                final price = variant.discountPrice > 0 ? variant.discountPrice : variant.price;
+                final price = variant.discountPrice > 0
+                    ? variant.discountPrice
+                    : variant.price;
 
                 return GestureDetector(
                   onTap: () => provider.selectVariant(index),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 24,
+                    ),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primaryGreen.withOpacity(0.05) : Colors.white,
+                      color: isSelected
+                          ? AppColors.primaryGreen.withOpacity(0.05)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? AppColors.primaryGreen : Colors.grey.shade300,
+                        color: isSelected
+                            ? AppColors.primaryGreen
+                            : Colors.grey.shade300,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -44,8 +52,12 @@ class VariantSelector extends StatelessWidget {
                           variant.label,
                           style: TextStyle(
                             fontSize: 14,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                            color: isSelected ? const Color(0xFF1B5E20) : Colors.grey.shade700,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w600,
+                            color: isSelected
+                                ? const Color(0xFF1B5E20)
+                                : Colors.grey.shade700,
                           ),
                         ),
                       ],

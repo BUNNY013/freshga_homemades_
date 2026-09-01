@@ -7,26 +7,35 @@ class CategoryService {
 
   Future<List<CategoryModel>> getActiveCategories() async {
     try {
-      final snapshot = await _firestore.collection('categories')
+      final snapshot = await _firestore
+          .collection('categories')
           .where('status', isEqualTo: 'active')
           .orderBy('displayIndex')
           .get();
-      return snapshot.docs.map((doc) => CategoryModel.fromJson(doc.data(), doc.id)).toList();
+      return snapshot.docs
+          .map((doc) => CategoryModel.fromJson(doc.data(), doc.id))
+          .toList();
     } catch (e) {
       throw Exception('Failed to load categories: $e');
     }
   }
 
   Stream<List<CategoryModel>> streamActiveCategories() {
-    return _firestore.collection('categories')
+    return _firestore
+        .collection('categories')
         .where('status', isEqualTo: 'active')
         .orderBy('displayIndex')
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => CategoryModel.fromJson(doc.data(), doc.id)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => CategoryModel.fromJson(doc.data(), doc.id))
+              .toList(),
+        );
   }
 
   Stream<Map<String, dynamic>?> streamCategoryBanner() {
-    return _firestore.collection('appConfig')
+    return _firestore
+        .collection('appConfig')
         .doc('categories_banner')
         .snapshots()
         .map((snapshot) {
@@ -38,16 +47,25 @@ class CategoryService {
   }
 
   Stream<List<SubCategoryModel>> streamSubCategories(String categoryId) {
-    return _firestore.collection('sub_categories')
+    return _firestore
+        .collection('sub_categories')
         .where('categoryId', isEqualTo: categoryId)
         .where('status', isEqualTo: 'active')
         .orderBy('displayIndex')
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => SubCategoryModel.fromJson(doc.data(), doc.id)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => SubCategoryModel.fromJson(doc.data(), doc.id))
+              .toList(),
+        );
   }
 
-  Stream<int> streamSubCategoryProductCount(String categoryId, String subCategoryId) {
-    return _firestore.collection('products')
+  Stream<int> streamSubCategoryProductCount(
+    String categoryId,
+    String subCategoryId,
+  ) {
+    return _firestore
+        .collection('products')
         .where('categoryId', isEqualTo: categoryId)
         .where('subCategoryIds', arrayContains: subCategoryId)
         .snapshots()

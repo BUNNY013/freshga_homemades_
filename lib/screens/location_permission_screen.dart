@@ -7,7 +7,8 @@ class LocationPermissionScreen extends StatefulWidget {
   const LocationPermissionScreen({super.key});
 
   @override
-  State<LocationPermissionScreen> createState() => _LocationPermissionScreenState();
+  State<LocationPermissionScreen> createState() =>
+      _LocationPermissionScreenState();
 }
 
 class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
@@ -61,7 +62,7 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              
+
               // Map Icon Container
               Center(
                 child: Container(
@@ -78,15 +79,15 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                 ),
               ),
               const SizedBox(height: 48),
-              
+
               Text(
                 "Where should we\ndeliver?",
-                style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  height: 1.2,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.displayLarge?.copyWith(height: 1.2),
               ),
               const SizedBox(height: 16),
-              
+
               Text(
                 "We need your location to show available homemade creators in your area.",
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -102,7 +103,7 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                 height: 56,
                 child: ElevatedButton.icon(
                   onPressed: _isLocating ? null : _useCurrentLocation,
-                  icon: _isLocating 
+                  icon: _isLocating
                       ? const SizedBox.shrink()
                       : const Icon(Icons.my_location),
                   label: _isLocating
@@ -119,11 +120,15 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
               ),
 
               const SizedBox(height: 32),
-              
+
               // Divider
               Row(
                 children: [
-                  Expanded(child: Divider(color: AppColors.textSecondary.withOpacity(0.2))),
+                  Expanded(
+                    child: Divider(
+                      color: AppColors.textSecondary.withOpacity(0.2),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
@@ -134,21 +139,25 @@ class _LocationPermissionScreenState extends State<LocationPermissionScreen> {
                       ),
                     ),
                   ),
-                  Expanded(child: Divider(color: AppColors.textSecondary.withOpacity(0.2))),
+                  Expanded(
+                    child: Divider(
+                      color: AppColors.textSecondary.withOpacity(0.2),
+                    ),
+                  ),
                 ],
               ),
-              
+
               const SizedBox(height: 32),
 
               // Manual Pincode Entry
               Text(
                 "Enter Pincode Manually",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontSize: 16,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontSize: 16),
               ),
               const SizedBox(height: 12),
-              
+
               Row(
                 children: [
                   Expanded(

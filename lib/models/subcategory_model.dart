@@ -43,25 +43,44 @@ class SubCategoryModel {
     this.metadata,
   });
 
-  factory SubCategoryModel.fromJson(Map<String, dynamic> json, [String? docId]) {
+  factory SubCategoryModel.fromJson(
+    Map<String, dynamic> json, [
+    String? docId,
+  ]) {
     return SubCategoryModel(
       subCategoryId: json['subCategoryId'] ?? docId ?? '',
       categoryId: json['categoryId'] ?? '',
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
       description: json['description'] ?? '',
-      image: (json['image'] is Map) ? Map<String, dynamic>.from(json['image'] as Map) : null,
+      image: (json['image'] is Map)
+          ? Map<String, dynamic>.from(json['image'] as Map)
+          : null,
       productsCount: (json['productsCount'] as num?)?.toInt() ?? 0,
       storesCount: (json['storesCount'] as num?)?.toInt() ?? 0,
       tagsCount: (json['tagsCount'] as num?)?.toInt() ?? 0,
       isPopular: json['isPopular'] == true,
-      status: json['status']?.toString() ?? (json['isActive'] == false ? 'hidden' : 'active'),
-      displayIndex: (json['displayIndex'] as num?)?.toInt() ?? (json['sortOrder'] as num?)?.toInt() ?? (json['order'] as num?)?.toInt() ?? 0,
-      aliases: json['aliases'] is List ? List<String>.from(json['aliases']) : [],
-      searchKeywords: json['searchKeywords'] is List ? List<String>.from(json['searchKeywords']) : [],
+      status:
+          json['status']?.toString() ??
+          (json['isActive'] == false ? 'hidden' : 'active'),
+      displayIndex:
+          (json['displayIndex'] as num?)?.toInt() ??
+          (json['sortOrder'] as num?)?.toInt() ??
+          (json['order'] as num?)?.toInt() ??
+          0,
+      aliases: json['aliases'] is List
+          ? List<String>.from(json['aliases'])
+          : [],
+      searchKeywords: json['searchKeywords'] is List
+          ? List<String>.from(json['searchKeywords'])
+          : [],
       createdBySeeder: json['createdBySeeder'] == true,
-      analytics: (json['analytics'] is Map) ? Map<String, dynamic>.from(json['analytics'] as Map) : null,
-      metadata: (json['metadata'] is Map) ? Map<String, dynamic>.from(json['metadata'] as Map) : null,
+      analytics: (json['analytics'] is Map)
+          ? Map<String, dynamic>.from(json['analytics'] as Map)
+          : null,
+      metadata: (json['metadata'] is Map)
+          ? Map<String, dynamic>.from(json['metadata'] as Map)
+          : null,
     );
   }
 

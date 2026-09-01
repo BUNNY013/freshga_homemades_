@@ -5,9 +5,9 @@ import 'firebase_options.dart';
 void main() async {
   print("Starting debug fetch...");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  
+
   final db = FirebaseFirestore.instance;
-  
+
   try {
     final subCats = await db.collection('sub_categories').get();
     print("sub_categories count: ${subCats.docs.length}");
@@ -15,10 +15,10 @@ void main() async {
       print("Sample sub_category:");
       print(subCats.docs.first.data());
     }
-    
+
     final subcatsOld = await db.collection('subcategories').get();
     print("subcategories (no underscore) count: ${subcatsOld.docs.length}");
-    
+
     final cats = await db.collection('categories').get();
     print("categories count: ${cats.docs.length}");
     if (cats.docs.isNotEmpty) {

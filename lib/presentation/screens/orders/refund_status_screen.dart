@@ -38,7 +38,10 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
   // Helper to find cancellation time
   DateTime _getCancellationTime() {
     final cancelEvent = widget.order.timeline.lastWhere(
-      (event) => event['status'] == 'Cancelled' || event['status'] == 'Auto-Cancelled' || event['status'] == 'Declined',
+      (event) =>
+          event['status'] == 'Cancelled' ||
+          event['status'] == 'Auto-Cancelled' ||
+          event['status'] == 'Declined',
       orElse: () => {'time': widget.order.updatedAt.toIso8601String()},
     );
     return DateTime.parse(cancelEvent['time'] as String);
@@ -50,15 +53,16 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
     final cancelTime = _getCancellationTime();
     final dateFormat = DateFormat('dd MMM, yyyy');
     final timeFormat = DateFormat('hh:mm a');
-    
+
     // Simulate refund steps based on time passed since cancellation
     final now = DateTime.now();
     final durationSinceCancel = now.difference(cancelTime);
-    
+
     final bool isInitiated = true;
     final bool isProcessing = durationSinceCancel.inMinutes > 30;
     final bool isSentToBank = durationSinceCancel.inHours > 24;
-    final bool isCredited = durationSinceCancel.inHours > 72; // usually takes 3-5 days
+    final bool isCredited =
+        durationSinceCancel.inHours > 72; // usually takes 3-5 days
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -69,18 +73,31 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () {
             // Because we might have come from CancelOrderScreen, pop to My Orders
-            Navigator.popUntil(context, (route) => route.isFirst || route.settings.name == '/orders');
+            Navigator.popUntil(
+              context,
+              (route) => route.isFirst || route.settings.name == '/orders',
+            );
           },
         ),
         title: const Text(
           "Refund Status",
-          style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () {},
-            child: const Text("Help", style: TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.bold)),
-          )
+            child: const Text(
+              "Help",
+              style: TextStyle(
+                color: AppColors.primaryGreen,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -92,13 +109,22 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isCredited ? AppColors.primaryGreen.withOpacity(0.05) : Colors.orange.shade50,
+                color: isCredited
+                    ? AppColors.primaryGreen.withOpacity(0.05)
+                    : Colors.orange.shade50,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: isCredited ? AppColors.primaryGreen.withOpacity(0.2) : Colors.orange.shade200),
+                border: Border.all(
+                  color: isCredited
+                      ? AppColors.primaryGreen.withOpacity(0.2)
+                      : Colors.orange.shade200,
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(isCredited ? Icons.check_circle : Icons.refresh, color: isCredited ? AppColors.primaryGreen : Colors.orange),
+                  Icon(
+                    isCredited ? Icons.check_circle : Icons.refresh,
+                    color: isCredited ? AppColors.primaryGreen : Colors.orange,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -107,29 +133,39 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
                         Text(
                           isCredited ? "Refund Completed" : "Refund Initiated",
                           style: TextStyle(
-                            color: isCredited ? AppColors.primaryGreen : Colors.orange.shade800,
+                            color: isCredited
+                                ? AppColors.primaryGreen
+                                : Colors.orange.shade800,
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          isCredited 
-                            ? "Your refund has been successfully credited."
-                            : "Your refund is being processed. We will notify you once it is completed.",
-                          style: TextStyle(color: isCredited ? AppColors.primaryGreen : Colors.orange.shade800, fontSize: 13),
+                          isCredited
+                              ? "Your refund has been successfully credited."
+                              : "Your refund is being processed. We will notify you once it is completed.",
+                          style: TextStyle(
+                            color: isCredited
+                                ? AppColors.primaryGreen
+                                : Colors.orange.shade800,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Order Summary
-            Text("Order ID: ${order.orderId}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            Text(
+              "Order ID: ${order.orderId}",
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,9 +173,22 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(_store?.name ?? "Loading...", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(
+                      _store?.name ?? "Loading...",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text("${order.items.length} item(s) • ₹${order.totalAmount.toInt()}", style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
+                    Text(
+                      "${order.items.length} item(s) • ₹${order.totalAmount.toInt()}",
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
                 if (order.items.isNotEmpty)
@@ -150,21 +199,33 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: Colors.grey.shade100, width: 40, height: 40),
-                      errorWidget: (context, url, error) => Container(color: Colors.grey.shade100, width: 40, height: 40, child: const Icon(Icons.image, color: Colors.grey)),
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey.shade100,
+                        width: 40,
+                        height: 40,
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey.shade100,
+                        width: 40,
+                        height: 40,
+                        child: const Icon(Icons.image, color: Colors.grey),
+                      ),
                     ),
                   ),
               ],
             ),
-            
+
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
               child: Divider(height: 1),
             ),
-            
-            const Text("Refund Progress", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+
+            const Text(
+              "Refund Progress",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 24),
-            
+
             // Timeline
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -179,31 +240,55 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
                   ),
                   _buildTimelineStep(
                     title: "Refund Processing",
-                    date: isProcessing ? dateFormat.format(cancelTime.add(const Duration(minutes: 30))) : "Expected by ${dateFormat.format(cancelTime.add(const Duration(days: 1)))}",
-                    time: isProcessing ? timeFormat.format(cancelTime.add(const Duration(minutes: 30))) : "",
+                    date: isProcessing
+                        ? dateFormat.format(
+                            cancelTime.add(const Duration(minutes: 30)),
+                          )
+                        : "Expected by ${dateFormat.format(cancelTime.add(const Duration(days: 1)))}",
+                    time: isProcessing
+                        ? timeFormat.format(
+                            cancelTime.add(const Duration(minutes: 30)),
+                          )
+                        : "",
                     isCompleted: isProcessing,
                     isLast: false,
                   ),
                   _buildTimelineStep(
                     title: "Refund Sent to Bank",
-                    date: isSentToBank ? dateFormat.format(cancelTime.add(const Duration(days: 1))) : "Expected by ${dateFormat.format(cancelTime.add(const Duration(days: 2)))}",
-                    time: isSentToBank ? timeFormat.format(cancelTime.add(const Duration(days: 1))) : "",
+                    date: isSentToBank
+                        ? dateFormat.format(
+                            cancelTime.add(const Duration(days: 1)),
+                          )
+                        : "Expected by ${dateFormat.format(cancelTime.add(const Duration(days: 2)))}",
+                    time: isSentToBank
+                        ? timeFormat.format(
+                            cancelTime.add(const Duration(days: 1)),
+                          )
+                        : "",
                     isCompleted: isSentToBank,
                     isLast: false,
                   ),
                   _buildTimelineStep(
                     title: "Refund Credited",
-                    date: isCredited ? dateFormat.format(cancelTime.add(const Duration(days: 3))) : "Expected by ${dateFormat.format(cancelTime.add(const Duration(days: 5)))}",
-                    time: isCredited ? timeFormat.format(cancelTime.add(const Duration(days: 3))) : "",
+                    date: isCredited
+                        ? dateFormat.format(
+                            cancelTime.add(const Duration(days: 3)),
+                          )
+                        : "Expected by ${dateFormat.format(cancelTime.add(const Duration(days: 5)))}",
+                    time: isCredited
+                        ? timeFormat.format(
+                            cancelTime.add(const Duration(days: 3)),
+                          )
+                        : "",
                     isCompleted: isCredited,
                     isLast: true,
                   ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Footer Note
             Container(
               padding: const EdgeInsets.all(16),
@@ -219,12 +304,16 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
                   Expanded(
                     child: Text(
                       "Refund amount will be credited to your original payment method.",
-                      style: TextStyle(color: Colors.black87, fontSize: 13, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  )
+                  ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -248,20 +337,30 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: isCompleted ? AppColors.primaryGreen : Colors.transparent,
+                color: isCompleted
+                    ? AppColors.primaryGreen
+                    : Colors.transparent,
                 shape: BoxShape.circle,
-                border: isCompleted ? null : Border.all(color: Colors.grey.shade300, width: 2),
+                border: isCompleted
+                    ? null
+                    : Border.all(color: Colors.grey.shade300, width: 2),
               ),
-              child: isCompleted 
-                ? const Icon(Icons.check, size: 14, color: Colors.white)
-                : Icon(Icons.star, size: 12, color: Colors.grey.shade400), // Custom star dot for future
+              child: isCompleted
+                  ? const Icon(Icons.check, size: 14, color: Colors.white)
+                  : Icon(
+                      Icons.star,
+                      size: 12,
+                      color: Colors.grey.shade400,
+                    ), // Custom star dot for future
             ),
             if (!isLast)
               Container(
                 width: 2,
                 height: 50,
-                color: isCompleted ? AppColors.primaryGreen : Colors.grey.shade200,
-              )
+                color: isCompleted
+                    ? AppColors.primaryGreen
+                    : Colors.grey.shade200,
+              ),
           ],
         ),
         const SizedBox(width: 16),
@@ -283,12 +382,17 @@ class _RefundStatusScreenState extends State<RefundStatusScreen> {
                 const SizedBox(height: 4),
                 Text(
                   time.isNotEmpty ? "$date • $time" : date,
-                  style: TextStyle(color: isCompleted ? Colors.grey.shade600 : Colors.grey.shade500, fontSize: 13),
+                  style: TextStyle(
+                    color: isCompleted
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade500,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
           ),
-        )
+        ),
       ],
     );
   }

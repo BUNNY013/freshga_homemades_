@@ -23,8 +23,21 @@ class ProductRatingsScreen extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Ratings & Feedback", style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(product.name, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            const Text(
+              "Ratings & Feedback",
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              product.name,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+              ),
+            ),
           ],
         ),
       ),
@@ -48,14 +61,21 @@ class ProductRatingsScreen extends StatelessWidget {
                         children: [
                           Text(
                             product.rating.toStringAsFixed(1),
-                            style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                            style: const TextStyle(
+                              fontSize: 48,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                           const Icon(Icons.star, color: Colors.amber, size: 28),
                         ],
                       ),
                       Text(
                         "(${product.reviewsCount} ratings)",
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
@@ -65,46 +85,60 @@ class ProductRatingsScreen extends StatelessWidget {
                       children: List.generate(5, (index) {
                         int star = 5 - index;
                         int count = product.ratingCounts[star.toString()] ?? 0;
-                        double percent = product.reviewsCount > 0 ? count / product.reviewsCount : 0.0;
+                        double percent = product.reviewsCount > 0
+                            ? count / product.reviewsCount
+                            : 0.0;
                         return _buildRatingBar(star, percent, count);
                       }),
                     ),
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 32),
             ],
-            
+
             // Notice
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.primaryGreen.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.primaryGreen.withOpacity(0.2)),
+                border: Border.all(
+                  color: AppColors.primaryGreen.withOpacity(0.2),
+                ),
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.verified_user_outlined, color: AppColors.primaryGreen),
+                  Icon(
+                    Icons.verified_user_outlined,
+                    color: AppColors.primaryGreen,
+                  ),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       "You can rate this product after your order is delivered.",
-                      style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Rating Highlights
             if (hasRatings && product.ratingHighlights.isNotEmpty) ...[
               const Text(
                 "Rating highlights",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 16),
               Wrap(
@@ -116,20 +150,33 @@ class ProductRatingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 40),
             ],
-            
+
             // How to rate
             const Text(
               "How to rate?",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 16),
-            _buildHowToStep(Icons.shopping_bag_outlined, "Place an order and try the product"),
-            _buildHowToStep(Icons.local_shipping_outlined, "Once delivered, go to 'My Orders'"),
+            _buildHowToStep(
+              Icons.shopping_bag_outlined,
+              "Place an order and try the product",
+            ),
+            _buildHowToStep(
+              Icons.local_shipping_outlined,
+              "Once delivered, go to 'My Orders'",
+            ),
             _buildHowToStep(Icons.star_border, "Tap on 'Rate this Product'"),
-            _buildHowToStep(Icons.rate_review_outlined, "Give star rating and submit"),
-            
+            _buildHowToStep(
+              Icons.rate_review_outlined,
+              "Give star rating and submit",
+            ),
+
             const SizedBox(height: 40),
-            
+
             // Bottom Illustration/Message
             Center(
               child: Container(
@@ -143,11 +190,19 @@ class ProductRatingsScreen extends StatelessWidget {
                     const Expanded(
                       child: Text(
                         "Your feedback helps us and the seller improve and serve you better.",
-                        style: TextStyle(color: Colors.brown, fontSize: 14, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                          color: Colors.brown,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Icon(Icons.feedback_outlined, size: 40, color: Colors.orange.shade300),
+                    Icon(
+                      Icons.feedback_outlined,
+                      size: 40,
+                      color: Colors.orange.shade300,
+                    ),
                   ],
                 ),
               ),
@@ -169,7 +224,11 @@ class ProductRatingsScreen extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               "No ratings yet",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
             ),
             SizedBox(height: 8),
             Text(
@@ -187,7 +246,10 @@ class ProductRatingsScreen extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6.0),
       child: Row(
         children: [
-          Text("$star", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(
+            "$star",
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          ),
           const Icon(Icons.star, size: 12, color: Colors.black87),
           const SizedBox(width: 8),
           Expanded(
@@ -204,7 +266,14 @@ class ProductRatingsScreen extends StatelessWidget {
           const SizedBox(width: 8),
           SizedBox(
             width: 30,
-            child: Text("$count", style: const TextStyle(fontSize: 12, color: AppColors.textSecondary), textAlign: TextAlign.right),
+            child: Text(
+              "$count",
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.right,
+            ),
           ),
         ],
       ),
@@ -222,9 +291,22 @@ class ProductRatingsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(text, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textPrimary)),
+          Text(
+            text,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: AppColors.textPrimary,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text("($count)", style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+          Text(
+            "($count)",
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );
@@ -244,7 +326,15 @@ class ProductRatingsScreen extends StatelessWidget {
             child: Icon(icon, size: 20, color: AppColors.textPrimary),
           ),
           const SizedBox(width: 16),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary))),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
         ],
       ),
     );

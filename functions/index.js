@@ -1,10 +1,12 @@
 const { setGlobalOptions } = require("firebase-functions/v2");
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const admin = require("firebase-admin");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore, FieldValue, Timestamp } = require("firebase-admin/firestore");
+const { getMessaging } = require("firebase-admin/messaging");
 
 setGlobalOptions({ region: "asia-south1" });
-admin.initializeApp();
+initializeApp();
 
 exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}", async (event) => {
   const snap = event.data;
@@ -42,7 +44,7 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
   }
 
   // 2. Find all customers who follow this store
-  const followersSnap = await admin.firestore().collection(`stores/${storeId}/followers`).get();
+  const followersSnap = await getFirestore().collection(`stores/${storeId}/followers`).get();
 
   if (followersSnap.empty) {
     console.log(`No followers found for store ${storeId}.`);
@@ -65,8 +67,8 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
   }
 
   for (const chunk of chunks) {
-    const refs = chunk.map(id => admin.firestore().collection("customers").doc(id));
-    const customerDocs = await admin.firestore().getAll(...refs);
+    const refs = chunk.map(id => getFirestore().collection("customers").doc(id));
+    const customerDocs = await getFirestore().getAll(...refs);
 
     customerDocs.forEach(doc => {
       if (doc.exists) {
@@ -92,6 +94,11 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
       storeId: storeId,
       productId: updateData.productId || "",
       click_action: "FLUTTER_NOTIFICATION_CLICK"
+    },
+    android: {
+      notification: {
+        icon: "@mipmap/ic_launcher"
+      }
     }
   };
 
@@ -102,7 +109,7 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
 
   // 5. Save to In-App Notifications (if high value)
   if (type === "offer" || type === "new_launch") {
-    const db = admin.firestore();
+    const db = getFirestore();
     let chunkedBatches = [];
     let currentBatch = db.batch();
     let opCount = 0;
@@ -117,7 +124,7 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
         productId: updateData.productId || null,
         imageUrl: imageUrl || null,
         isUnread: true,
-        createdAt: admin.firestore.FieldValue.serverTimestamp()
+        createdAt: FieldValue.serverTimestamp()
       });
       opCount++;
 
@@ -143,7 +150,7 @@ exports.sendFollowerNotifications = onDocumentCreated("store_updates/{updateId}"
   // 6. Blast the Push Notification
   if (tokens.length > 0) {
     try {
-      const response = await admin.messaging().sendEachForMulticast({
+      const response = await getMessaging().sendEachForMulticast({
         tokens: tokens,
         ...payload
       });
@@ -162,13 +169,13 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
   const orderData = snap.data();
 
   const storeId = orderData.storeId;
-  const storeSnap = await admin.firestore().collection("stores").doc(storeId).get();
+  const storeSnap = await getFirestore().collection("stores").doc(storeId).get();
   if (!storeSnap.exists) return null;
 
   const storeData = storeSnap.data();
   const ownerId = storeData.ownerId;
 
-  const userSnap = await admin.firestore().collection("users").doc(ownerId).get();
+  const userSnap = await getFirestore().collection("users").doc(ownerId).get();
 
   const tokens = [];
   if (userSnap.exists) {
@@ -186,11 +193,11 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
     type: "order",
     relatedId: orderData.orderId,
     isRead: false,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: FieldValue.serverTimestamp(),
   };
 
   try {
-    await admin.firestore().collection("notifications").add(vendorNotification);
+    await getFirestore().collection("notifications").add(vendorNotification);
   } catch (error) {
     console.error("Error saving vendor notification to DB:", error);
   }
@@ -207,7 +214,7 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
       },
       android: {
         priority: "high",
-        notification: { sound: "default", channelId: "high_importance_channel" }
+        notification: { sound: "default", channelId: "high_importance_channel", icon: "@mipmap/ic_launcher" }
       },
       apns: {
         payload: { aps: { sound: "default" } }
@@ -215,7 +222,7 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
     };
 
     try {
-      await admin.messaging().sendEachForMulticast({
+      await getMessaging().sendEachForMulticast({
         tokens: uniqueTokens,
         ...payload
       });
@@ -239,16 +246,16 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
       type: "order_update",
       orderId: orderData.orderId,
       isUnread: true,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
     };
 
     try {
-      await admin.firestore().collection("customers").doc(customerId).collection("notifications").add(notificationData);
+      await getFirestore().collection("customers").doc(customerId).collection("notifications").add(notificationData);
     } catch (error) {
       console.error("Error saving order placed notification to DB:", error);
     }
 
-    const customerSnap = await admin.firestore().collection("customers").doc(customerId).get();
+    const customerSnap = await getFirestore().collection("customers").doc(customerId).get();
 
     const tokens = [];
     if (customerSnap.exists) {
@@ -271,7 +278,7 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
         },
         android: {
           priority: "high",
-          notification: { sound: "default", channelId: "high_importance_channel" }
+          notification: { sound: "default", channelId: "high_importance_channel", icon: "@mipmap/ic_launcher" }
         },
         apns: {
           payload: { aps: { sound: "default" } }
@@ -279,7 +286,7 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
       };
 
       try {
-        await admin.messaging().sendEachForMulticast({
+        await getMessaging().sendEachForMulticast({
           tokens: uniqueTokens,
           ...customerPayload
         });
@@ -308,7 +315,7 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
   // Fetch real store name if possible
   if (afterData.storeId) {
     try {
-      const storeSnap = await admin.firestore().collection("stores").doc(afterData.storeId).get();
+      const storeSnap = await getFirestore().collection("stores").doc(afterData.storeId).get();
       if (storeSnap.exists && storeSnap.data().storeName) {
         storeName = storeSnap.data().storeName;
       }
@@ -358,17 +365,17 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
     type: "order_update",
     orderId: afterData.orderId,
     isUnread: true,
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdAt: FieldValue.serverTimestamp(),
   };
 
   try {
-    await admin.firestore().collection("customers").doc(customerId).collection("notifications").add(notificationData);
+    await getFirestore().collection("customers").doc(customerId).collection("notifications").add(notificationData);
   } catch (error) {
     console.error("Error saving notification to DB:", error);
   }
 
   // 2. Send push notification if token exists
-  const customerSnap = await admin.firestore().collection("customers").doc(customerId).get();
+  const customerSnap = await getFirestore().collection("customers").doc(customerId).get();
 
   const tokens = [];
   if (customerSnap.exists) {
@@ -394,7 +401,8 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
       priority: "high",
       notification: {
         sound: "default",
-        channelId: "high_importance_channel"
+        channelId: "high_importance_channel",
+        icon: "@mipmap/ic_launcher"
       }
     },
     apns: {
@@ -407,7 +415,7 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
   };
 
   try {
-    await admin.messaging().sendEachForMulticast({
+    await getMessaging().sendEachForMulticast({
       tokens: uniqueTokens,
       ...payload
     });
@@ -420,10 +428,10 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
     const storeId = afterData.storeId;
     if (storeId) {
       try {
-        const storeSnap = await admin.firestore().collection("stores").doc(storeId).get();
+        const storeSnap = await getFirestore().collection("stores").doc(storeId).get();
         if (storeSnap.exists) {
           const ownerId = storeSnap.data().ownerId;
-          const userSnap = await admin.firestore().collection("users").doc(ownerId).get();
+          const userSnap = await getFirestore().collection("users").doc(ownerId).get();
 
           const tokens = [];
           if (userSnap.exists) {
@@ -440,17 +448,17 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
             type: "alert",
             relatedId: afterData.orderId,
             isRead: false,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: FieldValue.serverTimestamp(),
           };
 
-          await admin.firestore().collection("notifications").add(vendorNotification);
+          await getFirestore().collection("notifications").add(vendorNotification);
 
           if (uniqueTokens.length > 0) {
-            await admin.messaging().sendEachForMulticast({
+            await getMessaging().sendEachForMulticast({
               tokens: uniqueTokens,
               notification: { title: vendorNotification.title, body: vendorNotification.message },
               data: { orderId: afterData.orderId, type: "order_cancelled", click_action: "FLUTTER_NOTIFICATION_CLICK" },
-              android: { priority: "high", notification: { sound: "default", channelId: "high_importance_channel" } },
+              android: { priority: "high", notification: { sound: "default", channelId: "high_importance_channel", icon: "@mipmap/ic_launcher" } },
               apns: { payload: { aps: { sound: "default" } } }
             });
           }
@@ -465,9 +473,9 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
 });
 
 exports.scheduledSLACheck = onSchedule("every 15 minutes", async (event) => {
-  const now = admin.firestore.Timestamp.now();
+  const now = Timestamp.now();
 
-  const snapshot = await admin.firestore().collection("orders")
+  const snapshot = await getFirestore().collection("orders")
     .where("orderStatus", "==", "New")
     .where("expiresAt", "<", now)
     .get();
@@ -476,7 +484,7 @@ exports.scheduledSLACheck = onSchedule("every 15 minutes", async (event) => {
     return null;
   }
 
-  const batch = admin.firestore().batch();
+  const batch = getFirestore().batch();
   snapshot.docs.forEach(doc => {
     const data = doc.data();
     const timeline = data.timeline || [];
@@ -502,10 +510,10 @@ exports.scheduledSLACheck = onSchedule("every 15 minutes", async (event) => {
 });
 
 exports.autoMarkDelivered = onSchedule("every 12 hours", async (event) => {
-  const now = admin.firestore.Timestamp.now();
+  const now = Timestamp.now();
 
   // Find all orders that are currently "Shipped"
-  const snapshot = await admin.firestore().collection("orders")
+  const snapshot = await getFirestore().collection("orders")
     .where("orderStatus", "==", "Shipped")
     .get();
 
@@ -513,7 +521,7 @@ exports.autoMarkDelivered = onSchedule("every 12 hours", async (event) => {
     return null;
   }
 
-  const batch = admin.firestore().batch();
+  const batch = getFirestore().batch();
   let count = 0;
 
   snapshot.docs.forEach(doc => {
@@ -553,8 +561,8 @@ exports.autoMarkDelivered = onSchedule("every 12 hours", async (event) => {
 });
 
 exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
-  const db = admin.firestore();
-  const now = admin.firestore.Timestamp.now();
+  const db = getFirestore();
+  const now = Timestamp.now();
   const nowMs = now.toDate().getTime();
 
   let count = 0;
@@ -588,7 +596,7 @@ exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
         type: "alert",
         relatedId: order.orderId,
         isRead: false,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
       });
 
       const userSnap = await db.collection("users").doc(ownerId).get();
@@ -601,11 +609,11 @@ exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
       const uniqueTokens = [...new Set(tokens)];
 
       if (uniqueTokens.length > 0) {
-        await admin.messaging().sendEachForMulticast({
+        await getMessaging().sendEachForMulticast({
           tokens: uniqueTokens,
           notification: { title: title, body: body },
           data: { orderId: order.orderId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
-          android: { priority: "high" }
+          android: { priority: "high", notification: { icon: "@mipmap/ic_launcher" } }
         }).catch(e => console.error(e));
       }
       count++;
@@ -641,7 +649,7 @@ exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
         type: "alert",
         relatedId: order.orderId,
         isRead: false,
-        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: FieldValue.serverTimestamp(),
       });
 
       const userSnap = await db.collection("users").doc(ownerId).get();
@@ -654,11 +662,11 @@ exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
       const uniqueTokens = [...new Set(tokens)];
 
       if (uniqueTokens.length > 0) {
-        await admin.messaging().sendEachForMulticast({
+        await getMessaging().sendEachForMulticast({
           tokens: uniqueTokens,
           notification: { title: title, body: body },
           data: { orderId: order.orderId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
-          android: { priority: "high" }
+          android: { priority: "high", notification: { icon: "@mipmap/ic_launcher" } }
         }).catch(e => console.error(e));
       }
       count++;
@@ -684,11 +692,11 @@ exports.updateStoreRating = onDocumentCreated('reviews/{reviewId}', async (event
     return null;
   }
 
-  const storeRef = admin.firestore().collection('stores').doc(storeId);
+  const storeRef = getFirestore().collection('stores').doc(storeId);
 
   try {
     // We use a Firestore Transaction to ensure data consistency
-    await admin.firestore().runTransaction(async (transaction) => {
+    await getFirestore().runTransaction(async (transaction) => {
       const storeDoc = await transaction.get(storeRef);
 
       if (!storeDoc.exists) {

@@ -20,19 +20,20 @@ class FadeSlideAnimation extends StatefulWidget {
   State<FadeSlideAnimation> createState() => _FadeSlideAnimationState();
 }
 
-class _FadeSlideAnimationState extends State<FadeSlideAnimation> with SingleTickerProviderStateMixin {
+class _FadeSlideAnimationState extends State<FadeSlideAnimation>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
+    _controller = AnimationController(vsync: this, duration: widget.duration);
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
     );
-    
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
 
     Future.delayed(widget.delay * widget.index, () {
       if (mounted) {
@@ -54,10 +55,7 @@ class _FadeSlideAnimationState extends State<FadeSlideAnimation> with SingleTick
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(0, widget.yOffset * (1 - _animation.value)),
-          child: Opacity(
-            opacity: _animation.value,
-            child: child,
-          ),
+          child: Opacity(opacity: _animation.value, child: child),
         );
       },
       child: widget.child,

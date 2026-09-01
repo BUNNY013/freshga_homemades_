@@ -15,11 +15,12 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController phoneController = TextEditingController();
   final FocusNode phoneFocusNode = FocusNode();
   bool isLoading = false;
-  
+
   late AnimationController _animController;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _fadeAnimation;
@@ -31,14 +32,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
-    );
-    
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animController, curve: Curves.easeIn),
-    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic),
+        );
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeIn));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animController.forward();
@@ -56,7 +59,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   void sendOTP() async {
     if (phoneController.text.trim().length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid 10-digit phone number')),
+        const SnackBar(
+          content: Text('Please enter a valid 10-digit phone number'),
+        ),
       );
       return;
     }
@@ -104,225 +109,264 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       resizeToAvoidBottomInset: true,
       body: Stack(
-          children: [
-            // Homemade Background Image
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: screenHeight,
-              child: Image.asset(
-                'assets/images/login_bg_v3.png',
-                fit: BoxFit.cover,
-              ),
+        children: [
+          // Homemade Background Image
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: screenHeight,
+            child: Image.asset(
+              'assets/images/login_bg_v3.png',
+              fit: BoxFit.cover,
             ),
-            
-            // Content
-            Positioned.fill(
-              child: SingleChildScrollView(
-                physics: const ClampingScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: screenHeight - MediaQuery.of(context).viewInsets.bottom),
-                  child: IntrinsicHeight(
-                    child: SafeArea(
-                      child: Column(
-                        children: [
-                          const Spacer(),
-                  // Login Card
-                  SlideTransition(
-                    position: _slideAnimation,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(32),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Welcome to",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w600,
+          ),
+
+          // Content
+          Positioned.fill(
+            child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight:
+                      screenHeight - MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: IntrinsicHeight(
+                  child: SafeArea(
+                    child: Column(
+                      children: [
+                        const Spacer(),
+                        // Login Card
+                        SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 32,
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              "FreshGa",
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.primaryGreen,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              "Enter your phone number to discover authentic homemade creators.",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textSecondary,
-                                height: 1.5,
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-                            
-                            // Input Field
-                            Container(
+                              padding: const EdgeInsets.all(32),
                               decoration: BoxDecoration(
-                                color: AppColors.surfaceBeige,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: AppColors.textSecondary.withOpacity(0.1)),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(32),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 30,
+                                    offset: const Offset(0, 15),
+                                  ),
+                                ],
                               ),
-                              child: Row(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  const Text(
+                                    "Welcome to",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    "FreshGa",
+                                    style: TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppColors.primaryGreen,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    "Enter your phone number to discover authentic homemade creators.",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.textSecondary,
+                                      height: 1.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 32),
+
+                                  // Input Field
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: AppColors.surfaceBeige,
                                       borderRadius: BorderRadius.circular(16),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.02),
-                                          blurRadius: 10,
+                                      border: Border.all(
+                                        color: AppColors.textSecondary
+                                            .withOpacity(0.1),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 16,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(
+                                                  0.02,
+                                                ),
+                                                blurRadius: 10,
+                                              ),
+                                            ],
+                                          ),
+                                          child: const Text(
+                                            '+91',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColors.textPrimary,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: phoneController,
+                                            focusNode: phoneFocusNode,
+                                            keyboardType: TextInputType.phone,
+                                            maxLength: 10,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppColors.textPrimary,
+                                              letterSpacing: 2.0,
+                                            ),
+                                            decoration: const InputDecoration(
+                                              hintText: "00000 00000",
+                                              hintStyle: TextStyle(
+                                                color: AppColors.textSecondary,
+                                                fontWeight: FontWeight.normal,
+                                                letterSpacing: 1.0,
+                                              ),
+                                              counterText: "",
+                                              border: InputBorder.none,
+                                              isDense: true,
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     ),
-                                    child: const Text(
-                                      '+91',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPrimary,
+                                  ),
+                                  const SizedBox(height: 32),
+
+                                  // Button
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 56,
+                                    child: ElevatedButton(
+                                      onPressed: isLoading ? null : sendOTP,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primaryGreen,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            16,
+                                          ),
+                                        ),
+                                        elevation: 0,
                                       ),
+                                      child: isLoading
+                                          ? const SizedBox(
+                                              height: 24,
+                                              width: 24,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : const Text(
+                                              "Send OTP",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: phoneController,
-                                      focusNode: phoneFocusNode,
-                                      keyboardType: TextInputType.phone,
-                                      maxLength: 10,
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.textPrimary,
-                                        letterSpacing: 2.0,
-                                      ),
-                                      decoration: const InputDecoration(
-                                        hintText: "00000 00000",
-                                        hintStyle: TextStyle(
+                                  const SizedBox(height: 32),
+                                  // Terms
+                                  Center(
+                                    child: RichText(
+                                      textAlign: TextAlign.center,
+                                      text: TextSpan(
+                                        style: const TextStyle(
                                           color: AppColors.textSecondary,
-                                          fontWeight: FontWeight.normal,
-                                          letterSpacing: 1.0,
+                                          fontSize: 12,
+                                          height: 1.5,
                                         ),
-                                        counterText: "",
-                                        border: InputBorder.none,
-                                        isDense: true,
+                                        children: [
+                                          const TextSpan(
+                                            text:
+                                                'By continuing, you agree to our\n',
+                                          ),
+                                          TextSpan(
+                                            text: 'Terms of Service',
+                                            style: const TextStyle(
+                                              color: AppColors.primaryGreen,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                launchUrl(
+                                                  Uri.parse(
+                                                    'https://sites.google.com/view/freshaga/home',
+                                                  ),
+                                                );
+                                              },
+                                          ),
+                                          const TextSpan(text: ' and '),
+                                          TextSpan(
+                                            text: 'Privacy Policy',
+                                            style: const TextStyle(
+                                              color: AppColors.primaryGreen,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                launchUrl(
+                                                  Uri.parse(
+                                                    'https://sites.google.com/view/freshaga/home',
+                                                  ),
+                                                );
+                                              },
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 32),
-                            
-                            // Button
-                            SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: isLoading ? null : sendOTP,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryGreen,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                child: isLoading
-                                    ? const SizedBox(
-                                        height: 24,
-                                        width: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Text(
-                                        "Send OTP",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(height: 32),
-                            // Terms
-                            Center(
-                              child: RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(
-                                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.5),
-                                  children: [
-                                    const TextSpan(text: 'By continuing, you agree to our\n'),
-                                    TextSpan(
-                                      text: 'Terms of Service',
-                                      style: const TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.w600),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          launchUrl(Uri.parse('https://sites.google.com/view/freshaga/home'));
-                                        },
-                                    ),
-                                    const TextSpan(text: ' and '),
-                                    TextSpan(
-                                      text: 'Privacy Policy',
-                                      style: const TextStyle(color: AppColors.primaryGreen, fontWeight: FontWeight.w600),
-                                      recognizer: TapGestureRecognizer()
-                                        ..onTap = () {
-                                          launchUrl(Uri.parse('https://sites.google.com/view/freshaga/home'));
-                                        },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                        ],
-                      ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
   }
 }

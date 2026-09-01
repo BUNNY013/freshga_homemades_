@@ -29,34 +29,41 @@ class HomeHeader extends StatelessWidget {
             },
             child: Row(
               children: [
-                const Icon(Icons.location_on, color: AppColors.primaryGreen, size: 24),
+                const Icon(
+                  Icons.location_on,
+                  color: AppColors.primaryGreen,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Consumer<CustomerProvider>(
                     builder: (context, customerProvider, child) {
                       final customer = customerProvider.currentCustomer;
-                      final city = customer?.city ?? 'home.select_location'.tr();
+                      final city =
+                          customer?.city ?? 'home.select_location'.tr();
                       final state = customer?.state ?? '';
-                      final displayText = state.isNotEmpty ? '$city, $state' : city;
+                      final displayText = state.isNotEmpty
+                          ? '$city, $state'
+                          : city;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             "home.delivery_to".tr(),
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: 12,
-                              color: AppColors.textSecondary,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
                           ),
                           Row(
                             children: [
                               Flexible(
                                 child: Text(
                                   displayText,
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    fontSize: 14,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(fontSize: 14),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -65,7 +72,7 @@ class HomeHeader extends StatelessWidget {
                           ),
                         ],
                       );
-                    }
+                    },
                   ),
                 ),
               ],
@@ -77,39 +84,54 @@ class HomeHeader extends StatelessWidget {
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseAuth.instance.currentUser != null
                   ? FirebaseFirestore.instance
-                      .collection('customers')
-                      .doc(FirebaseAuth.instance.currentUser!.uid)
-                      .collection('notifications')
-                      .where('isUnread', isEqualTo: true)
-                      .snapshots()
+                        .collection('customers')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .collection('notifications')
+                        .where('isUnread', isEqualTo: true)
+                        .snapshots()
                   : const Stream.empty(),
               builder: (context, snapshot) {
-                int unreadCount = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                int unreadCount = snapshot.hasData
+                    ? snapshot.data!.docs.length
+                    : 0;
                 return IconButton(
                   icon: Badge(
                     isLabelVisible: unreadCount > 0,
                     label: Text(
                       unreadCount > 99 ? '99+' : unreadCount.toString(),
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     backgroundColor: AppColors.primaryGreen,
-                    child: const Icon(Icons.notifications_none_rounded, color: AppColors.textPrimary),
+                    child: const Icon(
+                      Icons.notifications_none_rounded,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationScreen(),
+                      ),
                     );
                   },
                 );
-              }
+              },
             ),
             IconButton(
-              icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textPrimary),
+              icon: const Icon(
+                Icons.favorite_border_rounded,
+                color: AppColors.textPrimary,
+              ),
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const LikedProductsScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const LikedProductsScreen(),
+                  ),
                 );
               },
             ),

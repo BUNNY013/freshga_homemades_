@@ -9,14 +9,15 @@ class FollowingProvider with ChangeNotifier {
   List<String> _followingStoreIds = [];
   List<Map<String, dynamic>> _followingStoresData = [];
   bool _isLoadingIds = true;
-  
+
   List<StoreUpdateModel> _feed = [];
   bool _isLoading = false;
   bool _isPaginating = false;
   bool _hasMore = true;
   DocumentSnapshot? _lastDoc;
 
-  String _selectedFilter = 'all'; // all, new_launch, restock, offer, community_update
+  String _selectedFilter =
+      'all'; // all, new_launch, restock, offer, community_update
 
   // Getters
   List<String> get followingStoreIds => _followingStoreIds;
@@ -37,7 +38,7 @@ class FollowingProvider with ChangeNotifier {
 
     _followingStoreIds = await _service.getFollowingStoreIds();
     _followingStoresData = await _service.getFollowingStoresData();
-    
+
     _isLoadingIds = false;
     notifyListeners();
 
@@ -46,9 +47,12 @@ class FollowingProvider with ChangeNotifier {
     }
   }
 
-  Future<void> toggleFollow(String storeId, Map<String, dynamic> storeData) async {
+  Future<void> toggleFollow(
+    String storeId,
+    Map<String, dynamic> storeData,
+  ) async {
     final currentlyFollowing = isFollowing(storeId);
-    
+
     // Optimistic UI Update
     if (currentlyFollowing) {
       _followingStoreIds.remove(storeId);
@@ -65,9 +69,9 @@ class FollowingProvider with ChangeNotifier {
 
     try {
       await _service.toggleFollowStore(
-        storeId, 
-        storeData: storeData, 
-        isCurrentlyFollowing: currentlyFollowing
+        storeId,
+        storeData: storeData,
+        isCurrentlyFollowing: currentlyFollowing,
       );
       // Reload feed if follow state changes to keep it fresh
       fetchFeed();
@@ -120,15 +124,16 @@ class FollowingProvider with ChangeNotifier {
 
       if (newItems.isNotEmpty) {
         _feed.addAll(newItems);
-        // The service doesn't easily expose the last doc without modifying return type, 
+        // The service doesn't easily expose the last doc without modifying return type,
         // so for simplicity in the provider we fetch query again or we modify service.
-        // Wait, the previous implementation did the query here to get _lastDoc. 
-        // I will keep the raw query in the provider for pagination state to work smoothly, 
+        // Wait, the previous implementation did the query here to get _lastDoc.
+        // I will keep the raw query in the provider for pagination state to work smoothly,
         // or modify the service to return a tuple. Let's do the query here to get _lastDoc easily.
       }
-      
+
       // We will do the query here to maintain _lastDoc
-      Query query = FirebaseFirestore.instance.collection('store_updates')
+      Query query = FirebaseFirestore.instance
+          .collection('store_updates')
           .where('storeId', whereIn: _followingStoreIds.take(10).toList())
           .where('isActive', isEqualTo: true);
 
@@ -146,10 +151,15 @@ class FollowingProvider with ChangeNotifier {
 
       if (snapshot.docs.isNotEmpty) {
         _lastDoc = snapshot.docs.last;
-        final fetchedItems = snapshot.docs.map((doc) => 
-          StoreUpdateModel.fromMap(doc.data() as Map<String, dynamic>, doc.id)
-        ).toList();
-        
+        final fetchedItems = snapshot.docs
+            .map(
+              (doc) => StoreUpdateModel.fromMap(
+                doc.data() as Map<String, dynamic>,
+                doc.id,
+              ),
+            )
+            .toList();
+
         if (refresh) {
           _feed = fetchedItems;
         } else {
@@ -160,7 +170,7 @@ class FollowingProvider with ChangeNotifier {
             }
           }
         }
-        
+
         if (snapshot.docs.length < 10) {
           _hasMore = false;
         }
@@ -180,11 +190,11 @@ class FollowingProvider with ChangeNotifier {
   Future<void> mockFollowStoresForTesting(List<String> storeIds) async {
     _followingStoreIds = storeIds;
     // mock some dummy data for horizontal list
-    _followingStoresData = storeIds.map((id) => {
-      'storeId': id,
-      'storeName': 'Mock Store',
-      'storeLogo': ''
-    }).toList();
+    _followingStoresData = storeIds
+        .map(
+          (id) => {'storeId': id, 'storeName': 'Mock Store', 'storeLogo': ''},
+        )
+        .toList();
     await fetchFeed();
   }
 }

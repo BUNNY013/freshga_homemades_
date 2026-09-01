@@ -8,7 +8,11 @@ class FeaturedStoresSection extends StatelessWidget {
   final List<StoreModel> stores;
   final String title;
 
-  const FeaturedStoresSection({super.key, required this.stores, required this.title});
+  const FeaturedStoresSection({
+    super.key,
+    required this.stores,
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,18 +22,15 @@ class FeaturedStoresSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SectionTitle(
-          title: title, 
+          title: title,
           onSeeAll: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => StoreListScreen(
-                  title: title,
-                  stores: stores,
-                ),
+                builder: (_) => StoreListScreen(title: title, stores: stores),
               ),
             );
-          }
+          },
         ),
         const SizedBox(height: 12),
         SizedBox(

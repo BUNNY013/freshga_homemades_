@@ -27,8 +27,8 @@ class _ProductImageSectionState extends State<ProductImageSection> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> displayImages = widget.product.images.isNotEmpty 
-        ? widget.product.images 
+    List<String> displayImages = widget.product.images.isNotEmpty
+        ? widget.product.images
         : [widget.product.imageUrl];
 
     return Stack(
@@ -50,12 +50,16 @@ class _ProductImageSectionState extends State<ProductImageSection> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => ProductImagesFullscreenScreen(product: widget.product),
+                      builder: (_) => ProductImagesFullscreenScreen(
+                        product: widget.product,
+                      ),
                     ),
                   );
                 },
                 child: Hero(
-                  tag: index == 0 ? 'product_image_${widget.product.id}' : 'product_image_${widget.product.id}_$index',
+                  tag: index == 0
+                      ? 'product_image_${widget.product.id}'
+                      : 'product_image_${widget.product.id}_$index',
                   child: Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
@@ -65,10 +69,15 @@ class _ProductImageSectionState extends State<ProductImageSection> {
                     child: CachedNetworkImage(
                       imageUrl: displayImages[index],
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(color: Colors.grey.shade50),
+                      placeholder: (context, url) =>
+                          Container(color: Colors.grey.shade50),
                       errorWidget: (context, url, error) => Container(
                         color: Colors.grey.shade50,
-                        child: const Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                        child: const Icon(
+                          Icons.broken_image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
                       ),
                     ),
                   ),
@@ -77,7 +86,7 @@ class _ProductImageSectionState extends State<ProductImageSection> {
             },
           ),
         ),
-        
+
         // Dark Warm Gradient Overlay
         Positioned(
           top: 0,
@@ -89,10 +98,7 @@ class _ProductImageSectionState extends State<ProductImageSection> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.5),
-                  Colors.transparent,
-                ],
+                colors: [Colors.black.withOpacity(0.5), Colors.transparent],
               ),
             ),
           ),
@@ -113,14 +119,15 @@ class _ProductImageSectionState extends State<ProductImageSection> {
                   width: _currentIndex == index ? 8 : 6,
                   height: _currentIndex == index ? 8 : 6,
                   decoration: BoxDecoration(
-                    color: _currentIndex == index ? AppColors.primaryGreen : Colors.white.withOpacity(0.5),
+                    color: _currentIndex == index
+                        ? AppColors.primaryGreen
+                        : Colors.white.withOpacity(0.5),
                     shape: BoxShape.circle,
                   ),
                 );
               }),
             ),
           ),
-
       ],
     );
   }

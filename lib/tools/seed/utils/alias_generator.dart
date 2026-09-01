@@ -1,6 +1,11 @@
 class AliasGenerator {
   static final Map<String, List<String>> _aliasMap = {
-    'mango pickles': ['avakaya', 'aam achar', 'mango achar', 'mavidikaya pachadi'],
+    'mango pickles': [
+      'avakaya',
+      'aam achar',
+      'mango achar',
+      'mavidikaya pachadi',
+    ],
     'lemon pickles': ['nimbu achar', 'nimmakaya pachadi'],
     'garlic pickles': ['lahsun achar', 'vellulli pachadi'],
     'tomato pickles': ['tomato nilva pachadi', 'tamatar achar'],
@@ -26,14 +31,14 @@ class AliasGenerator {
     if (_aliasMap.containsKey(lowerName)) {
       return _aliasMap[lowerName]!;
     }
-    
+
     // Check for partial matches
     for (final entry in _aliasMap.entries) {
       if (lowerName.contains(entry.key)) {
         return entry.value;
       }
     }
-    
+
     return [];
   }
 }

@@ -42,17 +42,34 @@ class CategoryModel {
       categoryId: json['categoryId'] ?? docId ?? '',
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
-      image: (json['image'] is Map) ? Map<String, dynamic>.from(json['image'] as Map) : null,
-      banner: (json['banner'] is Map) ? Map<String, dynamic>.from(json['banner'] as Map) : null,
+      image: (json['image'] is Map)
+          ? Map<String, dynamic>.from(json['image'] as Map)
+          : null,
+      banner: (json['banner'] is Map)
+          ? Map<String, dynamic>.from(json['banner'] as Map)
+          : null,
       itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
-      status: json['status']?.toString() ?? (json['isActive'] == false ? 'hidden' : 'active'),
+      status:
+          json['status']?.toString() ??
+          (json['isActive'] == false ? 'hidden' : 'active'),
       isFeatured: json['isFeatured'] == true,
-      displayIndex: (json['displayIndex'] as num?)?.toInt() ?? (json['sortOrder'] as num?)?.toInt() ?? (json['order'] as num?)?.toInt() ?? 0,
-      description: json['description']?.toString() ?? json['tagline']?.toString() ?? '',
-      searchKeywords: json['searchKeywords'] is List ? List<String>.from(json['searchKeywords']) : [],
+      displayIndex:
+          (json['displayIndex'] as num?)?.toInt() ??
+          (json['sortOrder'] as num?)?.toInt() ??
+          (json['order'] as num?)?.toInt() ??
+          0,
+      description:
+          json['description']?.toString() ?? json['tagline']?.toString() ?? '',
+      searchKeywords: json['searchKeywords'] is List
+          ? List<String>.from(json['searchKeywords'])
+          : [],
       createdBySeeder: json['createdBySeeder'] == true,
-      analytics: (json['analytics'] is Map) ? Map<String, dynamic>.from(json['analytics'] as Map) : null,
-      metadata: (json['metadata'] is Map) ? Map<String, dynamic>.from(json['metadata'] as Map) : null,
+      analytics: (json['analytics'] is Map)
+          ? Map<String, dynamic>.from(json['analytics'] as Map)
+          : null,
+      metadata: (json['metadata'] is Map)
+          ? Map<String, dynamic>.from(json['metadata'] as Map)
+          : null,
     );
   }
 

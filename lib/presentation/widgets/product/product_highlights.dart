@@ -22,7 +22,9 @@ class ProductHighlights extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.primaryGreen.withOpacity(0.05),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.primaryGreen.withOpacity(0.2)),
+              border: Border.all(
+                color: AppColors.primaryGreen.withOpacity(0.2),
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

@@ -78,7 +78,10 @@ class FollowingStoresSection extends StatelessWidget {
     );
   }
 
-  Widget _buildFollowingStore(BuildContext context, Map<String, dynamic> storeData) {
+  Widget _buildFollowingStore(
+    BuildContext context,
+    Map<String, dynamic> storeData,
+  ) {
     final String storeId = storeData['storeId'] ?? '';
     final String storeName = storeData['storeName'] ?? 'Store';
     final String storeLogo = storeData['storeLogo'] ?? '';
@@ -87,9 +90,7 @@ class FollowingStoresSection extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => StoreScreen(storeId: storeId),
-          ),
+          MaterialPageRoute(builder: (_) => StoreScreen(storeId: storeId)),
         );
       },
       child: Container(
@@ -110,8 +111,10 @@ class FollowingStoresSection extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: storeLogo,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(color: Colors.grey.shade200),
-                        errorWidget: (context, url, error) => const Icon(Icons.store, color: Colors.grey),
+                        placeholder: (context, url) =>
+                            Container(color: Colors.grey.shade200),
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.store, color: Colors.grey),
                       )
                     : const Icon(Icons.store, size: 30, color: Colors.grey),
               ),

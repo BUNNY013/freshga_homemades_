@@ -45,38 +45,47 @@ class WishlistProvider with ChangeNotifier {
     notifyListeners();
 
     // 1. Immediate one-time fetch to prevent infinite loading spinners on 0 items
-    _service.getLikedProductsOnce().then((products) {
-      if (_isLoading) {
+    _service
+        .getLikedProductsOnce()
+        .then((products) {
+          if (_isLoading) {
+            _likedProducts = products;
+            _likedProductIds = products.map((p) => p.id).toSet();
+            _isLoading = false;
+            notifyListeners();
+          }
+        })
+        .catchError((e) {
+          if (_isLoading) {
+            _isLoading = false;
+            notifyListeners();
+          }
+        });
+
+    // 2. Real-time subscriptions
+    _idsSub = _service.getLikedProductIdsStream().listen(
+      (ids) {
+        _likedProductIds = ids;
+        notifyListeners();
+      },
+      onError: (e) {
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
+
+    _productsSub = _service.getLikedProductsStream().listen(
+      (products) {
         _likedProducts = products;
         _likedProductIds = products.map((p) => p.id).toSet();
         _isLoading = false;
         notifyListeners();
-      }
-    }).catchError((e) {
-      if (_isLoading) {
+      },
+      onError: (e) {
         _isLoading = false;
         notifyListeners();
-      }
-    });
-
-    // 2. Real-time subscriptions
-    _idsSub = _service.getLikedProductIdsStream().listen((ids) {
-      _likedProductIds = ids;
-      notifyListeners();
-    }, onError: (e) {
-      _isLoading = false;
-      notifyListeners();
-    });
-
-    _productsSub = _service.getLikedProductsStream().listen((products) {
-      _likedProducts = products;
-      _likedProductIds = products.map((p) => p.id).toSet();
-      _isLoading = false;
-      notifyListeners();
-    }, onError: (e) {
-      _isLoading = false;
-      notifyListeners();
-    });
+      },
+    );
   }
 
   bool isLiked(String productId) {
@@ -127,7 +136,10 @@ class WishlistProvider with ChangeNotifier {
   }
 
   Future<void> removeLike(String productId) async {
-    final removedProduct = _likedProducts.cast<ProductModel?>().firstWhere((p) => p?.id == productId, orElse: () => null);
+    final removedProduct = _likedProducts.cast<ProductModel?>().firstWhere(
+      (p) => p?.id == productId,
+      orElse: () => null,
+    );
     _likedProductIds.remove(productId);
     _likedProducts.removeWhere((p) => p.id == productId);
     notifyListeners();

@@ -13,7 +13,10 @@ class AddressBookScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Saved Addresses', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text(
+          'Saved Addresses',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
         backgroundColor: Colors.white,
         elevation: 0.5,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -36,18 +39,30 @@ class AddressBookScreen extends StatelessWidget {
                         color: AppColors.primaryGreen.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.location_on_outlined, size: 56, color: AppColors.primaryGreen),
+                      child: const Icon(
+                        Icons.location_on_outlined,
+                        size: 56,
+                        color: AppColors.primaryGreen,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     const Text(
                       'No Saved Addresses Yet',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
                       'Save your Home, Work, and other delivery addresses for faster checkout.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
                     ),
                   ],
                 ),
@@ -70,19 +85,28 @@ class AddressBookScreen extends StatelessWidget {
         onPressed: () => _showAddEditAddressModal(context, null),
         backgroundColor: AppColors.primaryGreen,
         icon: const Icon(Icons.add_location_alt_outlined, color: Colors.white),
-        label: const Text('Add New Address', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        label: const Text(
+          'Add New Address',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
       ),
     );
   }
 
-  Widget _buildAddressCard(BuildContext context, AddressModel address, CustomerProvider provider) {
+  Widget _buildAddressCard(
+    BuildContext context,
+    AddressModel address,
+    CustomerProvider provider,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: address.isDefault ? AppColors.primaryGreen : Colors.grey.shade200,
+          color: address.isDefault
+              ? AppColors.primaryGreen
+              : Colors.grey.shade200,
           width: address.isDefault ? 1.5 : 1,
         ),
         boxShadow: [
@@ -97,9 +121,14 @@ class AddressBookScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            address.addressType == 'Home' ? Icons.home_outlined : 
-            address.addressType == 'Work' ? Icons.work_outline : Icons.location_on_outlined,
-            color: address.isDefault ? AppColors.primaryGreen : Colors.grey.shade600,
+            address.addressType == 'Home'
+                ? Icons.home_outlined
+                : address.addressType == 'Work'
+                ? Icons.work_outline
+                : Icons.location_on_outlined,
+            color: address.isDefault
+                ? AppColors.primaryGreen
+                : Colors.grey.shade600,
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -108,19 +137,41 @@ class AddressBookScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(address.addressType, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(
+                      address.addressType,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     if (address.isDefault)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(color: AppColors.primaryGreen, borderRadius: BorderRadius.circular(4)),
-                        child: const Text("DEFAULT", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGreen,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          "DEFAULT",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         address.name,
-                        style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 14,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -134,7 +185,10 @@ class AddressBookScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   address.phoneNumber,
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -142,7 +196,11 @@ class AddressBookScreen extends StatelessWidget {
           const SizedBox(width: 8),
           PopupMenuButton<String>(
             padding: EdgeInsets.zero,
-            icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary, size: 20),
+            icon: const Icon(
+              Icons.more_vert_rounded,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
             onSelected: (value) async {
               if (value == 'edit') {
                 _showAddEditAddressModal(context, address);
@@ -158,16 +216,26 @@ class AddressBookScreen extends StatelessWidget {
                   value: 'default',
                   child: Row(
                     children: [
-                      Icon(Icons.check_circle_outline, color: AppColors.primaryGreen, size: 20),
+                      Icon(
+                        Icons.check_circle_outline,
+                        color: AppColors.primaryGreen,
+                        size: 20,
+                      ),
                       SizedBox(width: 8),
-                      Text('Set as Default', style: TextStyle(fontWeight: FontWeight.w600)),
+                      Text(
+                        'Set as Default',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
                     ],
                   ),
                 ),
               const PopupMenuItem(value: 'edit', child: Text('Edit Address')),
               const PopupMenuItem(
                 value: 'delete',
-                child: Text('Delete Address', style: TextStyle(color: Colors.red)),
+                child: Text(
+                  'Delete Address',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
             ],
           ),

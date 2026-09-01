@@ -7,7 +7,8 @@ class StoreLoadingShimmer extends StatefulWidget {
   State<StoreLoadingShimmer> createState() => _StoreLoadingShimmerState();
 }
 
-class _StoreLoadingShimmerState extends State<StoreLoadingShimmer> with SingleTickerProviderStateMixin {
+class _StoreLoadingShimmerState extends State<StoreLoadingShimmer>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Color?> _colorAnimation;
 
@@ -43,11 +44,8 @@ class _StoreLoadingShimmerState extends State<StoreLoadingShimmer> with SingleTi
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Banner Shimmer
-                Container(
-                  height: 220,
-                  color: _colorAnimation.value,
-                ),
-                
+                Container(height: 220, color: _colorAnimation.value),
+
                 // Info Section
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -67,16 +65,21 @@ class _StoreLoadingShimmerState extends State<StoreLoadingShimmer> with SingleTi
                           ),
                         ),
                       ),
-                      
+
                       // Title & Follow
                       Transform.translate(
                         offset: const Offset(0, -10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(width: 150, height: 24, color: _colorAnimation.value),
                             Container(
-                              width: 80, height: 36,
+                              width: 150,
+                              height: 24,
+                              color: _colorAnimation.value,
+                            ),
+                            Container(
+                              width: 80,
+                              height: 36,
                               decoration: BoxDecoration(
                                 color: _colorAnimation.value,
                                 borderRadius: BorderRadius.circular(20),
@@ -85,33 +88,50 @@ class _StoreLoadingShimmerState extends State<StoreLoadingShimmer> with SingleTi
                           ],
                         ),
                       ),
-                      
+
                       // Stats Shimmer
                       const SizedBox(height: 16),
-                      Container(width: double.infinity, height: 16, color: _colorAnimation.value),
+                      Container(
+                        width: double.infinity,
+                        height: 16,
+                        color: _colorAnimation.value,
+                      ),
                       const SizedBox(height: 24),
-                      
+
                       // Tabs Shimmer
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Container(width: 60, height: 20, color: _colorAnimation.value),
-                          Container(width: 60, height: 20, color: _colorAnimation.value),
-                          Container(width: 60, height: 20, color: _colorAnimation.value),
+                          Container(
+                            width: 60,
+                            height: 20,
+                            color: _colorAnimation.value,
+                          ),
+                          Container(
+                            width: 60,
+                            height: 20,
+                            color: _colorAnimation.value,
+                          ),
+                          Container(
+                            width: 60,
+                            height: 20,
+                            color: _colorAnimation.value,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Content Shimmer Grid
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.7,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.7,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
                         itemCount: 4,
                         itemBuilder: (context, index) {
                           return Container(

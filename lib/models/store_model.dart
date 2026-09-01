@@ -26,15 +26,17 @@ class StoreModel {
   final String status; // 'Active', 'Pending', 'Suspended'
   final bool canSellPanIndia;
 
-  bool get isSuspended => status.toLowerCase() == 'suspended' || (!isActive && status.toLowerCase() == 'suspended');
+  bool get isSuspended =>
+      status.toLowerCase() == 'suspended' ||
+      (!isActive && status.toLowerCase() == 'suspended');
 
   final String dispatchTime;
-  
+
   // Tax Info
   final String taxRegistrationType; // 'GSTIN' or 'EnrolmentNumber'
   final String taxNumber;
   final String fssaiNumber;
-  
+
   // Location
   final String businessAddress;
   final String village;
@@ -43,11 +45,11 @@ class StoreModel {
   final String state;
   final String country;
   final String pincode;
-  
+
   // Shipping & Delivery
   final Map<String, dynamic> shippingConfig;
   final List<DeliveryAreaModel> deliveryAreas;
-  
+
   // Dates
   final String createdAt;
 
@@ -128,13 +130,20 @@ class StoreModel {
       country: json['country'] ?? '',
       pincode: json['pincode'] ?? '',
       shippingConfig: json['shippingConfig'] ?? {},
-      deliveryAreas: json['deliveryAreas'] != null && (json['deliveryAreas'] as List).isNotEmpty
-          ? (json['deliveryAreas'] as List).map((e) => DeliveryAreaModel.fromJson(e)).toList() 
-          : DeliveryAreaModel.createDefaultAreas(json['state'] ?? '', json['canSellPanIndia'] ?? false),
-      createdAt: json['createdAt'] != null 
-          ? (json['createdAt'] is Timestamp 
-              ? (json['createdAt'] as Timestamp).toDate().toIso8601String() 
-              : json['createdAt'].toString()) 
+      deliveryAreas:
+          json['deliveryAreas'] != null &&
+              (json['deliveryAreas'] as List).isNotEmpty
+          ? (json['deliveryAreas'] as List)
+                .map((e) => DeliveryAreaModel.fromJson(e))
+                .toList()
+          : DeliveryAreaModel.createDefaultAreas(
+              json['state'] ?? '',
+              json['canSellPanIndia'] ?? false,
+            ),
+      createdAt: json['createdAt'] != null
+          ? (json['createdAt'] is Timestamp
+                ? (json['createdAt'] as Timestamp).toDate().toIso8601String()
+                : json['createdAt'].toString())
           : '',
     );
   }

@@ -47,14 +47,14 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
 
     try {
       final batch = FirebaseFirestore.instance.batch();
-      
+
       // 1. Add reply to subcollection
       final replyRef = FirebaseFirestore.instance
           .collection('support_tickets')
           .doc(widget.ticketId)
           .collection('replies')
           .doc();
-          
+
       batch.set(replyRef, {
         'senderId': customerId,
         'senderType': 'customer',
@@ -63,7 +63,9 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       });
 
       // 2. Update parent ticket timestamp and potentially status if it was waiting
-      final ticketRef = FirebaseFirestore.instance.collection('support_tickets').doc(widget.ticketId);
+      final ticketRef = FirebaseFirestore.instance
+          .collection('support_tickets')
+          .doc(widget.ticketId);
       batch.update(ticketRef, {
         'lastUpdatedAt': FieldValue.serverTimestamp(),
         // Optional: change status to Open if it was waiting for customer
@@ -74,9 +76,9 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
       _messageController.clear();
       _scrollToBottom();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send message: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to send message: $e')));
     } finally {
       if (mounted) setState(() => _isSending = false);
     }
@@ -98,37 +100,49 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
           children: [
             const Text(
               "Ticket Details",
-              style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w800, fontSize: 16),
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
             ),
             Text(
               "ID: ${widget.ticketId.substring(0, 8).toUpperCase()}",
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.normal),
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+              ),
             ),
           ],
         ),
       ),
       body: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance.collection('support_tickets').doc(widget.ticketId).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('support_tickets')
+            .doc(widget.ticketId)
+            .snapshots(),
         builder: (context, ticketSnapshot) {
-          if (ticketSnapshot.hasError) return const Center(child: Text("Error loading ticket"));
-          if (ticketSnapshot.connectionState == ConnectionState.waiting && !ticketSnapshot.hasData) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen));
+          if (ticketSnapshot.hasError)
+            return const Center(child: Text("Error loading ticket"));
+          if (ticketSnapshot.connectionState == ConnectionState.waiting &&
+              !ticketSnapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            );
           }
 
-          final ticketData = ticketSnapshot.data?.data() as Map<String, dynamic>? ?? widget.initialTicketData;
+          final ticketData =
+              ticketSnapshot.data?.data() as Map<String, dynamic>? ??
+              widget.initialTicketData;
           final status = ticketData['status'] ?? 'Open';
           final isClosed = status == 'Resolved' || status == 'Closed';
-          
+
           return Column(
             children: [
               _buildTicketHeader(ticketData),
-              Expanded(
-                child: _buildChatThread(),
-              ),
-              if (isClosed)
-                _buildClosedBanner()
-              else
-                _buildMessageInput(),
+              Expanded(child: _buildChatThread()),
+              if (isClosed) _buildClosedBanner() else _buildMessageInput(),
             ],
           );
         },
@@ -141,7 +155,9 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
     final String status = data['status'] ?? 'Open';
     final String orderId = data['orderId'] ?? '';
     final bool isResolved = status == 'Resolved' || status == 'Closed';
-    final Color statusColor = isResolved ? AppColors.primaryGreen : Colors.orange;
+    final Color statusColor = isResolved
+        ? AppColors.primaryGreen
+        : Colors.orange;
 
     return Container(
       width: double.infinity,
@@ -157,18 +173,29 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
               Expanded(
                 child: Text(
                   topic,
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   status.toUpperCase(),
-                  style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 11),
+                  style: TextStyle(
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                  ),
                 ),
               ),
             ],
@@ -184,9 +211,20 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.receipt_long_outlined, size: 16, color: AppColors.textSecondary),
+                  const Icon(
+                    Icons.receipt_long_outlined,
+                    size: 16,
+                    color: AppColors.textSecondary,
+                  ),
                   const SizedBox(width: 8),
-                  Text("Order ID: $orderId", style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text(
+                    "Order ID: $orderId",
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -205,10 +243,11 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
           .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.hasError) return const Center(child: Text("Failed to load messages"));
-        
+        if (snapshot.hasError)
+          return const Center(child: Text("Failed to load messages"));
+
         List<QueryDocumentSnapshot> docs = snapshot.data?.docs ?? [];
-        
+
         return ListView.builder(
           controller: _scrollController,
           reverse: true, // Show latest at bottom
@@ -217,23 +256,28 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
           itemBuilder: (context, index) {
             if (index == docs.length) {
               // The original ticket message acts as the first message
-              final Timestamp? createdAt = widget.initialTicketData['createdAt'] as Timestamp?;
+              final Timestamp? createdAt =
+                  widget.initialTicketData['createdAt'] as Timestamp?;
               return _buildMessageBubble(
                 message: widget.initialTicketData['message'] ?? '',
                 isCustomer: true,
-                time: createdAt != null ? DateFormat('hh:mm a').format(createdAt.toDate()) : '',
+                time: createdAt != null
+                    ? DateFormat('hh:mm a').format(createdAt.toDate())
+                    : '',
                 isOriginal: true,
               );
             }
-            
+
             final data = docs[index].data() as Map<String, dynamic>;
             final bool isCustomer = data['senderType'] == 'customer';
             final Timestamp? ts = data['timestamp'] as Timestamp?;
-            
+
             return _buildMessageBubble(
               message: data['message'] ?? '',
               isCustomer: isCustomer,
-              time: ts != null ? DateFormat('hh:mm a').format(ts.toDate()) : 'Sending...',
+              time: ts != null
+                  ? DateFormat('hh:mm a').format(ts.toDate())
+                  : 'Sending...',
               isOriginal: false,
             );
           },
@@ -242,36 +286,60 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
     );
   }
 
-  Widget _buildMessageBubble({required String message, required bool isCustomer, required String time, required bool isOriginal}) {
+  Widget _buildMessageBubble({
+    required String message,
+    required bool isCustomer,
+    required String time,
+    required bool isOriginal,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
-        crossAxisAlignment: isCustomer ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isCustomer
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: isCustomer ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: isCustomer
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (!isCustomer) ...[
                 const CircleAvatar(
                   radius: 14,
                   backgroundColor: AppColors.primaryGreen,
-                  child: Icon(Icons.support_agent, size: 16, color: Colors.white),
+                  child: Icon(
+                    Icons.support_agent,
+                    size: 16,
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(width: 8),
               ],
               Flexible(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: isCustomer ? AppColors.primaryGreen : Colors.white,
                     borderRadius: BorderRadius.circular(16).copyWith(
-                      bottomRight: isCustomer ? const Radius.circular(4) : const Radius.circular(16),
-                      bottomLeft: !isCustomer ? const Radius.circular(4) : const Radius.circular(16),
+                      bottomRight: isCustomer
+                          ? const Radius.circular(4)
+                          : const Radius.circular(16),
+                      bottomLeft: !isCustomer
+                          ? const Radius.circular(4)
+                          : const Radius.circular(16),
                     ),
                     boxShadow: [
                       if (!isCustomer)
-                        BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5, offset: const Offset(0, 2))
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
                     ],
                   ),
                   child: Column(
@@ -283,7 +351,9 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: isCustomer ? Colors.white70 : Colors.grey.shade500,
+                            color: isCustomer
+                                ? Colors.white70
+                                : Colors.grey.shade500,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -291,7 +361,9 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                       Text(
                         message,
                         style: TextStyle(
-                          color: isCustomer ? Colors.white : AppColors.textPrimary,
+                          color: isCustomer
+                              ? Colors.white
+                              : AppColors.textPrimary,
                           fontSize: 14,
                           height: 1.4,
                         ),
@@ -310,7 +382,11 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
             ),
             child: Text(
               time,
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 10, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -321,15 +397,19 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
   Widget _buildMessageInput() {
     return Container(
       padding: EdgeInsets.only(
-        left: 16, 
-        right: 16, 
-        top: 12, 
-        bottom: 12 + MediaQuery.of(context).padding.bottom
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: 12 + MediaQuery.of(context).padding.bottom,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -2))
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
         ],
       ),
       child: Row(
@@ -346,9 +426,15 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                 minLines: 1,
                 decoration: InputDecoration(
                   hintText: "Type a reply...",
-                  hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 14,
+                  ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ),
@@ -368,9 +454,16 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                   ? const SizedBox(
                       width: 24,
                       height: 24,
-                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
-                  : const Icon(Icons.send_rounded, color: Colors.white, size: 24),
+                  : const Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
             ),
           ),
         ],
@@ -382,19 +475,26 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.only(
-        left: 16, 
-        right: 16, 
-        top: 16, 
-        bottom: 16 + MediaQuery.of(context).padding.bottom
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: 16 + MediaQuery.of(context).padding.bottom,
       ),
       color: Colors.grey.shade100,
       child: Column(
         children: [
-          const Icon(Icons.check_circle, color: AppColors.primaryGreen, size: 32),
+          const Icon(
+            Icons.check_circle,
+            color: AppColors.primaryGreen,
+            size: 32,
+          ),
           const SizedBox(height: 8),
           const Text(
             "This ticket has been resolved and closed.",
-            style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 4),
           Text(

@@ -38,7 +38,10 @@ class IngredientsSection extends StatelessWidget {
             runSpacing: 12,
             children: product.ingredients.map((ingredient) {
               return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),

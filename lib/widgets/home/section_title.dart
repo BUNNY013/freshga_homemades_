@@ -7,7 +7,12 @@ class SectionTitle extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onSeeAll;
 
-  const SectionTitle({super.key, required this.title, this.subtitle, this.onSeeAll});
+  const SectionTitle({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.onSeeAll,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +42,7 @@ class SectionTitle extends StatelessWidget {
                       color: AppColors.textSecondary,
                     ),
                   ),
-                ]
+                ],
               ],
             ),
           ),

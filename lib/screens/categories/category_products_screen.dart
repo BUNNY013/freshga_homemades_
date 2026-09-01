@@ -33,7 +33,8 @@ class CategoryProductsScreen extends StatefulWidget {
   State<CategoryProductsScreen> createState() => _CategoryProductsScreenState();
 }
 
-class _CategoryProductsScreenState extends State<CategoryProductsScreen> with SingleTickerProviderStateMixin {
+class _CategoryProductsScreenState extends State<CategoryProductsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String? _selectedSubCategoryId;
   String _currentSort = 'Popularity';
@@ -52,11 +53,13 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
     _selectedSubCategoryId = widget.selectedSubCategoryId;
     _fetchCategory();
   }
-  
+
   Future<void> _fetchCategory() async {
     final categories = await CategoryService().getActiveCategories();
     try {
-      final cat = categories.firstWhere((c) => c.categoryId == widget.categoryId || c.id == widget.categoryId);
+      final cat = categories.firstWhere(
+        (c) => c.categoryId == widget.categoryId || c.id == widget.categoryId,
+      );
       setState(() {
         _category = cat;
       });
@@ -91,21 +94,34 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
       body: _category == null
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen))
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            )
           : StreamBuilder<List<ProductModel>>(
-              stream: ProductService().streamProductsByCategory(widget.categoryId),
+              stream: ProductService().streamProductsByCategory(
+                widget.categoryId,
+              ),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen));
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryGreen,
+                    ),
+                  );
                 }
-                
+
                 final allProducts = snapshot.data!;
                 List<ProductModel> filteredProducts = allProducts;
-                
+
                 if (_selectedSubCategoryId != null) {
-                  filteredProducts = filteredProducts.where((p) => p.subCategoryIds.contains(_selectedSubCategoryId)).toList();
+                  filteredProducts = filteredProducts
+                      .where(
+                        (p) =>
+                            p.subCategoryIds.contains(_selectedSubCategoryId),
+                      )
+                      .toList();
                 }
-                
+
                 // Mock Sort
                 if (_currentSort == 'Price: Low to High') {
                   filteredProducts.sort((a, b) => a.price.compareTo(b.price));
@@ -119,14 +135,18 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
                       child: Column(
                         children: [
                           _buildTabSwitcher(),
-                          CategoryHeroCard(category: _category!, isStoresTab: isStoresTab),
+                          CategoryHeroCard(
+                            category: _category!,
+                            isStoresTab: isStoresTab,
+                          ),
                         ],
                       ),
                     ),
                     SliverPersistentHeader(
                       pinned: true,
                       delegate: _StickyHeaderDelegate(
-                        height: 190.0, // Subcategory chips (~130px) + Compact Filter Bar (~60px)
+                        height:
+                            190.0, // Subcategory chips (~130px) + Compact Filter Bar (~60px)
                         child: Column(
                           children: [
                             SubcategoryChipsRow(
@@ -182,7 +202,10 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
           ),
           Text(
             _tabController.index == 0 ? "Products" : "Stores",
-            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -202,7 +225,10 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
               alignment: Alignment.center,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
+                  icon: const Icon(
+                    Icons.shopping_cart_outlined,
+                    color: AppColors.textPrimary,
+                  ),
                   onPressed: () {},
                 ),
                 if (cart.itemCount > 0)
@@ -260,8 +286,14 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
           dividerColor: Colors.transparent,
           labelColor: Colors.white,
           unselectedLabelColor: AppColors.textSecondary,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
           tabs: const [
             Tab(text: "Products"),
             Tab(text: "Stores"),
@@ -279,11 +311,19 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey.shade300),
+              Icon(
+                Icons.inventory_2_outlined,
+                size: 64,
+                color: Colors.grey.shade300,
+              ),
               const SizedBox(height: 16),
               const Text(
                 "No products found",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -296,7 +336,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
         ),
       );
     }
-    
+
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       sliver: SliverGrid(
@@ -306,19 +346,20 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
           crossAxisSpacing: 16,
           childAspectRatio: 0.45,
         ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            return FreshgaProductCard(product: products[index]);
-          },
-          childCount: products.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return FreshgaProductCard(product: products[index]);
+        }, childCount: products.length),
       ),
     );
   }
 
   Widget _buildStoresList(List<ProductModel> products) {
-    final storeIds = products.map((p) => p.storeId).where((id) => id.isNotEmpty).toSet().toList();
-    
+    final storeIds = products
+        .map((p) => p.storeId)
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
     if (storeIds.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
@@ -330,7 +371,11 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
               const SizedBox(height: 16),
               const Text(
                 "No stores found",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -344,16 +389,16 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
       );
     }
 
-    return SliverToBoxAdapter(
-      child: _StoresFetcher(storeIds: storeIds),
-    );
+    return SliverToBoxAdapter(child: _StoresFetcher(storeIds: storeIds));
   }
 
   void _showFilterSheet() {
     // Basic placeholder for bottom sheet
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(24),
@@ -361,18 +406,24 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Filters", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                "Filters",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 20),
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: ["Veg Only", "Non-Veg", "Spicy", "Sweet", "Homemade Only"].map((e) => 
-                  ChoiceChip(
-                    label: Text(e),
-                    selected: false,
-                    onSelected: (val) {},
-                  )
-                ).toList(),
+                children:
+                    ["Veg Only", "Non-Veg", "Spicy", "Sweet", "Homemade Only"]
+                        .map(
+                          (e) => ChoiceChip(
+                            label: Text(e),
+                            selected: false,
+                            onSelected: (val) {},
+                          ),
+                        )
+                        .toList(),
               ),
               const SizedBox(height: 30),
               SizedBox(
@@ -385,22 +436,32 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryGreen,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: const Text("Apply Filters", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Apply Filters",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
         );
-      }
+      },
     );
   }
 
   void _showSortSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(24),
@@ -408,22 +469,40 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> with Si
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Sort By", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text(
+                "Sort By",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 20),
-              ...['Popularity', 'Newest', 'Price: Low to High', 'Price: High to Low', 'Highest Rated'].map((sort) => 
-                ListTile(
-                  title: Text(sort, style: TextStyle(fontWeight: _currentSort == sort ? FontWeight.bold : FontWeight.normal)),
-                  trailing: _currentSort == sort ? const Icon(Icons.check, color: AppColors.primaryGreen) : null,
+              ...[
+                'Popularity',
+                'Newest',
+                'Price: Low to High',
+                'Price: High to Low',
+                'Highest Rated',
+              ].map(
+                (sort) => ListTile(
+                  title: Text(
+                    sort,
+                    style: TextStyle(
+                      fontWeight: _currentSort == sort
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  trailing: _currentSort == sort
+                      ? const Icon(Icons.check, color: AppColors.primaryGreen)
+                      : null,
                   onTap: () {
                     setState(() => _currentSort = sort);
                     Navigator.pop(context);
                   },
-                )
+                ),
               ),
             ],
           ),
         );
-      }
+      },
     );
   }
 }
@@ -463,7 +542,9 @@ class _StoresFetcherState extends State<_StoresFetcher> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
             padding: EdgeInsets.all(40.0),
-            child: Center(child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGreen),
+            ),
           );
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -490,11 +571,12 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   _StickyHeaderDelegate({required this.child, required this.height});
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: AppColors.background,
-      child: child,
-    );
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(color: AppColors.background, child: child);
   }
 
   @override

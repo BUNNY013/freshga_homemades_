@@ -19,7 +19,8 @@ class SearchResultsScreen extends StatefulWidget {
   State<SearchResultsScreen> createState() => _SearchResultsScreenState();
 }
 
-class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTickerProviderStateMixin {
+class _SearchResultsScreenState extends State<SearchResultsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _currentSort = 'Relevance';
   int _appliedFilters = 0;
@@ -49,7 +50,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 24.0),
@@ -59,7 +62,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
             children: [
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-                child: Text("Sort By", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                child: Text(
+                  "Sort By",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
               ),
               const Divider(),
               _buildSortOption("Relevance"),
@@ -82,8 +92,17 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
   Widget _buildSortOption(String sortName) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 24.0),
-      title: Text(sortName, style: TextStyle(fontWeight: _currentSort == sortName ? FontWeight.bold : FontWeight.normal)),
-      trailing: _currentSort == sortName ? const Icon(Icons.check_circle, color: AppColors.primaryGreen) : null,
+      title: Text(
+        sortName,
+        style: TextStyle(
+          fontWeight: _currentSort == sortName
+              ? FontWeight.bold
+              : FontWeight.normal,
+        ),
+      ),
+      trailing: _currentSort == sortName
+          ? const Icon(Icons.check_circle, color: AppColors.primaryGreen)
+          : null,
       onTap: () {
         setState(() {
           _currentSort = sortName;
@@ -96,7 +115,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
   void _showFilterSheet() {
     final provider = Provider.of<SearchProvider>(context, listen: false);
     final isStoresTab = _tabController.index == 1;
-    
+
     // Extract unique dynamic tags based on the active tab
     final Set<String> availableTags = {};
     if (isStoresTab) {
@@ -110,14 +129,16 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
         availableTags.addAll(p.tags);
       }
     }
-    
+
     // Sort tags alphabetically
     final List<String> sortedTags = availableTags.toList()..sort();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) {
         return DraggableScrollableSheet(
           initialChildSize: 0.6,
@@ -129,7 +150,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
               children: [
                 const Padding(
                   padding: EdgeInsets.all(24.0),
-                  child: Text("Filters", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  child: Text(
+                    "Filters",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
                 const Divider(height: 1),
                 Expanded(
@@ -137,13 +165,30 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
                     controller: scrollController,
                     padding: const EdgeInsets.all(24.0),
                     children: [
-                      Text(isStoresTab ? "Categories" : "Tags & Dietary", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(
+                        isStoresTab ? "Categories" : "Tags & Dietary",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       if (sortedTags.isEmpty)
-                        Text(isStoresTab ? "No categories available." : "No specific tags available.", style: const TextStyle(color: Colors.grey)),
+                        Text(
+                          isStoresTab
+                              ? "No categories available."
+                              : "No specific tags available.",
+                          style: const TextStyle(color: Colors.grey),
+                        ),
                       ...sortedTags.map((tag) => _buildFilterCheckbox(tag)),
                       const SizedBox(height: 24),
-                      const Text("Seller Rating", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const Text(
+                        "Seller Rating",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       _buildFilterCheckbox("4.0+ Stars"),
                     ],
@@ -157,12 +202,21 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryGreen,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text("Apply Filters", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      child: const Text(
+                        "Apply Filters",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -179,7 +233,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
       builder: (context, setModalState) {
         return CheckboxListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+          title: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
           activeColor: AppColors.primaryGreen,
           value: _selectedFilters.contains(label),
           onChanged: (bool? value) {
@@ -195,7 +252,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
             });
           },
         );
-      }
+      },
     );
   }
 
@@ -257,13 +314,24 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
                     return FadeTransition(
                       opacity: animation,
                       child: SlideTransition(
-                        position: Tween<Offset>(begin: const Offset(0, 0.05), end: Offset.zero).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(0, 0.05),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeOutCubic,
+                              ),
+                            ),
                         child: child,
                       ),
                     );
                   },
                   child: CustomScrollView(
-                    key: ValueKey('$_currentSort-$_appliedFilters-$_isNearMeActive-${_tabController.index}'),
+                    key: ValueKey(
+                      '$_currentSort-$_appliedFilters-$_isNearMeActive-${_tabController.index}',
+                    ),
                     slivers: [
                       if (!isStoresTab)
                         _buildProductsGrid(provider)
@@ -302,12 +370,20 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
             child: Row(
               children: [
                 const SizedBox(width: 12),
-                const Icon(Icons.search_rounded, color: AppColors.textPrimary, size: 18),
+                const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.textPrimary,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     provider.searchQuery,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -330,7 +406,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.shopping_cart_outlined,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () {}, // Navigate to cart
         ),
         const SizedBox(width: 8),
@@ -365,8 +444,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
           labelColor: Colors.white,
           unselectedLabelColor: AppColors.textSecondary,
           labelPadding: EdgeInsets.zero,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
           tabs: const [
             Tab(text: "Products"),
             Tab(text: "Stores"),
@@ -377,37 +462,47 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
   }
 
   Widget _buildProductsGrid(SearchProvider provider) {
-    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    );
     List<ProductModel> products = List.from(provider.searchResultsProducts);
-    
+
     // Apply Near Me filter
     if (_isNearMeActive) {
-      final String userCity = customerProvider.currentCustomer?.selectedLocation?['city'] ?? '';
+      final String userCity =
+          customerProvider.currentCustomer?.selectedLocation?['city'] ?? '';
       if (userCity.isNotEmpty) {
         // Find stores in the user's city
         final nearMeStoreIds = provider.searchResultsStores
             .where((s) => s.city.toLowerCase() == userCity.toLowerCase())
             .map((s) => s.id)
             .toSet();
-            
+
         // Filter products to only those sold by nearby stores
-        products = products.where((p) => nearMeStoreIds.contains(p.storeId)).toList();
+        products = products
+            .where((p) => nearMeStoreIds.contains(p.storeId))
+            .toList();
       }
     }
 
     // Apply dynamic filters
     if (_selectedFilters.isNotEmpty) {
-      final selectedTags = _selectedFilters.where((f) => f != "4.0+ Stars" && f != "On Sale").toList();
-      
+      final selectedTags = _selectedFilters
+          .where((f) => f != "4.0+ Stars" && f != "On Sale")
+          .toList();
+
       if (selectedTags.isNotEmpty) {
         // Filter products that contain ANY of the selected tags
-        products = products.where((p) => selectedTags.any((tag) => p.tags.contains(tag))).toList();
+        products = products
+            .where((p) => selectedTags.any((tag) => p.tags.contains(tag)))
+            .toList();
       }
 
       if (_selectedFilters.contains("4.0+ Stars")) {
         products = products.where((p) => p.rating >= 4.0).toList();
       }
-      
+
       if (_selectedFilters.contains("On Sale")) {
         // A product is on sale if it has an original price strictly greater than the current selling price
         products = products.where((p) => p.originalPrice > p.price).toList();
@@ -430,12 +525,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
           child: EmptyStateWidget.noSearchResults(
             title: "No products found",
             message: "Try adjusting your filters or search terms",
-            onClearFilters: _selectedFilters.isNotEmpty ? () {
-              setState(() {
-                _selectedFilters.clear();
-                _appliedFilters = 0;
-              });
-            } : null,
+            onClearFilters: _selectedFilters.isNotEmpty
+                ? () {
+                    setState(() {
+                      _selectedFilters.clear();
+                      _appliedFilters = 0;
+                    });
+                  }
+                : null,
           ),
         ),
       );
@@ -450,12 +547,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            return FreshgaProductCard(product: products[index]);
-          },
-          childCount: products.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return FreshgaProductCard(product: products[index]);
+        }, childCount: products.length),
       ),
     );
   }
@@ -466,24 +560,34 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
   }
 
   Widget _buildStoresList(SearchProvider provider) {
-    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    );
     List<StoreModel> stores = List.from(provider.searchResultsStores);
-    
+
     // Apply Near Me filter
     if (_isNearMeActive) {
-      final String userCity = customerProvider.currentCustomer?.selectedLocation?['city'] ?? '';
+      final String userCity =
+          customerProvider.currentCustomer?.selectedLocation?['city'] ?? '';
       if (userCity.isNotEmpty) {
-        stores = stores.where((s) => s.city.toLowerCase() == userCity.toLowerCase()).toList();
+        stores = stores
+            .where((s) => s.city.toLowerCase() == userCity.toLowerCase())
+            .toList();
       }
     }
 
     // Apply dynamic filters
     if (_selectedFilters.isNotEmpty) {
-      final selectedTags = _selectedFilters.where((f) => f != "4.0+ Stars" && f != "On Sale").toList();
-      
+      final selectedTags = _selectedFilters
+          .where((f) => f != "4.0+ Stars" && f != "On Sale")
+          .toList();
+
       if (selectedTags.isNotEmpty) {
         // Filter stores that contain ANY of the selected tags in their categories
-        stores = stores.where((s) => selectedTags.any((tag) => s.categories.contains(tag))).toList();
+        stores = stores
+            .where((s) => selectedTags.any((tag) => s.categories.contains(tag)))
+            .toList();
       }
 
       if (_selectedFilters.contains("4.0+ Stars")) {
@@ -500,7 +604,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
       // Fallback sorting by ID if createdAt is unavailable, larger IDs loosely mean newer documents
       stores.sort((a, b) => b.id.compareTo(a.id));
     }
-    
+
     if (stores.isEmpty) {
       return SliverToBoxAdapter(
         child: Padding(
@@ -510,12 +614,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
             title: "No stores found",
             message: "We couldn't find any homemade sellers for this query.",
             buttonText: _selectedFilters.isNotEmpty ? 'Clear Filters' : null,
-            onAction: _selectedFilters.isNotEmpty ? () {
-              setState(() {
-                _selectedFilters.clear();
-                _appliedFilters = 0;
-              });
-            } : null,
+            onAction: _selectedFilters.isNotEmpty
+                ? () {
+                    setState(() {
+                      _selectedFilters.clear();
+                      _appliedFilters = 0;
+                    });
+                  }
+                : null,
           ),
         ),
       );
@@ -524,15 +630,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
     return SliverPadding(
       padding: const EdgeInsets.all(16.0),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
-              child: StoreSearchCard(store: stores[index]),
-            );
-          },
-          childCount: stores.length,
-        ),
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: StoreSearchCard(store: stores[index]),
+          );
+        }, childCount: stores.length),
       ),
     );
   }
@@ -545,11 +648,12 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   _StickyHeaderDelegate({required this.child, required this.height});
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: AppColors.background,
-      child: child,
-    );
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(color: AppColors.background, child: child);
   }
 
   @override

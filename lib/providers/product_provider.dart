@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product_model.dart';
@@ -6,12 +7,19 @@ import '../services/store_service.dart';
 
 class ProductProvider with ChangeNotifier {
   final ProductService _service = ProductService();
-  
+  StreamSubscription<DocumentSnapshot>? _productSubscription;
+
+  @override
+  void dispose() {
+    _productSubscription?.cancel();
+    super.dispose();
+  }
+
   String? _customerState;
   void updateCustomerState(String? state) {
     _customerState = state;
   }
-  
+
   List<ProductModel> _trendingProducts = [];
   bool _isLoadingTrending = false;
 
@@ -23,7 +31,7 @@ class ProductProvider with ChangeNotifier {
   bool _isLoadingProduct = false;
   String? _productError;
   bool _isStoreActive = true;
-  
+
   List<ProductModel> _similarProducts = [];
   bool _isLoadingSimilar = false;
 
@@ -54,19 +62,21 @@ class ProductProvider with ChangeNotifier {
   int get quantity => _quantity;
   bool get isWishlisted => _isWishlisted;
   bool get isAddingToCart => _isAddingToCart;
-  
+
   List<ProductVariantModel> get variants => _currentProduct?.variants ?? [];
 
   double get currentVariantPrice {
     if (variants.isEmpty) return _currentProduct?.price ?? 0.0;
-    if (_selectedVariantIndex >= variants.length) return _currentProduct?.price ?? 0.0;
+    if (_selectedVariantIndex >= variants.length)
+      return _currentProduct?.price ?? 0.0;
     final variant = variants[_selectedVariantIndex];
     return variant.discountPrice > 0 ? variant.discountPrice : variant.price;
   }
 
   double get currentVariantOriginalPrice {
     if (variants.isEmpty) return _currentProduct?.originalPrice ?? 0.0;
-    if (_selectedVariantIndex >= variants.length) return _currentProduct?.originalPrice ?? 0.0;
+    if (_selectedVariantIndex >= variants.length)
+      return _currentProduct?.originalPrice ?? 0.0;
     return variants[_selectedVariantIndex].price;
   }
 
@@ -100,11 +110,13 @@ class ProductProvider with ChangeNotifier {
     try {
       if (_allDiscoveryProducts.isEmpty) {
         // Fetch a large pool of products and shuffle them
-        _allDiscoveryProducts = await _service.getRandomDiscoveryProducts(limit: 50, customerState: _customerState);
+        _allDiscoveryProducts = await _service.getRandomDiscoveryProducts(
+          limit: 50,
+          customerState: _customerState,
+        );
       }
-      
+
       _loadNextDiscoveryChunk();
-      
     } catch (e) {
       debugPrint('Error loading discovery feed: $e');
     } finally {
@@ -116,20 +128,22 @@ class ProductProvider with ChangeNotifier {
   void _loadNextDiscoveryChunk() {
     final startIndex = _currentDiscoveryPage * _discoveryPageSize;
     final endIndex = startIndex + _discoveryPageSize;
-    
+
     if (startIndex >= _allDiscoveryProducts.length) {
       _hasMoreDiscovery = false;
       return;
     }
-    
+
     final chunk = _allDiscoveryProducts.sublist(
-      startIndex, 
-      endIndex > _allDiscoveryProducts.length ? _allDiscoveryProducts.length : endIndex
+      startIndex,
+      endIndex > _allDiscoveryProducts.length
+          ? _allDiscoveryProducts.length
+          : endIndex,
     );
-    
+
     _discoveryProducts.addAll(chunk);
     _currentDiscoveryPage++;
-    
+
     if (endIndex >= _allDiscoveryProducts.length) {
       _hasMoreDiscovery = false;
     }
@@ -154,7 +168,9 @@ class ProductProvider with ChangeNotifier {
     _isLoadingTrending = true;
     notifyListeners();
     try {
-      _trendingProducts = await _service.getTrendingProducts(customerState: _customerState);
+      _trendingProducts = await _service.getTrendingProducts(
+        customerState: _customerState,
+      );
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -174,21 +190,43 @@ class ProductProvider with ChangeNotifier {
     try {
       _currentProduct = await _service.getProduct(productId);
       if (_currentProduct != null) {
+        // Set up real-time listener for the product
+        _productSubscription?.cancel();
+        _productSubscription = FirebaseFirestore.instance
+            .collection('products')
+            .doc(productId)
+            .snapshots()
+            .listen((snapshot) {
+              if (snapshot.exists && snapshot.data() != null) {
+                _currentProduct = ProductModel.fromJson(
+                  snapshot.data()!,
+                  snapshot.id,
+                );
+                notifyListeners();
+              }
+            });
+
         try {
-          final storeDoc = await FirebaseFirestore.instance.collection('stores').doc(_currentProduct!.storeId).get();
+          final storeDoc = await FirebaseFirestore.instance
+              .collection('stores')
+              .doc(_currentProduct!.storeId)
+              .get();
           final data = storeDoc.data();
-          final bool isStoreSuspendedOrInactive = !(data?['isActive'] ?? true) ||
+          final bool isStoreSuspendedOrInactive =
+              !(data?['isActive'] ?? true) ||
               ((data?['status'] ?? '').toString().toLowerCase() == 'suspended');
-          
+
           if (isStoreSuspendedOrInactive) {
             _isStoreActive = false;
           } else {
-            _isStoreActive = await StoreService().isStoreActive(_currentProduct!.storeId);
+            _isStoreActive = await StoreService().isStoreActive(
+              _currentProduct!.storeId,
+            );
           }
         } catch (e) {
           _isStoreActive = true;
         }
-        
+
         // Fetch recommendations in parallel
         _fetchRecommendations(_currentProduct!);
       }
@@ -208,12 +246,25 @@ class ProductProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final similarFuture = _service.getSimilarProducts(product, customerState: _customerState);
-      final suggestedFuture = _service.getSuggestedProducts(product, customerState: _customerState);
-      final storeProductsFuture = _service.getStoreProducts(product.storeId, excludeProductId: product.id);
+      final similarFuture = _service.getSimilarProducts(
+        product,
+        customerState: _customerState,
+      );
+      final suggestedFuture = _service.getSuggestedProducts(
+        product,
+        customerState: _customerState,
+      );
+      final storeProductsFuture = _service.getStoreProducts(
+        product.storeId,
+        excludeProductId: product.id,
+      );
 
-      final results = await Future.wait([similarFuture, suggestedFuture, storeProductsFuture]);
-      
+      final results = await Future.wait([
+        similarFuture,
+        suggestedFuture,
+        storeProductsFuture,
+      ]);
+
       _similarProducts = results[0];
       _suggestedProducts = results[1];
       _storeProducts = results[2];
@@ -250,7 +301,7 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> toggleWishlist() async {
     if (_currentProduct == null) return;
-    
+
     // Optimistic UI update
     _isWishlisted = !_isWishlisted;
     notifyListeners();
@@ -267,15 +318,15 @@ class ProductProvider with ChangeNotifier {
   Future<void> addToCart() async {
     if (_currentProduct == null) return;
     if (variants.isEmpty) return;
-    
+
     _isAddingToCart = true;
     notifyListeners();
 
     try {
       await _service.addToCart(
-        _currentProduct!.id, 
-        _quantity, 
-        variants[_selectedVariantIndex].id
+        _currentProduct!.id,
+        _quantity,
+        variants[_selectedVariantIndex].id,
       );
       // Reset quantity after successful add
       _quantity = 1;

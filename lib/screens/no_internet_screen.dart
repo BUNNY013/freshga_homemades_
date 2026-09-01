@@ -10,7 +10,8 @@ class NoInternetScreen extends StatefulWidget {
   State<NoInternetScreen> createState() => _NoInternetScreenState();
 }
 
-class _NoInternetScreenState extends State<NoInternetScreen> with SingleTickerProviderStateMixin {
+class _NoInternetScreenState extends State<NoInternetScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   bool _isChecking = false;
@@ -22,7 +23,10 @@ class _NoInternetScreenState extends State<NoInternetScreen> with SingleTickerPr
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _scaleAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
+    _scaleAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
     _controller.forward();
   }
 
@@ -71,7 +75,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> with SingleTickerPr
                     },
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Text Content
                   Text(
                     'No Internet Connection',
@@ -85,7 +89,7 @@ class _NoInternetScreenState extends State<NoInternetScreen> with SingleTickerPr
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 40),
-                  
+
                   // Small Elegant Button
                   SizedBox(
                     height: 45,
@@ -106,7 +110,9 @@ class _NoInternetScreenState extends State<NoInternetScreen> with SingleTickerPr
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
                               ),
                             )
                           : const Text(

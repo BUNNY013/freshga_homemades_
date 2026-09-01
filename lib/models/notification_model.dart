@@ -37,8 +37,8 @@ class NotificationModel {
       storeId: data['storeId'],
       imageUrl: data['imageUrl'],
       isUnread: data['isUnread'] ?? true,
-      createdAt: data['createdAt'] != null 
-          ? (data['createdAt'] as Timestamp).toDate() 
+      createdAt: data['createdAt'] != null
+          ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
     );
   }

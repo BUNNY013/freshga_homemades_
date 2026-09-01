@@ -38,14 +38,17 @@ class WishlistService {
     if (ref == null) {
       return Stream.value([]);
     }
-    return ref.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => ProductModel.fromJson(doc.data(), doc.id))
-          .toList();
-    }).handleError((error) {
-      debugPrint('Error in getLikedProductsStream: $error');
-      return <ProductModel>[];
-    });
+    return ref
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs
+              .map((doc) => ProductModel.fromJson(doc.data(), doc.id))
+              .toList();
+        })
+        .handleError((error) {
+          debugPrint('Error in getLikedProductsStream: $error');
+          return <ProductModel>[];
+        });
   }
 
   /// Stream of liked product IDs for quick lookups
@@ -54,12 +57,15 @@ class WishlistService {
     if (ref == null) {
       return Stream.value({});
     }
-    return ref.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => doc.id).toSet();
-    }).handleError((error) {
-      debugPrint('Error in getLikedProductIdsStream: $error');
-      return <String>{};
-    });
+    return ref
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) => doc.id).toSet();
+        })
+        .handleError((error) {
+          debugPrint('Error in getLikedProductIdsStream: $error');
+          return <String>{};
+        });
   }
 
   /// Add a product to liked products
@@ -87,22 +93,13 @@ class WishlistService {
         'tags': List<String>.from(product.tags),
         'searchKeywords': List<String>.from(product.searchKeywords),
         'ingredients': List<String>.from(product.ingredients),
-        'variants': product.variants.map((v) => <String, dynamic>{
-          'id': v.id,
-          'label': v.label,
-          'price': v.price,
-          'discountPrice': v.discountPrice,
-          'stock': v.stock,
-          'inStock': v.inStock,
-          'isArchived': v.isArchived,
-          'manageStock': v.manageStock,
-          'weightGrams': v.weightGrams,
-          'lengthCm': v.lengthCm,
-          'widthCm': v.widthCm,
-          'heightCm': v.heightCm,
-        }).toList(),
-        'ratingCounts': product.ratingCounts.map((k, v) => MapEntry(k.toString(), v)),
-        'ratingHighlights': product.ratingHighlights.map((k, v) => MapEntry(k.toString(), v)),
+        'variants': product.variants.map((v) => v.toJson()).toList(),
+        'ratingCounts': product.ratingCounts.map(
+          (k, v) => MapEntry(k.toString(), v),
+        ),
+        'ratingHighlights': product.ratingHighlights.map(
+          (k, v) => MapEntry(k.toString(), v),
+        ),
         'shelfLife': product.shelfLife,
         'dispatchTime': product.dispatchTime,
         'isStoreVerified': product.isStoreVerified,
