@@ -212,7 +212,7 @@ class AboutStoreSection extends StatelessWidget {
               _buildDivider(),
               _buildHighlightCol(
                 Icons.star_border_rounded,
-                store.rating > 0
+                store.reviewsCount >= 5
                     ? "${store.rating.toStringAsFixed(1)} ★"
                     : "New",
                 "Rating",
@@ -411,15 +411,15 @@ class AboutStoreSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: Image.asset(
                       'assets/fssai.png',
-                      width: 32,
+                      width: 48,
                       height: 32,
                       fit: BoxFit.contain,
                     ),
@@ -448,12 +448,27 @@ class AboutStoreSection extends StatelessWidget {
                         ),
                         if (store.fssaiNumber.isNotEmpty) ...[
                           const SizedBox(height: 8),
-                          Text(
-                            "Registration No: ${store.fssaiNumber}",
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF2E7D32),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF0FDF4),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(color: const Color(0xFFBBF7D0)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.verified, size: 14, color: Color(0xFF16A34A)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "Lic. No. ${store.fssaiNumber}",
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF16A34A),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -470,9 +485,11 @@ class AboutStoreSection extends StatelessWidget {
   }
 
   Widget _buildSocialLinks() {
+    final wNumber = store.whatsappNumber;
     if (store.instagramLink.isEmpty &&
         store.facebookLink.isEmpty &&
-        store.youtubeLink.isEmpty) {
+        store.youtubeLink.isEmpty &&
+        wNumber.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -494,21 +511,28 @@ class AboutStoreSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
+              if (wNumber.isNotEmpty)
+                _buildSocialImageIcon(
+                  'assets/images/whatsapp_icon.png',
+                  "WhatsApp",
+                  'https://wa.me/91$wNumber',
+                ),
               if (store.instagramLink.isNotEmpty)
                 _buildSocialImageIcon(
-                  'assets/instagram.png',
+                  'assets/images/instagram_icon.png',
                   "Instagram",
                   store.instagramLink,
+                  scale: 1.35,
                 ),
               if (store.facebookLink.isNotEmpty)
-                _buildSocialIcon(
-                  Icons.facebook_outlined,
+                _buildSocialImageIcon(
+                  'assets/images/facebook_icon.png',
                   "Facebook",
                   store.facebookLink,
                 ),
               if (store.youtubeLink.isNotEmpty)
-                _buildSocialIcon(
-                  Icons.play_circle_outline_rounded,
+                _buildSocialImageIcon(
+                  'assets/images/youtube_icon.png',
                   "YouTube",
                   store.youtubeLink,
                 ),
@@ -526,7 +550,7 @@ class AboutStoreSection extends StatelessWidget {
     }
   }
 
-  Widget _buildSocialIcon(IconData icon, String label, String url) {
+  Widget _buildSocialImageIcon(String assetPath, String label, String url, {double scale = 1.0}) {
     return Padding(
       padding: const EdgeInsets.only(right: 28),
       child: GestureDetector(
@@ -534,12 +558,29 @@ class AboutStoreSection extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: iconBgColor,
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                color: Colors.white,
+                border: Border.all(color: Colors.grey.shade200, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Icon(icon, color: iconColor, size: 32),
+              child: Center(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Transform.scale(
+                    scale: scale,
+                    child: Image.asset(assetPath, width: 48, height: 48, fit: BoxFit.cover),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 10),
             Text(
@@ -556,48 +597,6 @@ class AboutStoreSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialImageIcon(String assetPath, String label, String url) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 28),
-      child: GestureDetector(
-        onTap: () => _launchUrl(url),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade200, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Image.asset(
-                assetPath,
-                width: 36,
-                height: 36,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: secondaryText,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildFooterBanner() {
     return Container(

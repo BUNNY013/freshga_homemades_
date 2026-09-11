@@ -84,7 +84,7 @@ class StoreSearchCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            "${store.rating} (${store.reviewsCount})",
+                            store.reviewsCount >= 5 ? "${store.rating.toStringAsFixed(1)} (${store.reviewsCount})" : "New",
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,

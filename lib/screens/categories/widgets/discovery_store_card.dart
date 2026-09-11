@@ -125,6 +125,26 @@ class DiscoveryStoreCard extends StatelessWidget {
                                         )
                                       : null,
                                 ),
+                                if (!store.isActive || !store.hasValidSubscription)
+                                  Positioned(
+                                    bottom: -4,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.8),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: Colors.white, width: 1.5),
+                                      ),
+                                      child: Text(
+                                        !store.isActive ? "VACATION" : "CLOSED",
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
 
@@ -150,7 +170,7 @@ class DiscoveryStoreCard extends StatelessWidget {
                                   const SizedBox(height: 6),
                                   Row(
                                     children: [
-                                      if (store.reviewsCount > 0) ...[
+                                      if (store.reviewsCount >= 5) ...[
                                         Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 7,

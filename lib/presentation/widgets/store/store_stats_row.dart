@@ -28,7 +28,7 @@ class StoreStatsRow extends StatelessWidget {
             const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
             const SizedBox(width: 4),
             Text(
-              store.reviewsCount == 0
+              store.reviewsCount < 5
                   ? "New"
                   : "${store.rating.toStringAsFixed(1)} (${store.reviewsCount})",
               style: const TextStyle(

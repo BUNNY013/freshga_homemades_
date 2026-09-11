@@ -13,6 +13,7 @@ class StoreModel {
   final String instagramLink;
   final String youtubeLink;
   final String facebookLink;
+  final String whatsappNumber;
   final List<String> categories;
   final int followers;
   final int likesCount;
@@ -25,6 +26,9 @@ class StoreModel {
   final bool isActive;
   final String status; // 'Active', 'Pending', 'Suspended'
   final bool canSellPanIndia;
+  
+  // Transient property for UI state
+  bool hasValidSubscription;
 
   bool get isSuspended =>
       status.toLowerCase() == 'suspended' ||
@@ -65,6 +69,7 @@ class StoreModel {
     required this.instagramLink,
     required this.youtubeLink,
     required this.facebookLink,
+    this.whatsappNumber = '',
     required this.categories,
     required this.followers,
     required this.likesCount,
@@ -77,6 +82,7 @@ class StoreModel {
     required this.isActive,
     this.status = 'Active',
     required this.canSellPanIndia,
+    this.hasValidSubscription = true,
     required this.dispatchTime,
     this.taxRegistrationType = '',
     this.taxNumber = '',
@@ -106,6 +112,7 @@ class StoreModel {
       instagramLink: json['instagramLink'] ?? '',
       youtubeLink: json['youtubeLink'] ?? '',
       facebookLink: json['facebookLink'] ?? '',
+      whatsappNumber: json['whatsappNumber'] ?? '',
       categories: List<String>.from(json['categories'] ?? json['tags'] ?? []),
       followers: json['followers'] ?? 0,
       likesCount: json['likesCount'] ?? 0,
@@ -160,6 +167,7 @@ class StoreModel {
       'instagramLink': instagramLink,
       'youtubeLink': youtubeLink,
       'facebookLink': facebookLink,
+      'whatsappNumber': whatsappNumber,
       'categories': categories,
       'followers': followers,
       'likesCount': likesCount,

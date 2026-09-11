@@ -10,6 +10,7 @@ class StoreService {
       final snapshot = await _firestore
           .collection('stores')
           .where('verified', isEqualTo: true)
+          .where('status', isEqualTo: 'Active')
           .orderBy('rating', descending: true)
           .limit(20) // Fetch more to account for filtered ones
           .get();
@@ -30,7 +31,7 @@ class StoreService {
       // Primary query: Match exactly by City
       Query query = _firestore
           .collection('stores')
-          .where('isActive', isEqualTo: true)
+          .where('status', isEqualTo: 'Active')
           .where('city', isEqualTo: city);
 
       final snapshot = await query.limit(20).get();
@@ -46,7 +47,7 @@ class StoreService {
       if (stores.length < 3) {
         final stateQuery = await _firestore
             .collection('stores')
-            .where('isActive', isEqualTo: true)
+            .where('status', isEqualTo: 'Active')
             .where('state', isEqualTo: state)
             .limit(10)
             .get();
@@ -78,7 +79,7 @@ class StoreService {
     try {
       final snapshot = await _firestore
           .collection('stores')
-          .where('isActive', isEqualTo: true)
+          .where('status', isEqualTo: 'Active')
           .orderBy('createdAt', descending: true)
           .limit(20)
           .get();
@@ -99,7 +100,46 @@ class StoreService {
     try {
       final doc = await _firestore.collection('stores').doc(storeId).get();
       if (doc.exists && doc.data() != null) {
-        return StoreModel.fromJson(doc.data()!, doc.id);
+        final store = StoreModel.fromJson(doc.data()!, doc.id);
+        
+        final subDoc = await _firestore.collection('store_subscriptions').doc(storeId).get();
+        if (subDoc.exists) {
+          final data = subDoc.data()!;
+          final status = data['status'] ?? 'expired';
+          final trialEndsAtStr = data['trialEndsAt'];
+          final currentPeriodEndStr = data['currentPeriodEnd'];
+
+          final trialEndsAt = trialEndsAtStr != null
+              ? (trialEndsAtStr is Timestamp
+                    ? trialEndsAtStr.toDate()
+                    : DateTime.parse(trialEndsAtStr.toString()))
+              : DateTime.now().subtract(const Duration(days: 1));
+          final currentPeriodEnd = currentPeriodEndStr != null
+              ? (currentPeriodEndStr is Timestamp
+                    ? currentPeriodEndStr.toDate()
+                    : DateTime.parse(currentPeriodEndStr.toString()))
+              : null;
+
+          final isTrialActive =
+              status == 'trialing' && DateTime.now().isBefore(trialEndsAt);
+          final isPaidActive =
+              status == 'active' &&
+              currentPeriodEnd != null &&
+              DateTime.now().isBefore(currentPeriodEnd);
+
+          bool isInGracePeriod = false;
+          if (currentPeriodEnd != null) {
+            final graceEndsAt = currentPeriodEnd.add(const Duration(days: 3));
+            isInGracePeriod =
+                DateTime.now().isAfter(currentPeriodEnd) &&
+                DateTime.now().isBefore(graceEndsAt);
+          }
+          store.hasValidSubscription = isTrialActive || isPaidActive || isInGracePeriod;
+        } else {
+          store.hasValidSubscription = false;
+        }
+        
+        return store;
       }
       return null;
     } catch (e) {
@@ -348,43 +388,46 @@ class StoreService {
             .collection('store_subscriptions')
             .doc(store.id)
             .get();
-        if (!subDoc.exists) continue; // No subscription doc -> offline
+        // We always keep the store if it's fetched, but we flag if subscription is invalid
+        if (!subDoc.exists) {
+          store.hasValidSubscription = false;
+        } else {
+          final data = subDoc.data()!;
+          final status = data['status'] ?? 'expired';
+          final trialEndsAtStr = data['trialEndsAt'];
+          final currentPeriodEndStr = data['currentPeriodEnd'];
 
-        final data = subDoc.data()!;
-        final status = data['status'] ?? 'expired';
-        final trialEndsAtStr = data['trialEndsAt'];
-        final currentPeriodEndStr = data['currentPeriodEnd'];
+          final trialEndsAt = trialEndsAtStr != null
+              ? (trialEndsAtStr is Timestamp
+                    ? trialEndsAtStr.toDate()
+                    : DateTime.parse(trialEndsAtStr.toString()))
+              : DateTime.now().subtract(const Duration(days: 1));
+          final currentPeriodEnd = currentPeriodEndStr != null
+              ? (currentPeriodEndStr is Timestamp
+                    ? currentPeriodEndStr.toDate()
+                    : DateTime.parse(currentPeriodEndStr.toString()))
+              : null;
 
-        final trialEndsAt = trialEndsAtStr != null
-            ? (trialEndsAtStr is Timestamp
-                  ? trialEndsAtStr.toDate()
-                  : DateTime.parse(trialEndsAtStr.toString()))
-            : DateTime.now().subtract(const Duration(days: 1));
-        final currentPeriodEnd = currentPeriodEndStr != null
-            ? (currentPeriodEndStr is Timestamp
-                  ? currentPeriodEndStr.toDate()
-                  : DateTime.parse(currentPeriodEndStr.toString()))
-            : null;
+          final isTrialActive =
+              status == 'trialing' && DateTime.now().isBefore(trialEndsAt);
+          final isPaidActive =
+              status == 'active' &&
+              currentPeriodEnd != null &&
+              DateTime.now().isBefore(currentPeriodEnd);
 
-        final isTrialActive =
-            status == 'trialing' && DateTime.now().isBefore(trialEndsAt);
-        final isPaidActive =
-            status == 'active' &&
-            currentPeriodEnd != null &&
-            DateTime.now().isBefore(currentPeriodEnd);
+          bool isInGracePeriod = false;
+          if (currentPeriodEnd != null) {
+            final graceEndsAt = currentPeriodEnd.add(const Duration(days: 3));
+            isInGracePeriod =
+                DateTime.now().isAfter(currentPeriodEnd) &&
+                DateTime.now().isBefore(graceEndsAt);
+          }
 
-        bool isInGracePeriod = false;
-        if (currentPeriodEnd != null) {
-          final graceEndsAt = currentPeriodEnd.add(const Duration(days: 3));
-          isInGracePeriod =
-              DateTime.now().isAfter(currentPeriodEnd) &&
-              DateTime.now().isBefore(graceEndsAt);
+          store.hasValidSubscription = isTrialActive || isPaidActive || isInGracePeriod;
         }
 
-        if (isTrialActive || isPaidActive || isInGracePeriod) {
-          activeStores.add(store);
-          if (activeStores.length >= limit) break; // Reached desired limit
-        }
+        activeStores.add(store);
+        if (activeStores.length >= limit) break; // Reached desired limit
       } catch (e) {
         print("Error checking subscription for ${store.id}: $e");
       }

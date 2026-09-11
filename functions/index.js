@@ -185,11 +185,38 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
   }
   const uniqueTokens = [...new Set(tokens)];
 
+  // Count pending new orders
+  let pendingCount = 1;
+  try {
+    const pendingSnap = await getFirestore().collection("orders")
+      .where("storeId", "==", storeId)
+      .where("orderStatus", "==", "New")
+      .get();
+    if (!pendingSnap.empty) {
+      pendingCount = pendingSnap.docs.length;
+    }
+  } catch (e) {
+    console.error("Error counting pending orders:", e);
+  }
+
+  const fullOrderId = orderData.orderId || "";
+  const title = `🌟 New Order! #${fullOrderId}`;
+  
+  // Calculate vendor amount (Subtotal + Delivery Fee, excluding Platform Fees & Taxes if any)
+  const subTotal = orderData.subTotal || 0;
+  const deliveryFee = orderData.deliveryFee || 0;
+  const vendorAmount = subTotal + deliveryFee;
+  
+  let body = `Ka-ching! 💸 You received a new order for ₹${vendorAmount}.`;
+  if (pendingCount > 1) {
+    body += ` You now have ${pendingCount} new orders waiting to be accepted!`;
+  }
+
   // Save to DB for Vendor
   const vendorNotification = {
     vendorId: ownerId,
-    title: "New Order Received! 🚨",
-    message: `You have a new order (#${orderData.orderId.substring(0, 8)}) for ₹${orderData.totalAmount}.`,
+    title: title,
+    message: body,
     type: "order",
     relatedId: orderData.orderId,
     isRead: false,
@@ -205,8 +232,8 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
   if (uniqueTokens.length > 0) {
     const payload = {
       notification: {
-        title: vendorNotification.title,
-        body: vendorNotification.message,
+        title: title,
+        body: body,
       },
       data: {
         orderId: orderData.orderId,
@@ -214,7 +241,12 @@ exports.onOrderCreated = onDocumentCreated("orders/{orderId}", async (event) => 
       },
       android: {
         priority: "high",
-        notification: { sound: "default", channelId: "high_importance_channel", icon: "@mipmap/ic_launcher" }
+        notification: {
+          sound: "default",
+          channelId: "high_importance_channel",
+          icon: "ic_stat_name",
+          color: "#2E7D32"
+        }
       },
       apns: {
         payload: { aps: { sound: "default" } }
@@ -441,10 +473,14 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
           }
           const uniqueTokens = [...new Set(tokens)];
 
+          const shortOrderId = fullOrderId.substring(0, 8);
+          const title = `⚠️ Order Cancelled: #${shortOrderId}`;
+          const body = "The customer has cancelled their order. Please stop preparation if you have already started.";
+
           const vendorNotification = {
             vendorId: ownerId,
-            title: "Order Cancelled ❌",
-            message: `Order #${fullOrderId} has been cancelled. Do not prepare.`,
+            title: title,
+            message: body,
             type: "alert",
             relatedId: afterData.orderId,
             isRead: false,
@@ -456,9 +492,17 @@ exports.onOrderStatusUpdated = onDocumentUpdated("orders/{orderId}", async (even
           if (uniqueTokens.length > 0) {
             await getMessaging().sendEachForMulticast({
               tokens: uniqueTokens,
-              notification: { title: vendorNotification.title, body: vendorNotification.message },
+              notification: { title: title, body: body },
               data: { orderId: afterData.orderId, type: "order_cancelled", click_action: "FLUTTER_NOTIFICATION_CLICK" },
-              android: { priority: "high", notification: { sound: "default", channelId: "high_importance_channel", icon: "@mipmap/ic_launcher" } },
+              android: {
+                priority: "high",
+                notification: {
+                  sound: "default",
+                  channelId: "high_importance_channel",
+                  icon: "ic_stat_name",
+                  color: "#2E7D32"
+                }
+              },
               apns: { payload: { aps: { sound: "default" } } }
             });
           }
@@ -572,6 +616,7 @@ exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
     .where("orderStatus", "==", "New")
     .get();
 
+  const expiringByStore = {};
   for (const doc of newOrdersSnap.docs) {
     const order = doc.data();
     if (!order.expiresAt || order.vendorAcceptWarningSent === true) continue;
@@ -580,44 +625,61 @@ exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
     const hoursLeft = (expiresMs - nowMs) / (1000 * 60 * 60);
 
     if (hoursLeft <= 1 && hoursLeft > 0) {
-      await doc.ref.update({ vendorAcceptWarningSent: true });
-
-      const storeSnap = await db.collection("stores").doc(order.storeId).get();
-      if (!storeSnap.exists) continue;
-      const ownerId = storeSnap.data().ownerId;
-
-      const title = "Urgent: Accept Order! ⏳";
-      const body = `Order #${order.orderId.substring(0, 8)} expires in ${Math.floor(hoursLeft)} hours. Accept it now!`;
-
-      await db.collection("notifications").add({
-        vendorId: ownerId,
-        title: title,
-        message: body,
-        type: "alert",
-        relatedId: order.orderId,
-        isRead: false,
-        createdAt: FieldValue.serverTimestamp(),
-      });
-
-      const userSnap = await db.collection("users").doc(ownerId).get();
-      const tokens = [];
-      if (userSnap.exists) {
-        const data = userSnap.data();
-        if (data.fcmToken) tokens.push(data.fcmToken);
-        if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
-      }
-      const uniqueTokens = [...new Set(tokens)];
-
-      if (uniqueTokens.length > 0) {
-        await getMessaging().sendEachForMulticast({
-          tokens: uniqueTokens,
-          notification: { title: title, body: body },
-          data: { orderId: order.orderId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
-          android: { priority: "high", notification: { icon: "@mipmap/ic_launcher" } }
-        }).catch(e => console.error(e));
-      }
-      count++;
+      if (!expiringByStore[order.storeId]) expiringByStore[order.storeId] = [];
+      expiringByStore[order.storeId].push({ doc, order });
     }
+  }
+
+  for (const storeId of Object.keys(expiringByStore)) {
+    const orders = expiringByStore[storeId];
+    for (const item of orders) {
+      await item.doc.ref.update({ vendorAcceptWarningSent: true });
+    }
+
+    const storeSnap = await db.collection("stores").doc(storeId).get();
+    if (!storeSnap.exists) continue;
+    const ownerId = storeSnap.data().ownerId;
+
+    let title = "⏰ Expiring Soon!";
+    let body = "";
+    let relatedId = "";
+    if (orders.length === 1) {
+      const shortId = orders[0].order.orderId.substring(0, 8);
+      title += ` #${shortId}`;
+      body = `Action required! You have less than 1 hour to accept order #${shortId} before it is auto-cancelled.`;
+      relatedId = orders[0].order.orderId;
+    } else {
+      body = `Action required! You have ${orders.length} orders expiring in less than 1 hour. Accept them now!`;
+    }
+
+    await db.collection("notifications").add({
+      vendorId: ownerId,
+      title: title,
+      message: body,
+      type: "alert",
+      relatedId: relatedId,
+      isRead: false,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    const userSnap = await db.collection("users").doc(ownerId).get();
+    const tokens = [];
+    if (userSnap.exists) {
+      const data = userSnap.data();
+      if (data.fcmToken) tokens.push(data.fcmToken);
+      if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+    }
+    const uniqueTokens = [...new Set(tokens)];
+
+    if (uniqueTokens.length > 0) {
+      await getMessaging().sendEachForMulticast({
+        tokens: uniqueTokens,
+        notification: { title: title, body: body },
+        data: { click_action: "FLUTTER_NOTIFICATION_CLICK" },
+        android: { priority: "high", notification: { icon: "ic_stat_name", color: "#2E7D32" } }
+      }).catch(e => console.error(e));
+    }
+    count++;
   }
 
   // 2. Dispatch Overdue Warning (Past max dispatch date)
@@ -625,6 +687,7 @@ exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
     .where("orderStatus", "in", ["Accepted", "Packed"])
     .get();
 
+  const overdueByStore = {};
   for (const doc of acceptedOrdersSnap.docs) {
     const order = doc.data();
     if (!order.maxDispatchDate || order.vendorDispatchWarningSent === true) continue;
@@ -633,44 +696,61 @@ exports.vendorSLAWarnings = onSchedule("every 15 minutes", async (event) => {
     const hoursLeft = (dispatchMs - nowMs) / (1000 * 60 * 60);
 
     if (hoursLeft <= 0) {
-      await doc.ref.update({ vendorDispatchWarningSent: true });
-
-      const storeSnap = await db.collection("stores").doc(order.storeId).get();
-      if (!storeSnap.exists) continue;
-      const ownerId = storeSnap.data().ownerId;
-
-      const title = "OVERDUE: Dispatch Immediately! 🚨";
-      const body = `Order #${order.orderId.substring(0, 8)} is overdue for dispatch. Please ship immediately!`;
-
-      await db.collection("notifications").add({
-        vendorId: ownerId,
-        title: title,
-        message: body,
-        type: "alert",
-        relatedId: order.orderId,
-        isRead: false,
-        createdAt: FieldValue.serverTimestamp(),
-      });
-
-      const userSnap = await db.collection("users").doc(ownerId).get();
-      const tokens = [];
-      if (userSnap.exists) {
-        const data = userSnap.data();
-        if (data.fcmToken) tokens.push(data.fcmToken);
-        if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
-      }
-      const uniqueTokens = [...new Set(tokens)];
-
-      if (uniqueTokens.length > 0) {
-        await getMessaging().sendEachForMulticast({
-          tokens: uniqueTokens,
-          notification: { title: title, body: body },
-          data: { orderId: order.orderId, click_action: "FLUTTER_NOTIFICATION_CLICK" },
-          android: { priority: "high", notification: { icon: "@mipmap/ic_launcher" } }
-        }).catch(e => console.error(e));
-      }
-      count++;
+      if (!overdueByStore[order.storeId]) overdueByStore[order.storeId] = [];
+      overdueByStore[order.storeId].push({ doc, order });
     }
+  }
+
+  for (const storeId of Object.keys(overdueByStore)) {
+    const orders = overdueByStore[storeId];
+    for (const item of orders) {
+      await item.doc.ref.update({ vendorDispatchWarningSent: true });
+    }
+
+    const storeSnap = await db.collection("stores").doc(storeId).get();
+    if (!storeSnap.exists) continue;
+    const ownerId = storeSnap.data().ownerId;
+
+    let title = "🚨 Dispatch Overdue!";
+    let body = "";
+    let relatedId = "";
+    if (orders.length === 1) {
+      const shortId = orders[0].order.orderId.substring(0, 8);
+      title += ` #${shortId}`;
+      body = `Order #${shortId} has passed its maximum dispatch date. Please ship this immediately to avoid penalties.`;
+      relatedId = orders[0].order.orderId;
+    } else {
+      body = `You have ${orders.length} orders that have passed their maximum dispatch date. Please ship them immediately!`;
+    }
+
+    await db.collection("notifications").add({
+      vendorId: ownerId,
+      title: title,
+      message: body,
+      type: "alert",
+      relatedId: relatedId,
+      isRead: false,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    const userSnap = await db.collection("users").doc(ownerId).get();
+    const tokens = [];
+    if (userSnap.exists) {
+      const data = userSnap.data();
+      if (data.fcmToken) tokens.push(data.fcmToken);
+      if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+    }
+    const uniqueTokens = [...new Set(tokens)];
+
+    if (uniqueTokens.length > 0) {
+      await getMessaging().sendEachForMulticast({
+        tokens: uniqueTokens,
+        notification: { title: title, body: body },
+        data: { click_action: "FLUTTER_NOTIFICATION_CLICK" },
+        android: { priority: "high", notification: { icon: "ic_stat_name", color: "#2E7D32" } }
+      }).catch(e => console.error(e));
+    }
+    count++;
   }
 
   if (count > 0) console.log(`Sent ${count} SLA warnings to vendors.`);
@@ -695,6 +775,8 @@ exports.updateStoreRating = onDocumentCreated('reviews/{reviewId}', async (event
   const storeRef = getFirestore().collection('stores').doc(storeId);
 
   try {
+    let ownerId = null;
+
     // We use a Firestore Transaction to ensure data consistency
     await getFirestore().runTransaction(async (transaction) => {
       const storeDoc = await transaction.get(storeRef);
@@ -704,6 +786,7 @@ exports.updateStoreRating = onDocumentCreated('reviews/{reviewId}', async (event
       }
 
       const storeData = storeDoc.data();
+      ownerId = storeData.ownerId;
 
       // Fetch current values, defaulting to 0 if they don't exist yet
       const oldRating = storeData.rating || 0.0;
@@ -720,7 +803,50 @@ exports.updateStoreRating = onDocumentCreated('reviews/{reviewId}', async (event
       });
     });
 
-    console.log(`Successfully updated store ${storeId} to rating ${newRating}`);
+    console.log(`Successfully updated store ${storeId} rating.`);
+
+    // Send Notification to Vendor
+    if (ownerId) {
+      const title = `🎊 New ${newReviewRating}-Star Review!`;
+      const body = `Great job! A customer just left a glowing ${newReviewRating}-star review for your store. Keep up the good work!`;
+
+      // Save to Database
+      await getFirestore().collection("notifications").add({
+        vendorId: ownerId,
+        title: title,
+        message: body,
+        type: "system",
+        relatedId: storeId,
+        isRead: false,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+
+      // Send Push Notification
+      const userSnap = await getFirestore().collection("users").doc(ownerId).get();
+      const tokens = [];
+      if (userSnap.exists) {
+        const data = userSnap.data();
+        if (data.fcmToken) tokens.push(data.fcmToken);
+        if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+      }
+      const uniqueTokens = [...new Set(tokens)];
+
+      if (uniqueTokens.length > 0) {
+        await getMessaging().sendEachForMulticast({
+          tokens: uniqueTokens,
+          notification: { title: title, body: body },
+          data: { click_action: "FLUTTER_NOTIFICATION_CLICK" },
+          android: {
+            priority: "high",
+            notification: {
+              icon: "ic_stat_name",
+              color: "#2E7D32"
+            }
+          }
+        }).catch(e => console.error("Error sending review notification:", e));
+      }
+    }
+
     return null;
 
   } catch (error) {
@@ -729,3 +855,245 @@ exports.updateStoreRating = onDocumentCreated('reviews/{reviewId}', async (event
   }
 });
 
+exports.onPayoutUpdated = onDocumentUpdated("payouts/{payoutId}", async (event) => {
+  const beforeData = event.data.before.data();
+  const afterData = event.data.after.data();
+
+  if (beforeData.status === afterData.status) return null;
+
+  if (afterData.status === "completed") {
+    const storeId = afterData.storeId;
+    if (!storeId) return null;
+
+    try {
+      const storeSnap = await getFirestore().collection("stores").doc(storeId).get();
+      if (!storeSnap.exists) return null;
+
+      const ownerId = storeSnap.data().ownerId;
+      const amount = afterData.amount || 0;
+      const title = "💸 Payout Processed!";
+      const body = `Success! Your payout of ₹${amount} is on its way to your registered bank account.`;
+
+      // Save Notification
+      await getFirestore().collection("notifications").add({
+        vendorId: ownerId,
+        title: title,
+        message: body,
+        type: "payout",
+        relatedId: event.params.payoutId,
+        isRead: false,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+
+      // Send Push
+      const userSnap = await getFirestore().collection("users").doc(ownerId).get();
+      const tokens = [];
+      if (userSnap.exists) {
+        const data = userSnap.data();
+        if (data.fcmToken) tokens.push(data.fcmToken);
+        if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+      }
+      const uniqueTokens = [...new Set(tokens)];
+
+      if (uniqueTokens.length > 0) {
+        await getMessaging().sendEachForMulticast({
+          tokens: uniqueTokens,
+          notification: { title: title, body: body },
+          data: { click_action: "FLUTTER_NOTIFICATION_CLICK" },
+          android: {
+            priority: "high",
+            notification: {
+              icon: "ic_stat_name",
+              color: "#2E7D32"
+            }
+          }
+        }).catch(e => console.error("Error sending payout notification:", e));
+      }
+    } catch (e) {
+      console.error("Error in onPayoutUpdated:", e);
+    }
+  }
+  return null;
+});
+
+exports.onProductStockUpdated = onDocumentUpdated("products/{productId}", async (event) => {
+  const beforeData = event.data.before.data();
+  const afterData = event.data.after.data();
+
+  const beforeVariants = beforeData.variants || [];
+  const afterVariants = afterData.variants || [];
+
+  // Check if any variant went out of stock or low stock
+  let newlyOutOfStock = false;
+  let newlyLowStock = false;
+  let variantName = "";
+
+  for (let i = 0; i < afterVariants.length; i++) {
+    const aVar = afterVariants[i];
+    if (!aVar.manageStock) continue;
+
+    const bVar = beforeVariants.find(v => v.id === aVar.id) || { stock: aVar.stock + 1 }; // if new, assume it wasn't out of stock
+
+    // Out of stock trigger
+    if (bVar.stock > 0 && aVar.stock <= 0) {
+      newlyOutOfStock = true;
+      variantName = aVar.weight || aVar.name || "A variant";
+      break;
+    }
+
+    // Low stock trigger (went from > 5 to <= 5)
+    if (bVar.stock > 5 && aVar.stock > 0 && aVar.stock <= 5) {
+      newlyLowStock = true;
+      variantName = aVar.weight || aVar.name || "A variant";
+      break; // Out of stock takes precedence, but if we found low stock, keep checking for out of stock
+    }
+  }
+
+  if (!newlyOutOfStock && !newlyLowStock) return null;
+
+  const storeId = afterData.storeId;
+  if (!storeId) return null;
+
+  try {
+    const storeSnap = await getFirestore().collection("stores").doc(storeId).get();
+    if (!storeSnap.exists) return null;
+
+    const ownerId = storeSnap.data().ownerId;
+    const productName = afterData.name || "Your product";
+
+    let title = "";
+    let body = "";
+
+    const imageUrl = (afterData.images && afterData.images.length > 0) ? afterData.images[0] : "";
+
+    if (newlyOutOfStock) {
+      title = "🚨 Out of Stock!";
+      body = `${productName} (${variantName}) has run out of stock! Tap to restock.`;
+    } else if (newlyLowStock) {
+      title = "📉 Low Stock Alert!";
+      body = `${productName} (${variantName}) is running low. Tap to restock before it sells out!`;
+    }
+
+    // Save Notification
+    await getFirestore().collection("notifications").add({
+      vendorId: ownerId,
+      title: title,
+      message: body,
+      type: "alert",
+      relatedId: event.params.productId,
+      isRead: false,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    // Send Push
+    const userSnap = await getFirestore().collection("users").doc(ownerId).get();
+    const tokens = [];
+    if (userSnap.exists) {
+      const data = userSnap.data();
+      if (data.fcmToken) tokens.push(data.fcmToken);
+      if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+    }
+    const uniqueTokens = [...new Set(tokens)];
+
+    if (uniqueTokens.length > 0) {
+      const payload = {
+        notification: { title: title, body: body },
+        data: { click_action: "FLUTTER_NOTIFICATION_CLICK" },
+        android: {
+          priority: "high",
+          notification: {
+            icon: "ic_stat_name",
+            color: "#2E7D32"
+          }
+        }
+      };
+
+      // If image exists, add it to android notification
+      if (imageUrl) {
+        payload.android.notification.imageUrl = imageUrl;
+        payload.notification.image = imageUrl;
+      }
+
+      await getMessaging().sendEachForMulticast({
+        tokens: uniqueTokens,
+        ...payload
+      }).catch(e => console.error("Error sending stock notification:", e));
+    }
+
+  } catch (e) {
+    console.error("Error in onProductStockUpdated:", e);
+  }
+
+  return null;
+});
+
+exports.onSupplierApplicationUpdated = onDocumentUpdated("supplierApplications/{appId}", async (event) => {
+  const beforeData = event.data.before.data();
+  const afterData = event.data.after.data();
+
+  const beforeStatus = beforeData.status;
+  const afterStatus = afterData.status;
+
+  if (beforeStatus === afterStatus) return null;
+
+  const userId = afterData.userId;
+  if (!userId) return null;
+
+  let title = "";
+  let body = "";
+
+  if (afterStatus === "approved") {
+    title = "🎉 KYC Verified!";
+    body = "Congratulations! Your business details and KYC documents have been successfully verified. You are now eligible to create your store on FreshGa!";
+  } else if (afterStatus === "changes_required") {
+    title = "⚠️ Action Required: KYC Update";
+    body = "Your KYC verification requires some changes or additional documents. Please check the app to update your details.";
+  } else if (afterStatus === "under_review") {
+    title = "⏳ Under Review";
+    body = "Your KYC details are currently being reviewed by our team. We will notify you once verification is complete.";
+  } else {
+    return null;
+  }
+
+  try {
+    // Save Notification to Database
+    await getFirestore().collection("notifications").add({
+      vendorId: userId,
+      title: title,
+      message: body,
+      type: "system",
+      relatedId: event.params.appId,
+      isRead: false,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    // Send Push Notification
+    const userSnap = await getFirestore().collection("users").doc(userId).get();
+    const tokens = [];
+    if (userSnap.exists) {
+      const data = userSnap.data();
+      if (data.fcmToken) tokens.push(data.fcmToken);
+      if (Array.isArray(data.fcmTokens)) tokens.push(...data.fcmTokens);
+    }
+    const uniqueTokens = [...new Set(tokens)];
+
+    if (uniqueTokens.length > 0) {
+      await getMessaging().sendEachForMulticast({
+        tokens: uniqueTokens,
+        notification: { title: title, body: body },
+        data: { click_action: "FLUTTER_NOTIFICATION_CLICK" },
+        android: { 
+          priority: "high", 
+          notification: { 
+            icon: "ic_stat_name",
+            color: "#2E7D32" 
+          } 
+        }
+      });
+    }
+  } catch (error) {
+    console.error("Error in onSupplierApplicationUpdated:", error);
+  }
+
+  return null;
+});

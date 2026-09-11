@@ -156,7 +156,7 @@ class StoreProvider with ChangeNotifier {
       if (_currentStore == null) {
         _storeError = "Store not found";
       } else {
-        _isStoreActive = await _service.isStoreActive(storeId);
+        _isStoreActive = _currentStore!.hasValidSubscription;
         await loadAllStoreProducts(storeId);
 
         // Listen for realtime updates (like followers count)

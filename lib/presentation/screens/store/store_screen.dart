@@ -11,6 +11,7 @@ import '../../widgets/store/store_tab_bar.dart';
 import '../../widgets/store/about_store_section.dart';
 import '../../widgets/store/store_loading_shimmer.dart';
 import '../../widgets/states/app_state_widgets.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../widgets/store/dynamic_category_chips.dart';
 import '../../widgets/store/store_product_list_item.dart';
@@ -95,6 +96,7 @@ class _StoreScreenState extends State<StoreScreen>
     _tabController.dispose();
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
